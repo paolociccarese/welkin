@@ -1,7 +1,9 @@
 package edu.mit.simile.welkin;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +14,8 @@ import java.util.Set;
 public class InfoCache {
     //  Nodes (Rdf resources)
     public Set nodes = new HashSet();
-
+    public Hashtable hash = new Hashtable();
+    
     public class Node {
         float x, y;
         float vx, vy;
@@ -27,7 +30,6 @@ public class InfoCache {
         final String unique;
 
         List linkedObjectNodes = new ArrayList();
-//        List linkedSubjectNodes = new ArrayList();
         List linkedLiterals = new ArrayList();
 
         Node(final String unique) {
@@ -49,10 +51,6 @@ public class InfoCache {
         public void addObjectEdge(Edge edge) {
             linkedObjectNodes.add(edge);
         }
-        
-//        public void addSubjectEdge(Edge edge) {
-//            linkedSubjectNodes.add(edge);
-//        }
         
         public void addLiteral(CachedLiteral literal) {
             linkedLiterals.add(literal);
@@ -131,6 +129,31 @@ public class InfoCache {
         }
     }
 
+    public void addEntry(int hashSubject, int hashObject, String prNamespace, String prURI) {
+//        String key = hashSubject+","+hashSubject;
+        if(hashSubject==hashObject) return;
+        Point key = new Point(hashSubject, hashObject);
+        Object value = hash.get(key);
+        if(value!=null) { 
+            Object[] values = (Object[]) value;
+            Predicate newValues[] = new Predicate[values.length+1];
+            System.arraycopy(values, 0, newValues, 0, values.length);
+            newValues[values.length] = new Predicate(prNamespace, prURI);
+        } else {
+            Predicate[] values = new Predicate[1];
+            values[0] = new Predicate(prNamespace, prURI);
+            hash.put(key, values);
+        }
+    }
+
+    Point tmp = new Point();
+    
+    public Predicate[] getEntries(int hashSubject, int hashObject) {
+        tmp.x = hashSubject;
+        tmp.y = hashObject;
+        return (Predicate[]) hash.get(tmp);
+    }
+    
     public Node getNode(String unique) {
         for (Iterator it = nodes.iterator(); it.hasNext();) {
             Node tmp = (Node) it.next();

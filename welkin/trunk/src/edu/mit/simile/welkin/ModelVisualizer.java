@@ -340,8 +340,9 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 if (d == 0)
                     d = 0.0001f; // avoid divide by zero
 
-                float weight = (n.isObjectOf(m)) ? 1.0f : 0.0f;
-
+//                float weight1 = (n.isObjectOf(m)) ? 1.0f : 0.0f;
+                float weight = (model.cache.getEntries(n.hash,m.hash)!=null) ? 1.0f : 0.0f;
+                
                 // attractive force
                 float af = attractive(d, weight);
 

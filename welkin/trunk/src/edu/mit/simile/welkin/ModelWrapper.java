@@ -341,11 +341,10 @@ public class ModelWrapper {
                 if (obj2 instanceof Resource) {
                     String un = ((Resource) obj2).isAnon() ? ((Resource) obj2)
                             .getId().toString() : ((Resource) obj2).getURI();
-// TODO news                         
-//                  node.addObjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),cache.getNode(un)));
+                            
                     Node objectNode = cache.getNode(un);
                     node.addObjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),objectNode));
-//                    objectNode.addSubjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),node));
+                    cache.addEntry(node.hash,objectNode.hash, pr.getNameSpace(), pr.getURI());
                 } else {
                     String literal = ((Literal)obj2).toString();
                     node.addLiteral(cache.getLiteral(pr.getNameSpace(), pr.getURI(),literal));
