@@ -7,7 +7,7 @@
     |
     +-->
 
-<project name="welkin" default="compile" basedir=".">
+<project name="welkin" default="package" basedir=".">
 
 	<!-- === Initialization Targets ============================================= -->
 	
