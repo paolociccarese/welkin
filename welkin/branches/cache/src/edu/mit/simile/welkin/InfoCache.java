@@ -26,7 +26,9 @@ public class InfoCache {
         String label;
         final String unique;
 
-        List linkedNodes = new ArrayList();;
+        List linkedObjectNodes = new ArrayList();
+//        List linkedSubjectNodes = new ArrayList();
+        List linkedLiterals = new ArrayList();
 
         Node(final String unique) {
             this.unique = this.label = unique;
@@ -44,12 +46,24 @@ public class InfoCache {
             this.y = y;
         }
 
-        public void addObject(Edge edge) {
-            linkedNodes.add(edge);
+        public void addObjectEdge(Edge edge) {
+            linkedObjectNodes.add(edge);
+        }
+        
+//        public void addSubjectEdge(Edge edge) {
+//            linkedSubjectNodes.add(edge);
+//        }
+        
+        public void addLiteral(CachedLiteral literal) {
+            linkedLiterals.add(literal);
+        }
+        
+        public Iterator getLiterals() {
+            return linkedLiterals.iterator();
         }
 
-        public boolean isObject(final Node node) {
-            for (Iterator it = linkedNodes.iterator(); it.hasNext();) {
+        public boolean isObjectOf(final Node node) {
+            for (Iterator it = linkedObjectNodes.iterator(); it.hasNext();) {
                 if (((Edge) it.next()).object.equals(node))
                     return true;
             }
@@ -106,6 +120,16 @@ public class InfoCache {
             this.object = node;
         }
     }
+    
+    public class CachedLiteral {
+        final Predicate predicate;
+        final String literal;
+
+        CachedLiteral(final Predicate predicate, final String literal) {
+            this.predicate = predicate;
+            this.literal = literal;
+        }
+    }
 
     public Node getNode(String unique) {
         for (Iterator it = nodes.iterator(); it.hasNext();) {
@@ -136,6 +160,10 @@ public class InfoCache {
         return new Edge(new Predicate(namespace, predicate), node);
     }
 
+    public CachedLiteral getLiteral(String namespace, String predicate, String literal) {
+        return new CachedLiteral(new Predicate(namespace, predicate), literal);
+    }
+    
     public void setLabel(String unique, String label) {
         getNode(unique).label = "rdfs#label: " + label;
     }
@@ -190,18 +218,18 @@ public class InfoCache {
         for (Iterator it = nodes.iterator(); it.hasNext();) {
             Node node = (Node) it.next();
             boolean flag = false;
-            boolean in = false;
-            for (Iterator i = node.linkedNodes.iterator(); i.hasNext();) {
-                in = true;
+//          boolean in = false;
+            for (Iterator i = node.linkedObjectNodes.iterator(); i.hasNext();) {
+//                in = true;
                 if (tree.isChecked((((Edge) i.next()).predicate.property)))
                     flag = true;
             }
-            if (in) {
+//            if (in) {
                 if (flag)
                     node.isVisible = true;
                 else
                     node.isVisible = false;
-            }
+//            }
         }
     }
 }

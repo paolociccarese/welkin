@@ -19,8 +19,8 @@ import java.util.Iterator;
 import javax.swing.JComponent;
 
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
 
+import edu.mit.simile.welkin.InfoCache.CachedLiteral;
 import edu.mit.simile.welkin.InfoCache.Edge;
 import edu.mit.simile.welkin.InfoCache.Node;
 
@@ -98,6 +98,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
                 for (Iterator i = model.cache.nodes.iterator(); i.hasNext();) {
                     Node n = (Node) i.next();
+                    if(!n.isVisible) continue;
                     if (n != null) {
                         float dx = n.x - x;
                         float dy = n.y - y;
@@ -312,6 +313,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
         for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
             Node n = (Node) it.next();
+            
+            if(!n.isVisible) continue;
 
             float xi = n.x;
             float yi = n.y;
@@ -323,6 +326,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
             for (Iterator j = model.cache.nodes.iterator(); j.hasNext();) {
                 Node m = (Node) j.next();
+                
+                if(!m.isVisible) continue;
 
                 float xj = m.x;
                 float yj = m.y;
@@ -335,14 +340,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 if (d == 0)
                     d = 0.0001f; // avoid divide by zero
 
-                //                Property edge = (Property)
-                // model.getConnection(model.getModel()
-                //                        .getResource(n.unique), model.getModel().getResource(
-                //                        m.unique));
-
-                float weight = (n.isObject(m)) ? 1.0f : 0.0f;
-
-                //float weight = (edge != null) ? 1.0f : 0.0f;
+                float weight = (n.isObjectOf(m)) ? 1.0f : 0.0f;
 
                 // attractive force
                 float af = attractive(d, weight);
@@ -432,7 +430,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
             for (Iterator nodes = model.cache.nodes.iterator(); nodes.hasNext();) {
                 Node n1 = (Node) nodes.next();
                 if(!n1.isVisible) continue;
-                for (Iterator edges = n1.linkedNodes.iterator(); edges
+                for (Iterator edges = n1.linkedObjectNodes.iterator(); edges
                         .hasNext();) {
                     Node n2 = ((Edge) edges.next()).object;
                     if(!n2.isVisible) continue;
@@ -477,60 +475,11 @@ public class ModelVisualizer extends JComponent implements Runnable {
             }
         }
 
-        //        if (drawgroups)
-        //        {
-        //            g2.setFont(smallFont);
-        //            FontMetrics fm = g2.getFontMetrics(smallFont);
-        //            float ascent = fm.getAscent();
-        //            float descent = fm.getDescent();
-        //            float height = ascent + descent + 2 * BORDER;
-        //
-        //            Iterator i = graph.groups.values().iterator();
-        //            while (i.hasNext())
-        //            {
-        //                Group group = (Group) i.next();
-        //                Iterator j = group.nodes.iterator();
-        //                float minX = Float.MAX_VALUE;
-        //                float minY = Float.MAX_VALUE;
-        //                float maxX = -Float.MAX_VALUE;
-        //                float maxY = -Float.MAX_VALUE;
-        //                while (j.hasNext())
-        //                {
-        //                    Resource n = (Resource) j.next();
-        //// if (n.x < minX)
-        //// minX = n.x;
-        //// if (n.x > maxX)
-        //// maxX = n.x;
-        //// if (n.y < minY)
-        //// minY = n.y;
-        //// if (n.y > maxY)
-        //// maxY = n.y;
-        //                    
-        //                    if (model.getX(n) < minX)
-        //                        minX = model.getX(n);
-        //                    if (model.getX(n) > maxX)
-        //                        maxX = model.getX(n);
-        //                    if (model.getY(n) < minY)
-        //                        minY = model.getY(n);
-        //                    if (model.getY(n) > maxY)
-        //                        maxY = model.getY(n);
-        //                }
-        //                float dx = maxX - minX + 5.0f;
-        //                float dy = maxY - minY + 5.0f;
-        //                float width = fm.stringWidth(group.name) + BORDERs;
-        //                g2.setColor(groupColor);
-        //                g2.draw(new Ellipse2D.Float(minX + cx, minY + cy, dx, dy));
-        //                float sx = (dx - width) / 2.0f + minX + cx;
-        //                float sy = (dy - height) / 2.0f + minY + cy;
-        //                g2.setColor(groupFontColor);
-        //                g2.drawString(group.name, sx + BORDER, sy + ascent + BORDER);
-        //            }
-        //        }
-
         AffineTransform t = g2.getTransform();
 
         for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
             Node n = (Node) it.next();
+            if(!n.isVisible) continue;
             Font font = ((n == pick) || zoom) ? bigFont : smallFont;
             g2.setFont(font);
             FontMetrics fm = g2.getFontMetrics(font);
@@ -610,13 +559,12 @@ public class ModelVisualizer extends JComponent implements Runnable {
                         // count properties and max text length
                         int count = 0;
                         float max = width;
-                        for (Iterator i = model.getLiterals(model.getModel()
-                                .getResource(n.unique)); i.hasNext();) {
-                            Statement no = (Statement) i.next();
+                        for (Iterator i = n.getLiterals(); i.hasNext();) {
+                            CachedLiteral lit = (CachedLiteral) i.next();
                             fm = g2.getFontMetrics(smallFont);
-                            float length = fm.stringWidth(no.getPredicate()
+                            float length = fm.stringWidth(lit.predicate
                                     .toString()
-                                    + " -> " + no.getObject())
+                                    + " -> " + lit.literal)
                                     + BORDERs;
                             if (length > max)
                                 max = length;
@@ -639,12 +587,10 @@ public class ModelVisualizer extends JComponent implements Runnable {
                             g2.setFont(smallFont);
 
                             int ddy = 18;
-                            for (Iterator itt = model.getLiterals(model
-                                    .getModel().getResource(n.unique)); itt
-                                    .hasNext();) {
-                                Statement no = (Statement) itt.next();
-                                g2.drawString(no.getPredicate().toString()
-                                        + " -> " + no.getObject().toString(), x
+                            for (Iterator itt = n.getLiterals(); itt.hasNext();) {
+                                CachedLiteral lit = (CachedLiteral) itt.next();
+                                g2.drawString(lit.predicate.toString()
+                                        + " -> " + lit.literal, x
                                         + BORDER, y + BORDER + ddy + startY);
                                 ddy += 12;
                             }

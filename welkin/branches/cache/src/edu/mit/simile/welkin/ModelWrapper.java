@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.swing.JFileChooser;
 
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -340,7 +341,14 @@ public class ModelWrapper {
                 if (obj2 instanceof Resource) {
                     String un = ((Resource) obj2).isAnon() ? ((Resource) obj2)
                             .getId().toString() : ((Resource) obj2).getURI();
-                    node.addObject(cache.getEdge(pr.getNameSpace(), pr.getURI(),cache.getNode(un)));
+// TODO news                         
+//                  node.addObjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),cache.getNode(un)));
+                    Node objectNode = cache.getNode(un);
+                    node.addObjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),objectNode));
+//                    objectNode.addSubjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),node));
+                } else {
+                    String literal = ((Literal)obj2).toString();
+                    node.addLiteral(cache.getLiteral(pr.getNameSpace(), pr.getURI(),literal));
                 }
             }
         }

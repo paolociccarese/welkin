@@ -47,7 +47,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 	static final String SELECTED_ICON = ICON_PATH + "selected.gif"; 
     
 	CheckTree tree;
-    ModelVisualizer visualizer;
+	ModelVisualizer visualizer;
     ModelWrapper wrapper;
 
     boolean running = false;
@@ -336,7 +336,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 //		  TOREMOVE - Exception
 			try
             {
-                boolean res=wrapper.importModel();
+			    boolean res=wrapper.importModel();
                 if(res) tree.buildTree();
             } catch (FileNotFoundException e1)
             {
