@@ -289,8 +289,9 @@ public class ResourcesTree extends JPanel {
 		}
 		
 		public void adjustValue() {
-			if(resource!=null) resource.color = Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,1,1);
-			label.setForeground(Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,1,1)) ;
+		    Color color = Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,0.8f,1.0f);
+			if (resource != null) resource.color = color;
+			label.setForeground(color);
 		}
 
 		private void openCloseNodeChildren (FullNode node) {

@@ -66,7 +66,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public int delay = 50; // time (milliseconds)
     public float mass = 10.0f; // mass (kg)
     public float drag = 2.0f; // drag coefficient (kg / second)
-    public float attraction = 1.0f; // force (kg * pixel / second^2) [/100]
+    public float attraction = 5.0f; // force (kg * pixel / second^2) [/100]
     public float repulsion = 1.0f; // force (kg * pixel / second^2) [*100]
 
     float REPULSION_END = 40.0f; // distance (pixel)

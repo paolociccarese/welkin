@@ -43,8 +43,8 @@ public abstract class ModelChart extends JComponent {
     private Map distributionByValue = new HashMap();
     private Map distributionByCount = new HashMap();
 
-    private int maxValue = 100;
-    private int maxCount = 100;
+    private int maxValue = 150;
+    private int maxCount = 150;
 
     private ModelManager model;
     
@@ -268,13 +268,22 @@ public abstract class ModelChart extends JComponent {
 
         // paint grid
         g2.setColor(gridColor);
-        for (int i = 1; i < maxValue; i++) {
-            float x = scale(i,maxValue,w);
-            g2.draw(new Line2D.Float(x,0.0f,x,-h));
+        int xdecades = (int) Math.round(Math.log((double) maxValue) / Math.log(10.0d));
+        for (int i = 0; i < xdecades; i++) {
+            for (int j = 0; j < 10; j++) {
+                float ox = (float) ((double) j * Math.pow(10.0d,(double) i));
+                float x = scale(ox,maxValue,w);
+                g2.draw(new Line2D.Float(x,0.0f,x,-h));
+                
+            }
         }
-        for (int i = 1; i < maxCount; i++) {
-            float y = scale(i,maxCount,h);
-            g2.draw(new Line2D.Float(0.0f,-y,w,-y));
+        int ydecades = (int) Math.round(Math.log((double) maxCount) / Math.log(10.0d));
+        for (int i = 0; i < ydecades; i++) {
+            for (int j = 0; j < 10; j++) {
+                float oy = (float) ((double) j * Math.pow(10.0d,(double) i));
+                float y = scale(oy,maxCount,h);
+                g2.draw(new Line2D.Float(0.0f,-y,w,-y));
+            }
         }
  
         // paint chart
