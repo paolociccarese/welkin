@@ -69,7 +69,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     
     PredicatesTree tree;
     ResourcesTree resTree;
-//    ResourceUriBasePanel uriBases;
+    
     ModelVisualizer visualizer;
     ModelManager wrapper;
     ModelCharter charter;
@@ -204,10 +204,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         
         charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-        
-//        uriBases = new ResourceUriBasePanel(this);
-//        uriBases.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-//        scrollingUriBases = new JScrollPane(uriBases);
 
         resTree = new ResourcesTree(this);
         resTree.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
@@ -476,7 +472,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             visualizer.shake();
         } else if (source == resetColorsButton) {
             wrapper.cache.clearUriColors();
-            //uriBases.repaint();
             resTree.repaint();
             notifyBaseUriColorChange();
         } else if (source == colorsFilteringField || source == pickColorButton) {
@@ -486,7 +481,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         } else if (e.getActionCommand().equals("OK")) {
             // TODO make it stronger
             wrapper.cache.setUriColor(colorsFilteringField.getText().trim() , jc.getColor());
-            //uriBases.repaint();
             resTree.repaint();
             notifyBaseUriColorChange();
 		} else if (source == dataLoadButton) {
@@ -508,11 +502,21 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                                 + " not found");
                     }
                     
-                    boolean res = wrapper.addModel(in, ModelManager.RDFXML);
+                    boolean res = false;
+                    int extIndex = fileName.getAbsolutePath().lastIndexOf(".");
+                    if(extIndex>0) {
+                    	String ext = fileName.getAbsolutePath().substring(extIndex+1);
+                    	if(ext.equals("n3")) 
+                    		res = wrapper.addModel(in, ModelManager.NTRIPLES);
+                    	else if(ext.equals("rdf"))
+                    		res = wrapper.addModel(in, ModelManager.RDFXML);
+                    	else 
+                            throw new IllegalArgumentException("Extension not recognized!");
+                    }
+
                     if (res) {
                         tree.buildTree();
                         charter.analyze();
-                        //uriBases.init();
                         resTree.buildTree();
                         this.notifyBaseUriColorChange();
                         scrollingUriBases.revalidate();
@@ -527,7 +531,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             tree.clear();
             charter.clear();
             resTree.clear();
-            //uriBases.clear();
             scrollingUriBases.revalidate();
             scrollingTree.revalidate();
         } else if (source == aboutButton) {

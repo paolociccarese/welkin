@@ -122,7 +122,7 @@ public class ModelCache {
             blankNodes = true;
             ResourceUri ns = new ResourceUri(
             		factory.createURI("_:"+unique), 
-					ResourceUriBasePanel.DEFAULT_URI_COLOR);
+            		ResourcesTree.DEFAULT_URI_COLOR);
         }
         
         WResource res = new WResource(unique, true, true);
@@ -137,10 +137,11 @@ public class ModelCache {
     }
     
     public void clearUriColors() {
-        for(Iterator it = resourcesBases.iterator(); it.hasNext();) {
-        	ResourceUri uri = (ResourceUri) it.next();
-            uri.color = ResourceUriBasePanel.DEFAULT_URI_COLOR;
-        }
+    	// TODO Reset colors
+//        for(Iterator it = resourcesBases.iterator(); it.hasNext();) {
+//        	ResourceUri uri = (ResourceUri) it.next();
+//            uri.color = ResourcesTree.DEFAULT_URI_COLOR;
+//        }
     }
     
     public void setUriColor(String prefix, Color color) {
