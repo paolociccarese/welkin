@@ -32,6 +32,7 @@
 	    <path id="classpath">
 	      <fileset dir="${lib}">
 	        <include name="*jena*.*"/>
+	        <include name="*xerces*.*"/>
 	      	<include name="commons-collections-3.1.jar"/>
 	      </fileset>
 	    </path>

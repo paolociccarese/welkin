@@ -336,10 +336,12 @@ public class ModelWrapper {
         return model;
     }
     
+
+    
     private void addResource(Resource res, boolean isSubject) {
         String unique = res.isAnon()?res.getId().toString():res.getURI();
         Node result = cache.addNode(unique, getCoordinates(res), isNodeFixed(res), isSubject);
-        if (result!=null) result.namespaceCode = cache.addNamespace(res.getNameSpace());
+        if (result!=null) result.namespaceCode = cache.addNamespace(Util.getNameSpace(res));
     }
     
     private float[] getCoordinates (Resource res) {
@@ -395,5 +397,6 @@ public class ModelWrapper {
         model = ModelFactory.createDefaultModel();
         cache.nodes.clear();
         cache.hash.clear();
+        cache.namespaces.clear();
     }
 }

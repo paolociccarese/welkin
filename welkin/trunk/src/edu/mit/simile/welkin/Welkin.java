@@ -25,6 +25,7 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,6 +34,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -57,6 +59,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     static JFrame frame;
     
     CheckTree tree;
+    NamespacesPanel names;
     ModelVisualizer visualizer;
     ModelWrapper wrapper;
     ModelCharter charter;
@@ -89,6 +92,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     JCheckBox timeCheckbox;
     JCheckBox backgroundCheckbox;
     JCheckBox highlightOnLabelCheckbox;
+    
+    JRadioButton inOutColorsRadio;
+    JRadioButton namespaceColorsRadio;
     
     JTextField delayField;
     JTextField massField;
@@ -178,10 +184,14 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         charter = new ModelCharter(wrapper);
 
         tree = new CheckTree(this);
-
+        
         JScrollPane scrollingTree = new JScrollPane(tree);
         charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        
+        names = new NamespacesPanel(this);
+        names.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        JScrollPane scrollingNamespaces = new JScrollPane(names);
 
         dataClearButton = new JButton("Clear");
         dataLoadButton = new JButton("Load");
@@ -233,6 +243,13 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         timeCheckbox = new JCheckBox("Timing",visualizer.timing);
         backgroundCheckbox = new JCheckBox("Background",visualizer.background);
         highlightOnLabelCheckbox = new JCheckBox("Label",visualizer.highlightOnLabel);
+        
+        inOutColorsRadio = new JRadioButton("External and Internal Resources",true);
+        namespaceColorsRadio = new JRadioButton("Colored Namespaces");
+        
+        ButtonGroup group = new ButtonGroup();
+        group.add(inOutColorsRadio);
+        group.add(namespaceColorsRadio);
             
         delayField = new JTextField(Integer.toString(visualizer.delay),4);
         massField = new JTextField(Float.toString(visualizer.mass),4);
@@ -262,6 +279,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         timeCheckbox.addItemListener(this);
         backgroundCheckbox.addItemListener(this);
         highlightOnLabelCheckbox.addItemListener(this);
+        
+        inOutColorsRadio.addItemListener(this);
         
         JPanel highlight = new JPanel();
         highlight.setLayout(new BoxLayout(highlight, BoxLayout.X_AXIS));
@@ -319,12 +338,18 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 		drawing.add(backgroundCheckbox);
 		drawing.add(Box.createHorizontalGlue());
 		drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+		
+		JPanel namespacing = new JPanel();
+		namespacing.setLayout(new BoxLayout(namespacing, BoxLayout.X_AXIS));
+		namespacing.add(inOutColorsRadio);
+		namespacing.add(namespaceColorsRadio);
 		        
 		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
 		//toolsPane.addTab("Controls",controls);
 		toolsPane.addTab("Drawing", drawing);
 		toolsPane.addTab("Highlight",highlight);
 		toolsPane.addTab("Parameters",parameters);
+		toolsPane.addTab("Namespaces",namespacing);
 
         JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charter, visualizer);
         chartPane.setOneTouchExpandable(true);
@@ -336,7 +361,13 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         visualizerPane.setResizeWeight(1.0);
         visualizerPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
-        JSplitPane bodyPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,scrollingTree,visualizerPane);
+        JSplitPane infoPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scrollingTree,scrollingNamespaces);
+        infoPane.setOneTouchExpandable(true);
+        infoPane.setResizeWeight(0.25);
+        infoPane.setDividerLocation(350);        
+        infoPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        
+        JSplitPane bodyPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,infoPane,visualizerPane);
         bodyPane.setOneTouchExpandable(true);
         bodyPane.setResizeWeight(0.25);
         bodyPane.setDividerLocation(30);        
@@ -366,6 +397,10 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         visualizer.repaint();
     }
     
+    public void notifyNamespaceColorChange() {
+        wrapper.cache.adjustNamespaceColor();
+    }
+    
     public void itemStateChanged(ItemEvent e) {
         Object source = e.getItemSelectable();
         boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
@@ -385,6 +420,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 			visualizer.background = selected;
 		} else if (source == highlightOnLabelCheckbox) {
 			visualizer.highlightOnLabel = selected;
+        } else if (source == inOutColorsRadio) {
+            visualizer.colors = !selected;
         }
         visualizer.repaint();
     }
@@ -409,6 +446,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                 if (res) {
                     tree.buildTree();
                     charter.analyze();
+                    names.init();
+                    this.notifyNamespaceColorChange();
                 }
             } catch (FileNotFoundException ex) {
                 ex.printStackTrace();
@@ -417,6 +456,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             wrapper.clear();
             tree.clear();
             charter.clear();
+            names.clear();
         } else if (source == aboutButton) {
             about();
         } else if (source == delayField) {

@@ -1,5 +1,6 @@
 package edu.mit.simile.welkin;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class InfoCache {
         boolean highlighted = false;
         boolean isObjectOnly = true;
 
+        Color color;
         String label;
         final String unique;
 
@@ -140,6 +142,46 @@ public class InfoCache {
         }
     }
     
+    public class Namespace {
+        int hash=0;
+        String name;
+        Color color;
+        Namespace(String name,Color color) {
+            this.name = name;
+            this.color=color;
+            setHashCode();
+        }
+        
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || !(o instanceof Namespace))
+                return false;
+
+            if (this.name.equals(((Namespace) o).name))
+                return true;
+            else
+                return false;
+        }
+        
+        public int hashCode() {
+            return hash;
+        }
+
+        private void setHashCode() {
+            int h = hash;
+            if (h == 0) {
+                int off = 0;
+                char val[] = name.toCharArray();
+                int len = name.length();
+
+                for (int i = 0; i < len; i++) {
+                    h = 31 * h + val[off++];
+                }
+                hash = h;
+            }
+        }
+    }
+    
     public void addEntry(int hashSubject, int hashObject, String prNamespace, String prURI) {
         if (hashSubject == hashObject) return;
         Point key = new Point(hashSubject, hashObject);
@@ -157,9 +199,10 @@ public class InfoCache {
     }
     
     public int addNamespace(String namespace) {
-        if(!namespaces.contains(namespace))
-            namespaces.add(namespace);
-        return namespaces.indexOf(namespace);
+        Namespace ns = new Namespace(namespace, Color.red);
+        if(!namespaces.contains(ns))
+            namespaces.add(ns);
+        return namespaces.indexOf(ns);
     }
 
     Point tmp = new Point();  
@@ -280,4 +323,17 @@ public class InfoCache {
             ((Node)it.next()).isVisible = true;
         }   
     }
+    
+    public void adjustNamespaceColor() {
+        for(Iterator i=namespaces.iterator();i.hasNext();) {
+            Namespace ns = (Namespace) i.next();
+	        for(Iterator it=nodes.iterator();it.hasNext();) {
+	            Node tmp = (Node) it.next();
+	            if(Util.getNameSpace(tmp.unique).equals(ns.name)) {
+	                tmp.color = ns.color;
+	            }
+	        }
+        }
+    }
+    
 }

@@ -82,6 +82,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean background = true;
     public boolean highlightOnLabel = true;
 
+    public boolean colors = true;
+    
     ModelWrapper model;
     Node pick;
 
@@ -467,7 +469,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 }
                 
                 if (n == pick) {
-                    g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                    if(colors) g2.setColor(n.color);
+                    else g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
                     g2.fill(inside);
                     g2.setColor(fixedColor);
                     g2.draw(border);
@@ -475,10 +478,12 @@ public class ModelVisualizer extends JComponent implements Runnable {
                     if (n.fixed) {
                         g2.setColor(fixedColor);                     
                         g2.fill(inside);
-                        g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                        if(colors) g2.setColor(n.color);
+                        else g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
                         g2.draw(border);
                     } else {
-                        g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                        if(colors) g2.setColor(n.color);
+                        else g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
                         g2.fill(inside);
                     }
                 }
