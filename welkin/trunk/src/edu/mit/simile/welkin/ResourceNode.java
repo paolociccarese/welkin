@@ -97,7 +97,7 @@ public class ResourceNode extends WNode {
 	public void actionPerformed(ActionEvent arg0) {
     	tree.forwardPropagation(this.check.isSelected(), this);
     	tree.backwardPropagation(this.check.isSelected(), this);
-    	//if(isLeaf) welkin.wrapper.cache.setVisible(resource, this.check.isSelected());
+    	if(isLeaf) tree.treatLeaf(this, this.check.isSelected());
     	tree.notification();
 	}
 	
