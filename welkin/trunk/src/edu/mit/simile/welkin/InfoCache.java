@@ -3,15 +3,16 @@ package edu.mit.simile.welkin;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections.map.HashedMap;
+
 public class InfoCache {
 
     Set nodes = new HashSet();
-    Hashtable hash = new Hashtable();
+    HashedMap hash = new HashedMap();
     
     class Node {
         float x, y;
@@ -134,6 +135,7 @@ public class InfoCache {
         }
     }
 
+    
     public void addEntry(int hashSubject, int hashObject, String prNamespace, String prURI) {
         if (hashSubject == hashObject) return;
         Point key = new Point(hashSubject, hashObject);
@@ -151,6 +153,8 @@ public class InfoCache {
     }
 
     Point tmp = new Point();
+    
+
     
     public Predicate[] getEntries(int hashSubject, int hashObject) {
         tmp.x = hashSubject;
