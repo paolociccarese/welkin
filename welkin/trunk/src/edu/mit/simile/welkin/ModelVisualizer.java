@@ -332,7 +332,6 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 for (int i=0; i<pu.length;i++) {
                 	somma+=pu[i].weight;
                 }
-                	
                 
                 // get the weight of the link between n and m
                 float weight = somma>1 ? 1.0f : somma;

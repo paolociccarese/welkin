@@ -49,27 +49,19 @@ public class Util {
     public static String getBase(String uri) {
     	String[] us= new String[3];
     	
-    	int canceIndex = uri.lastIndexOf("#");
-    	if(canceIndex>=0) us[2] = uri.substring(canceIndex);
-    	else 
-    	{
-    		canceIndex = uri.lastIndexOf("/");
-//    		if(canceIndex>3) {
-//    			us[2] = uri.substring(canceIndex);
-//    		} else {
-//	    		String[] uris = new String[1];
-//				uris[0] = uri;
-//				return uris;
-//    		}
+    	try {
+	    	int canceIndex = uri.lastIndexOf("#");
+	    	if(canceIndex<0) {
+	    		canceIndex = uri.lastIndexOf("/");
+	    	}
+	    	
+	    	return uri.substring(0, canceIndex);
+    	} catch(Exception exc) {
+    		int canceIndex = uri.lastIndexOf(":");
+    		
+    		if(canceIndex>=0) return uri.substring(0, canceIndex);
+    		return "";
     	}
-    	
-    	int slashIndex = uri.indexOf('/',7);
-//    	if(slashIndex>=7) {
-//    		us[1] = uri.substring(slashIndex, canceIndex);
-//    		us[0] = uri.substring(0, slashIndex);
-//    	}
-    	
-    	return uri.substring(0, canceIndex);
     }
     
     public static String[] getBasisParts(String base) {

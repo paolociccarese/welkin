@@ -2,7 +2,6 @@ package edu.mit.simile.welkin;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -502,6 +501,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                 ex.printStackTrace();
             }
 		} else if (source == dataClearButton) {
+            if (visualizer.isRunning()) {
+        	    internalStop();
+            }
             wrapper.clear();
             tree.clear();
             charter.clear();
