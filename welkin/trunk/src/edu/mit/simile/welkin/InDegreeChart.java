@@ -22,9 +22,5 @@ public class InDegreeChart extends ModelChart {
         }
         return counter; 
     }
-    
-    public float scale(float value) {
-        return (float) Math.log((double) value);
-    }
 }    
 

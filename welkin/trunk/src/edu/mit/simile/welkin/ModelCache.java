@@ -105,7 +105,6 @@ public class ModelCache {
     }
     
     public WResource addResource(String unique, boolean isNotSubject) {
-    	System.out.println(unique + " " + isNotSubject);
         WResource res = new WResource(unique, isNotSubject);
         if (resources.add(res)) return res;
         else {
@@ -277,6 +276,14 @@ public class ModelCache {
             return linkedLiterals.iterator();
         }
 
+        void show() {
+            this.isVisible = true;
+        }
+        
+        void hide() {
+            this.isVisible = false;
+        }
+        
         boolean isObjectOf(final WResource res) {
             for (Iterator it = linkedObjectNodes.iterator(); it.hasNext();) {
                 if (((WStatement) it.next()).object.equals(res))

@@ -56,9 +56,5 @@ public class ClusteringCoefficientChart extends ModelChart {
             return 0;
         }
     }
-    
-    public float scale(float value) {
-        return (float) Math.log((double) value);
-    }
 }    
 
