@@ -1,3 +1,4 @@
+
 package edu.mit.simile.welkin;
 
 import java.awt.BorderLayout;
@@ -72,7 +73,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     JColorChooser jc;
     JDialog chooser;
 
-    PredicatesTree predTree;
+    //PredicatesTree predTree;
+    PredTree predTree;
     ResourcesTree resTree;
 
     ModelVisualizer visualizer;
@@ -215,7 +217,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
-        predTree = new PredicatesTree(this);
+        predTree = new PredTree(this);
         scrollingPredTree = new JScrollPane(predTree);
 
         resTree = new ResourcesTree(this);
@@ -528,7 +530,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
                     if (res) {
                         visualizer.setGraph(wrapper);
-                        predTree.buildTree();
+                        predTree.createTree();
                         inDegreeChart.analyze(true);
                         outDegreeChart.analyze(true);
                         clustCoeffChart.analyze(true);

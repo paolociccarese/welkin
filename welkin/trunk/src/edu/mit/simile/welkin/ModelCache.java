@@ -188,7 +188,7 @@ public class ModelCache {
 
     Set validatedNodes = new HashSet();
 
-    public void uriBasedVisualization(PredicatesTree tree) {
+    public void uriBasedVisualization(PredTree tree) {
         validatedNodes.clear();
         for (Iterator it = resources.iterator(); it.hasNext();) {
             WResource node = (WResource) it.next();

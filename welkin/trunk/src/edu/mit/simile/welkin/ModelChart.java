@@ -182,6 +182,7 @@ public abstract class ModelChart extends JComponent {
     public abstract int process(WResource node);
 
     public float scale(float value,float max,float scale) {
+    	if(value == 0.0f) value = 0.000000000001f;
         return (float) (Math.log((double) value) / Math.log((double) max)) * scale;
     }
 
