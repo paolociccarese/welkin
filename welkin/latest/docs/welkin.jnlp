@@ -21,6 +21,8 @@
                 <jar href="lib/jena.jar"/>
                 <jar href="lib/icu4j.jar"/>
                 <jar href="lib/commons-logging.jar"/>
+                <jar href="lib/xercesImpl.jar"/>
+                <jar href="lib/xml-apis.jar"/>
 	</resources>
 	<application-desc main-class="edu.mit.simile.welkin.Welkin" />
 </jnlp>
