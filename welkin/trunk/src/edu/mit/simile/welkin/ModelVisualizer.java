@@ -401,9 +401,6 @@ public class ModelVisualizer extends JComponent implements Runnable {
     }
 
     public void paintComponent(Graphics g) {
-        if (model.getNodes() == null)
-            return;
-
         long startTime = 0;
 
         if (timing)
@@ -607,7 +604,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
             g.setFont(smallFont);
             g.drawString("calculation: " + simulationTime + " ms", 5, 15);
             g.drawString("drawing: " + drawingTime + " ms", 5, 25);
-            g.drawString("nodes: " + model.getNodes().size(), 5, 35);
+            g.drawString("nodes: " + model.cache.nodes.size(), 5, 35);
             //            g.drawString("edges: " + graph.edges, 5, 45);
         }
 
