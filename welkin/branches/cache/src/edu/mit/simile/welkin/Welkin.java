@@ -97,7 +97,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
 		wrapper = new ModelWrapper();
         visualizer = new ModelVisualizer(wrapper);
-        tree = new CheckTree();
+        tree = new CheckTree(this);
 
 		dataClearButton = new JButton("Clear");
 		dataLoadButton = new JButton("Load");
@@ -290,6 +290,11 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         return NAME;
     }    
 
+    public void notifyTreeChange() {
+        wrapper.cache.verifyVisualized(tree);
+        visualizer.repaint();
+    }
+    
     public void itemStateChanged(ItemEvent e) {
         Object source = e.getItemSelectable();
         boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
@@ -332,6 +337,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 			try
             {
                 wrapper.importModel();
+                tree.fillTree(wrapper.getModel().listNameSpaces());
             } catch (FileNotFoundException e1)
             {
                 e1.printStackTrace();

@@ -6,12 +6,13 @@ package edu.mit.simile.welkin;
 import java.awt.Rectangle;
 import java.awt.event.MouseListener;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.Iterator;
 
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -20,51 +21,46 @@ import javax.swing.tree.TreePath;
  * @author Paolo Ciccarese
  */
 public class CheckTree extends JTree {
+    Welkin welkin;
     CheckTreeRenderer renderer;
     Hashtable map;
     Hashtable checked;
     boolean pathcheck = false;
 
+    public CheckTree(Welkin welkin) {
+        super();
+        this.welkin = welkin;
+        init();
+    }
+    
     public CheckTree(TreeModel model) {
         super(model);
-        init();
-    }
-
-    public void init() {
-        map = new Hashtable();
-        checked = new Hashtable();
-        super.setCellRenderer(renderer = new CheckTreeRenderer(map, checked));
-        this.addMouseListener(new Mouse());
-    }
-
-    public CheckTree() {
-        super();
-        init();
-    }
-
-    public CheckTree(Object[] value) {
-        super(value);
-        init();
-    }
-
-    public CheckTree(Vector value) {
-        super(value);
-        init();
-    }
-
-    public CheckTree(Hashtable value) {
-        super(value);
-        init();
-    }
-
-    public CheckTree(TreeNode node) {
-        super(node);
         init();
     }
 
     public CheckTree(TreeNode node, boolean bool) {
         super(node, bool);
         init();
+    }
+    
+    public void init() {
+        map = new Hashtable();
+        checked = new Hashtable();
+        super.setCellRenderer(renderer = new CheckTreeRenderer(map, checked));
+        this.addMouseListener(new Mouse());
+    }
+ 
+    public void fillTree(Iterator iter) {
+        DefaultMutableTreeNode root=new DefaultMutableTreeNode("base");
+        DefaultTreeModel model=new DefaultTreeModel(root);
+        for(Iterator it=iter;it.hasNext();) {
+            model.insertNodeInto(new NamespaceTreeNode((String)it.next()),root,root.getChildCount());
+        }
+        
+        this.setModel(model);
+        this.revalidate();
+        this.validate();
+        this.repaint();
     }
 
     public class TreeSelect implements TreeSelectionListener {
@@ -213,7 +209,7 @@ public class CheckTree extends JTree {
         if (CheckTree.this.pathcheck)
             removeCheck(path.getParentPath(), false);
     }
-
+    
     public class Mouse implements MouseListener {
 
         private void propagate(DefaultMutableTreeNode node, boolean bool) {
@@ -260,7 +256,7 @@ public class CheckTree extends JTree {
             
             boolean bool=CheckTree.this.isChecked(value);
             propagate((DefaultMutableTreeNode) value,bool);
-            
+            CheckTree.this.welkin.notifyTreeChange();
             CheckTree.this.repaint();
         }
 

@@ -338,7 +338,7 @@ public class ModelWrapper {
                 if (obj2 instanceof Resource) {
                     String un = ((Resource) obj2).isAnon() ? ((Resource) obj2)
                             .getId().toString() : ((Resource) obj2).getURI();
-                    node.addObject(cache.getEdge(pr.getURI(),cache.getNode(un)));
+                    node.addObject(cache.getEdge(pr.getNameSpace(), pr.getURI(),cache.getNode(un)));
                 }
             }
         }

@@ -431,9 +431,11 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
             for (Iterator nodes = model.cache.nodes.iterator(); nodes.hasNext();) {
                 Node n1 = (Node) nodes.next();
+                if(!n1.isVisible) continue;
                 for (Iterator edges = n1.linkedNodes.iterator(); edges
                         .hasNext();) {
                     Node n2 = ((Edge) edges.next()).object;
+                    if(!n2.isVisible) continue;
                     float z1 = zoom(n1.x, n1.y);
                     float z2 = zoom(n2.x, n2.y);
                     float x1 = n1.x + (n1.x - zoomX) * z1 + cx;
@@ -459,6 +461,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
         if (drawnodes) {
             for (Iterator i = model.cache.nodes.iterator(); i.hasNext();) {
                 Node n = (Node) i.next();
+                if(!n.isVisible) continue;
                 float z = zoom(n.x, n.y);
                 float x = n.x + (n.x - zoomX) * z + cx;
                 float y = n.y + (n.y - zoomY) * z + cy;
