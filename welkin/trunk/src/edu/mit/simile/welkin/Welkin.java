@@ -75,7 +75,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
     //PredicatesTree predTree;
     PredTree predTree;
-    ResourcesTree resTree;
+    //ResourcesTree resTree;
+    ResTree resTree;
 
     ModelVisualizer visualizer;
     ModelManager wrapper;
@@ -220,7 +221,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         predTree = new PredTree(this);
         scrollingPredTree = new JScrollPane(predTree);
 
-        resTree = new ResourcesTree(this);
+        resTree = new ResTree(this);
         scrollingResTree = new JScrollPane(resTree);
 
         dataClearButton = new JButton("Clear");
@@ -534,7 +535,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                         inDegreeChart.analyze(true);
                         outDegreeChart.analyze(true);
                         clustCoeffChart.analyze(true);
-                        resTree.buildTree();
+                        resTree.createTree();
                         this.notifyBaseUriColorChange();
                         scrollingResTree.revalidate();
                         scrollingPredTree.revalidate();
