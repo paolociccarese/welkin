@@ -1,14 +1,16 @@
 package edu.mit.simile.welkin;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
  * @author Paolo Ciccarese <paolo@hcklab.org>
  */
 public class InfoCache {
-    // Nodes divided by type
+//  Nodes (Rdf resources)
     public Set nodes = new HashSet();
 
     public class Node {
@@ -18,6 +20,7 @@ public class InfoCache {
         float vy;
 
         String unique;
+        List linkedNodes=new ArrayList();;
 
         boolean fixed = false;
         boolean highlighted = false;
@@ -34,12 +37,35 @@ public class InfoCache {
             this.y = y;
         }
         
+        public void addObject(Node node) {
+            linkedNodes.add(node);
+        }
+        
+        public boolean isObject(Node node) {
+            for(Iterator it=linkedNodes.iterator();it.hasNext();) {
+                Node tmp = (Node) it.next();
+                if(tmp.equals(node)) return true;
+            }
+            return false;
+        }
+        
         public boolean equals(Object o) {
+            if ( this == o ) return true;
+            if ( !(o instanceof Node) ) return false;
+
             if(this.unique.equals(((Node)o).unique))
                 return true;
             else
                 return false;
         }
+    }
+    
+    public Node getNode(String unique) {
+        for(Iterator it=nodes.iterator();it.hasNext();) {
+            Node tmp = (Node)it.next();
+            if(tmp.unique.equals(unique)) return tmp;
+        }       
+        return null;
     }
     
     public Node addNode(String unique) {

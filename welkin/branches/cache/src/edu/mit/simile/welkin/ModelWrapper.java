@@ -164,30 +164,15 @@ public class ModelWrapper {
     public float[] getCoordinateXY(Resource res) {
             return cache.getCoordinatesXY((res.isAnon()?res.getId().toString():res.getURI()));
     }
+
     
-    public float[] getCoordinateXY(Node node) {
-        return cache.getCoordinatesXY(node.unique);
-}
-    
-//    public void setCoordinateXY(Resource res, float x, float y) {
-//        cache.setCoordinatesXY((res.isAnon()?res.getId().toString():res.getURI()),x,y);
-//    }
-    
-    public void setCoordinateXY(Node node, float x, float y) {
-        cache.setCoordinatesXY(node.unique,x,y);
+    public void setCoordinateXY(Resource res, float x, float y) {
+        cache.setCoordinatesXY((res.isAnon()?res.getId().toString():res.getURI()),x,y);
     }
-    
-//    public float[] getCoordinateVXY(Resource res) {
-//        return cache.getCoordinatesVXY((res.isAnon()?res.getId().toString():res.getURI()));
-//    }
-    
+
     public float[] getCoordinateVXY(Node node) {
         return cache.getCoordinatesVXY(node.unique);
     }
-    
-//    public void setCoordinateVXY(Resource res, float x, float y) {
-//        cache.setCoordinatesVXY((res.isAnon()?res.getId().toString():res.getURI()),x,y);
-//    }
     
     public void setCoordinateVXY(Node node, float x, float y) {
         cache.setCoordinatesVXY(node.unique,x,y);
@@ -364,6 +349,24 @@ public class ModelWrapper {
                 node.fixed=st.getBoolean();
                 break;
             }           
+        }
+        
+        for (Iterator it = total.iterator(); it.hasNext();) {
+            Object obj = it.next();
+            if(!(obj instanceof Resource)) continue;
+            Resource res = (Resource) obj;
+            Node node = cache.getNode(res.isAnon() ? res
+                    .getId().toString() : res.getURI());
+            for (Iterator io = model.listStatements(res, null, (RDFNode) null); io
+                    .hasNext();) {
+                Statement st = (Statement) io.next();
+                RDFNode obj2 = st.getObject();
+                if (obj2 instanceof Resource) {
+                    String un = ((Resource) obj2).isAnon() ? ((Resource) obj2)
+                            .getId().toString() : ((Resource) obj2).getURI();
+                    node.addObject(cache.getNode(un));
+                }
+            }
         }
         return model;
     }
