@@ -75,7 +75,7 @@ public class ModelCharter extends JComponent {
         this.w = w;
         this.h = h ;
     }
-
+    
     private Map inDegreeDistribution = new HashMap();
     private Map outDegreeDistribution = new HashMap();
     private Map clustCoeffDistribution = new HashMap();

@@ -39,6 +39,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.border.EtchedBorder;
 
 public class Welkin extends JApplet implements ActionListener, ItemListener {
 
@@ -180,8 +181,8 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         tree = new CheckTree(this);
 
         JScrollPane scrollingTree = new JScrollPane(tree);
-        charter.setBorder(scrollingTree.getBorder());
-        visualizer.setBorder(scrollingTree.getBorder());
+        charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
         dataClearButton = new JButton("Clear");
         dataLoadButton = new JButton("Load");
