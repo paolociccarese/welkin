@@ -74,12 +74,12 @@ public class ModelCache {
         return (URI[]) hash.get(tmp);
     }
     
-    public WResource addResource(String unique, float[] coordinates, boolean isNodeFixed, boolean isSubject) {
+    public WResource addResource(String unique, float[] coordinates, boolean isNodeFixed, boolean isNotSubject) {
         WResource resource;
         if(coordinates!=null) {
-            resource = new WResource(unique, coordinates[0], coordinates[1], isNodeFixed, isSubject);
+            resource = new WResource(unique, coordinates[0], coordinates[1], isNodeFixed, isNotSubject);
         } else {
-            resource = new WResource(unique, isSubject);
+            resource = new WResource(unique, isNotSubject);
         }
         if (resources.add(resource))
             return resource;
@@ -87,12 +87,13 @@ public class ModelCache {
             return null;
     }
     
-    public WResource addResource(String unique, boolean isSubject) {
-        WResource res = new WResource(unique, isSubject);
+    public WResource addResource(String unique, boolean isNotSubject) {
+        WResource res = new WResource(unique, isNotSubject);
         if (resources.add(res)) return res;
         else {
             for(Iterator it = resources.iterator(); it.hasNext();) {
                 WResource tmp = (WResource) it.next();
+                if(!isNotSubject) tmp.isNotSubject = false;
                 if(res.equals(tmp)) return tmp;
             }
         }

@@ -31,14 +31,14 @@ public class ModelManager implements StatementHandler {
 	{    
         WResource sub = null;
         if (resource instanceof URI) {
-            sub = cache.addResource(resource.toString(), true);
+            sub = cache.addResource(resource.toString(), false);
             cache.addResourcesUri((URI)resource);
         } else if (resource instanceof BNode) {
             sub = cache.addBlankResource(resource.toString());
         }
          
         if (value instanceof URI) {
-            WResource obj = cache.addResource(value.toString(), false);
+            WResource obj = cache.addResource(value.toString(), true);
             sub.addObjectStatement(cache.getStatement(sub, uri, obj));
             cache.addResourcesUri((URI)value);
             cache.addStatement(sub.hash, obj.hash, uri);
