@@ -152,6 +152,14 @@ public class ModelCache {
         }
     }
     
+    public void setVisible(PartialUri resource, boolean isVisible) {
+    	for(Iterator it = resources.iterator(); it.hasNext();) {
+    		WResource res = (WResource) it.next();
+    		if(res.unique.startsWith(resource.getBase()))
+    			res.isVisible = isVisible;
+    	}
+    }
+    
     public WResource getResource(String unique) {
         for (Iterator it = resources.iterator(); it.hasNext();) {
             WResource tmp = (WResource) it.next();

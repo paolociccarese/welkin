@@ -196,6 +196,9 @@ public class ResourcesTree extends JPanel {
     private void forwardPropagation(boolean selection, FullNode node) {
     	for(int i=0; i<node.children.size();i++) {
     		((FullNode)node.children.get(i)).check.setSelected(selection);
+    		if(((FullNode)node.children.get(i)).isLeaf) {
+    			welkin.wrapper.cache.setVisible(((FullNode)node.children.get(i)).resource, ((FullNode)node.children.get(i)).check.isSelected());
+    		}
     		forwardPropagation(selection, (FullNode)node.children.get(i));
     	}
     }
@@ -317,6 +320,8 @@ public class ResourcesTree extends JPanel {
         public void actionPerformed(ActionEvent evt) {
         	forwardPropagation(this.check.isSelected(), this);
         	backwardPropagation(this.check.isSelected(), this);
+        	if(isLeaf) welkin.wrapper.cache.setVisible(resource, this.check.isSelected());
+        	if(!welkin.running) welkin.visualizer.repaint();
         }
         
         public void incCount(int count) {

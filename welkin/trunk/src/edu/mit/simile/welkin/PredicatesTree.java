@@ -201,9 +201,7 @@ public class PredicatesTree extends JPanel {
     	for(int i=0; i<node.children.size();i++) {
     		((FullNode)node.children.get(i)).check.setSelected(selection);
     		if(((FullNode)node.children.get(i)).isLeaf) {
-    			System.out.println(((FullNode)node.children.get(i)).label.getText()+" "+node.predicate.getUri());
     			((FullNode)node.children.get(i)).predicate.included = selection;
-    			//node.predicate.included = selection;
     		}
 
     		forwardPropagation(selection, (FullNode)node.children.get(i));
