@@ -333,11 +333,12 @@ public class ModelWrapper {
             for (Iterator io = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); io
             .hasNext();) {
                 Statement st = (Statement) io.next();
+                Property pr = st.getPredicate();
                 RDFNode obj2 = st.getObject();
                 if (obj2 instanceof Resource) {
                     String un = ((Resource) obj2).isAnon() ? ((Resource) obj2)
                             .getId().toString() : ((Resource) obj2).getURI();
-                    node.addObject(cache.getNode(un));
+                    node.addObject(cache.getEdge(pr.getURI(),cache.getNode(un)));
                 }
             }
         }

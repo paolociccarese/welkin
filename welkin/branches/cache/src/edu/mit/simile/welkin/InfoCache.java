@@ -14,43 +14,43 @@ public class InfoCache {
     public Set nodes = new HashSet();
 
     public class Node {
-        float x;
-        float y;
-        float vx;
-        float vy;
+        float x,y;
+        float vx,vy;
 
         int hash = 0;
-        int offset;
         
-        String unique;
+        boolean fixed = false;
+        boolean isVisible = true;
+        boolean highlighted = false;
+        
         String label;
+        final String unique;
+        
         List linkedNodes=new ArrayList();;
 
-        boolean fixed = false;
-        boolean highlighted = false;
-
-        Node(String unique) {
-            this.unique = unique;
-            this.label = unique;
+        Node(final String unique) {
+            this.unique = this.label = unique;
+            setHashCode();
+            
             this.x = (float) ((Math.random() - 0.5d) * 200.0d);
             this.y = (float) ((Math.random() - 0.5d) * 200.0d);
         }
         
-        Node(String unique, float x, float y) {
-            this.unique = unique;
-            this.label = unique;
+        Node(final String unique, final float x, final float y) {
+            this.unique = this.label = unique;
+            setHashCode();
+            
             this.x = x;
             this.y = y;
         }
         
-        public void addObject(Node node) {
-            linkedNodes.add(node);
+        public void addObject(Edge edge) {
+            linkedNodes.add(edge);
         }
         
-        public boolean isObject(Node node) {
+        public boolean isObject(final Node node) {
             for(Iterator it=linkedNodes.iterator();it.hasNext();) {
-                Node tmp = (Node) it.next();
-                if(tmp.equals(node)) return true;
+                if(((Edge) it.next()).object.equals(node)) return true;
             }
             return false;
         }
@@ -59,16 +59,22 @@ public class InfoCache {
             if ( this == o ) return true;
             if (o == null || !(o instanceof Node)) return false;
 
-            if(this.unique.equals(((Node)o).unique))
-                return true;
-            else
-                return false;
+            if(this.unique.equals(((Node)o).unique)) return true;
+            else return false;
         }
         
         public int hashCode() {
+            return hash;
+        }
+        
+//        public String toString() {
+//            return label;
+//        }
+        
+        private void setHashCode() {
         	int h = hash;
         	if (h == 0) {
-        	    int off = offset;
+        	    int off = 0;
         	    char val[] = unique.toCharArray();
         	    int len = unique.length();
 
@@ -76,8 +82,25 @@ public class InfoCache {
                     h = 31*h + val[off++];
                 }
                 hash = h;
-            }
-            return h;
+            }          
+        }
+    }
+    
+    public class Predicate {
+        final String property;
+        
+        Predicate(final String property) {
+            this.property=property;
+        }
+    }
+    
+    public class Edge {
+        final Predicate predicate;
+        final Node object;
+        
+        Edge(final Predicate predicate, final Node node) {
+            this.predicate=predicate;
+            this.object=node;
         }
     }
     
@@ -101,8 +124,12 @@ public class InfoCache {
         else return null;
     }
     
+    public Edge getEdge(String predicate, Node node) {
+        return new Edge(new Predicate(predicate),node);
+    }
+    
     public void setLabel(String unique, String label) {
-        getNode(unique).label = "Label: "+label;
+        getNode(unique).label = "rdfs#label: "+label;
     }
 
     public float[] getCoordinatesXY(String unique) {

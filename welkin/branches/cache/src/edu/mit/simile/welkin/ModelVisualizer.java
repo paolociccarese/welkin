@@ -21,6 +21,7 @@ import javax.swing.JComponent;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import edu.mit.simile.welkin.InfoCache.Edge;
 import edu.mit.simile.welkin.InfoCache.Node;
 
 /**
@@ -432,7 +433,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 Node n1 = (Node) nodes.next();
                 for (Iterator edges = n1.linkedNodes.iterator(); edges
                         .hasNext();) {
-                    Node n2 = (Node) edges.next();
+                    Node n2 = ((Edge) edges.next()).object;
                     float z1 = zoom(n1.x, n1.y);
                     float z2 = zoom(n2.x, n2.y);
                     float x1 = n1.x + (n1.x - zoomX) * z1 + cx;
