@@ -19,7 +19,11 @@ public class InfoCache {
         float vx;
         float vy;
 
+        int hash = 0;
+        int offset;
+        
         String unique;
+        String label;
         List linkedNodes=new ArrayList();;
 
         boolean fixed = false;
@@ -27,12 +31,14 @@ public class InfoCache {
 
         Node(String unique) {
             this.unique = unique;
+            this.label = unique;
             this.x = (float) ((Math.random() - 0.5d) * 200.0d);
             this.y = (float) ((Math.random() - 0.5d) * 200.0d);
         }
         
         Node(String unique, float x, float y) {
             this.unique = unique;
+            this.label = unique;
             this.x = x;
             this.y = y;
         }
@@ -51,12 +57,27 @@ public class InfoCache {
         
         public boolean equals(Object o) {
             if ( this == o ) return true;
-            if ( !(o instanceof Node) ) return false;
+            if (o == null || !(o instanceof Node)) return false;
 
             if(this.unique.equals(((Node)o).unique))
                 return true;
             else
                 return false;
+        }
+        
+        public int hashCode() {
+        	int h = hash;
+        	if (h == 0) {
+        	    int off = offset;
+        	    char val[] = unique.toCharArray();
+        	    int len = unique.length();
+
+                for (int i = 0; i < len; i++) {
+                    h = 31*h + val[off++];
+                }
+                hash = h;
+            }
+            return h;
         }
     }
     
@@ -68,16 +89,20 @@ public class InfoCache {
         return null;
     }
     
-    public Node addNode(String unique) {
+    public Node addNode(String unique, String label) {
         Node node = new Node(unique);
-        nodes.add(node);
-        return node;
+        if(nodes.add(node)) return node;
+        else return null;
     }
     
-    public Node addNode(String unique, float x, float y) {
+    public Node addNode(String unique, String label, float x, float y) {
         Node node = new Node(unique, x, y);
-        nodes.add(node);
-        return node;
+        if(nodes.add(node)) return node;
+        else return null;
+    }
+    
+    public void setLabel(String unique, String label) {
+        getNode(unique).label = "Label: "+label;
     }
 
     public float[] getCoordinatesXY(String unique) {

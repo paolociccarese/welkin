@@ -36,6 +36,8 @@ public class ModelWrapper {
     private final String NODE_VX = "welkin/vx";
     private final String NODE_Y = "welkin/y";
     private final String NODE_VY = "welkin/vy";
+    
+    private final String LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
 
     private Property modelProperty;
     private Property nodeX;
@@ -43,6 +45,8 @@ public class ModelWrapper {
     private Property nodeY;
     private Property nodeVY;
     private Property fix;
+    
+    private Property label;
 
     class Group {
         String name;
@@ -72,6 +76,8 @@ public class ModelWrapper {
         nodeY = model.createProperty(NODE_Y);
         nodeVY = model.createProperty(NODE_VY);
         fix = model.createProperty(FIX);
+        
+        label=model.createProperty(LABEL);
     }
 
     /**
@@ -161,23 +167,17 @@ public class ModelWrapper {
         return nodes;
     }
 
+    //TODO Remove the method changing the visualizer
     public float[] getCoordinateXY(Resource res) {
             return cache.getCoordinatesXY((res.isAnon()?res.getId().toString():res.getURI()));
     }
 
-    
+    //TODO Remove the method changing the visualizer   
     public void setCoordinateXY(Resource res, float x, float y) {
         cache.setCoordinatesXY((res.isAnon()?res.getId().toString():res.getURI()),x,y);
     }
 
-    public float[] getCoordinateVXY(Node node) {
-        return cache.getCoordinatesVXY(node.unique);
-    }
-    
-    public void setCoordinateVXY(Node node, float x, float y) {
-        cache.setCoordinatesVXY(node.unique,x,y);
-    }
-
+    //TODO Not used anymore
     public Property getConnection(Resource from, Resource to) {
         for (Iterator i = model.listStatements(
                 model.getResource(from.getURI()), null, model.getResource(to
@@ -190,6 +190,7 @@ public class ModelWrapper {
         return null;
     }
 
+    //TODO Not used anymore
     public List getConnectionTo(Resource res) {
         List finale = new ArrayList();
         for (Iterator i = model.listStatements(model.getResource(res.getURI()),
@@ -246,34 +247,6 @@ public class ModelWrapper {
     public void clearHighlights() {
         // TODO Clear Highlights
     }
-
-    public void load() throws FileNotFoundException {
-        File fileName;
-
-        // Save File Manager
-        JFileChooser openWin = new JFileChooser();
-        //saveWin.setFileFilter(new GeneDataFilter());
-
-        int returnVal = openWin.showOpenDialog(null);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            fileName = openWin.getSelectedFile();
-
-            // create an empty model
-            Model model = ModelFactory.createDefaultModel();
-
-            FileInputStream in = new FileInputStream(fileName);
-            if (in == null) {
-                throw new IllegalArgumentException("File: " + fileName
-                        + " not found");
-            }
-
-            addModel(model.read(in, ""), fileName.getName());
-
-            Welkin.log("Statements processed: " + model.size());
-
-        }
-    }
     
     public void importModel() throws FileNotFoundException {
         File fileName;
@@ -322,6 +295,7 @@ public class ModelWrapper {
             String unique;
             Node node;
             
+            // Querying the model for coordinates
             Object o=it.next(); 
             if(!(o instanceof Resource)) continue;          
             Resource res = (Resource) o;
@@ -338,27 +312,26 @@ public class ModelWrapper {
                 break;
             }
             
+            // Querying the model for URI or Id
             unique=res.isAnon()?res.getId().toString():res.getURI();
             if(flagX && flagY)
-                node = cache.addNode(unique,x,y);
+                node = cache.addNode(unique, unique,x,y);
             else
-                node = cache.addNode(unique);
+                node = cache.addNode(unique, unique);
             
-            for(Iterator ix=model.listStatements(res,fix,(RDFNode)null);ix.hasNext();) {
-                Statement st = (Statement) ix.next();
-                node.fixed=st.getBoolean();
-                break;
-            }           
+            if(node!=null) {
+	            for(Iterator ix=model.listStatements(res,fix,(RDFNode)null);ix.hasNext();) {
+	                Statement st = (Statement) ix.next();
+	                node.fixed=st.getBoolean();
+	                break;
+	            }    
+            }
         }
         
-        for (Iterator it = total.iterator(); it.hasNext();) {
-            Object obj = it.next();
-            if(!(obj instanceof Resource)) continue;
-            Resource res = (Resource) obj;
-            Node node = cache.getNode(res.isAnon() ? res
-                    .getId().toString() : res.getURI());
-            for (Iterator io = model.listStatements(res, null, (RDFNode) null); io
-                    .hasNext();) {
+        for(Iterator it1 = cache.nodes.iterator();it1.hasNext();) {
+            Node node = (Node) it1.next();
+            for (Iterator io = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); io
+            .hasNext();) {
                 Statement st = (Statement) io.next();
                 RDFNode obj2 = st.getObject();
                 if (obj2 instanceof Resource) {
@@ -368,6 +341,16 @@ public class ModelWrapper {
                 }
             }
         }
+        
+        for(Iterator it = cache.nodes.iterator(); it.hasNext();) {
+            Node node = (Node) it.next();
+            for(Iterator i=model.listStatements(model.getResource(node.unique),label,(RDFNode)null);i.hasNext();) {
+                String lab=((Statement)i.next()).getObject().toString();
+                cache.setLabel(node.unique,lab);
+                break;
+            }          
+        }
+        
         return model;
     }
     
@@ -388,7 +371,7 @@ public class ModelWrapper {
     }
 
     /**
-     *  
+     *  Clears 
      */
     public void clear() {
         model = ModelFactory.createDefaultModel();
