@@ -252,29 +252,27 @@ public class InfoCache {
         }
     }
 
-    Set tmpNodes = new HashSet();
+    Set validatedNodes = new HashSet();
     public void verifyVisualized(CheckTree tree) {
+        validatedNodes.clear();
         for (Iterator it = nodes.iterator(); it.hasNext();) {
             Node node = (Node) it.next();
-            
-            tmpNodes.clear();
             
             boolean flag = false;
             for (Iterator i = node.linkedObjectNodes.iterator(); i.hasNext();) {
                 Edge edge = (Edge) i.next();
                 if (tree.isChecked(edge.predicate.property)) {
                     flag = true;
-                    tmpNodes.add(edge.object);
+                    validatedNodes.add(edge.object);
                 }
             }
 
-            if (flag) {
-                node.isVisible = true;
-                for(Iterator ite = tmpNodes.iterator(); ite.hasNext();) 
-                    ((Node)ite.next()).isVisible = true;
-            } else
-                node.isVisible = false;
-
+            if(flag) validatedNodes.add(node);
+            else node.isVisible = false;
         }
+        
+        for(Iterator it = validatedNodes.iterator(); it .hasNext();) {
+            ((Node)it.next()).isVisible = true;
+        }   
     }
 }

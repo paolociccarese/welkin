@@ -29,6 +29,7 @@ public class ModelWrapper {
     
     private Map groups = new HashMap(5);
 
+    private final String BASE = "edu.mit.simile.welkin";
     private final String MODEL_PROPERTY = "welkin/model";
     private final String FIX = "welkin/fix";
     private final String NODE_X = "welkin/x";
@@ -88,7 +89,7 @@ public class ModelWrapper {
      *            The name of the model.
      */
     public void addModel(final Model model, final String uri) {
-        setModelOwner(model, uri);
+        //setModelOwner(model, uri);
         this.model = this.model.union(model);
     }
 
