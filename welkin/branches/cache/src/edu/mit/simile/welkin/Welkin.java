@@ -23,6 +23,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -45,6 +46,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 	static final String UNSELECTED_ICON = ICON_PATH + "file.gif"; 
 	static final String SELECTED_ICON = ICON_PATH + "selected.gif"; 
     
+	CheckTree tree;
     ModelVisualizer visualizer;
     ModelWrapper wrapper;
 
@@ -95,6 +97,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
 		wrapper = new ModelWrapper();
         visualizer = new ModelVisualizer(wrapper);
+        tree = new CheckTree();
 
 		dataClearButton = new JButton("Clear");
 		dataLoadButton = new JButton("Load");
@@ -125,9 +128,12 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 		about.add(Box.createRigidArea(new Dimension(5,0)));
 		about.add(logoLabel);
 
+		JScrollPane scroll = new JScrollPane(tree);
+		
 		JPanel dataPane = new JPanel();
 		dataPane.setLayout(new BorderLayout());
 		dataPane.add(about, BorderLayout.NORTH);
+		dataPane.add(scroll, BorderLayout.CENTER);
 		dataPane.add(dataControls, BorderLayout.SOUTH);
 		dataPane.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 		
