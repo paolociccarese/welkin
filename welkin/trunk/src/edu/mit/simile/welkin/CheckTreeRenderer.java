@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.swing.Icon;
@@ -14,8 +15,10 @@ import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
+import edu.mit.simile.welkin.tree.NamespaceTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToLiteralTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
 
@@ -73,22 +76,35 @@ public class CheckTreeRenderer extends JPanel implements TreeCellRenderer {
         label.setSelected(isSelected);
         label.setFocus(hasFocus);
 
-        if(value instanceof PropertyToLiteralTreeNode) this.remove(box);
-        else this.add(box, BorderLayout.WEST);
-        
         if (bool2 && !bool)
             box.setIcon(cicon);
         else
             box.setIcon(icon);
 
-        if(value instanceof PropertyToResourceTreeNode)
+        this.remove(box);
+        if(value instanceof PropertyToResourceTreeNode) {
             label.setIcon(null);
-        else if (leaf)
+        	this.add(box, BorderLayout.WEST);
+        } else if(value instanceof PropertyToLiteralTreeNode) {
+            label.setIcon(null);
+        } else if (leaf) {
             label.setIcon(UIManager.getIcon("Tree.leafIcon"));
-        else if (expanded)
+            if(!(value instanceof NamespaceTreeNode))
+                this.add(box, BorderLayout.WEST);
+        } else if (expanded) {
             label.setIcon(UIManager.getIcon("Tree.openIcon"));
-        else
+        	boolean litFlag=true;
+        	Enumeration enum=((DefaultMutableTreeNode)value).children();
+        	while(enum.hasMoreElements()) {
+        	    if(!(enum.nextElement() instanceof PropertyToLiteralTreeNode)) {
+        	        litFlag=false;
+        	    }
+        	}
+        	if(!litFlag) this.add(box, BorderLayout.WEST);
+        } else {
             label.setIcon(UIManager.getIcon("Tree.closedIcon"));
+            this.add(box, BorderLayout.WEST);
+        }
         return this;
     }
 
@@ -113,8 +129,9 @@ public class CheckTreeRenderer extends JPanel implements TreeCellRenderer {
             if ((str = getText()) != null) {
                 if (0 < str.length()) {
                     if (isSelected) {
-                        g.setColor(UIManager
-                                .getColor("Tree.selectionBackground"));
+//                        g.setColor(UIManager
+//                                .getColor("Tree.selectionBackground"));
+                        g.setColor(Color.RED);
                     } else {
                         g.setColor(UIManager.getColor("Tree.textBackground"));
                     }
@@ -129,14 +146,14 @@ public class CheckTreeRenderer extends JPanel implements TreeCellRenderer {
                     // d.height+10);
                     g.fillRect(0, 0, d.width + 1, d.height + 10);
 
-                    if (hasFocus) {
-                        g.setColor(UIManager
-                                .getColor("Tree.selectionBorderColor"));
-                        //g.drawRect(imageOffset, 0, d.width -1 - imageOffset,
-                        // d.height+2); //-1
-                        g.drawRect(0, 0, d.width - 1, d.height + 2); //-1
-
-                    }
+//                    if (hasFocus) {
+//                        g.setColor(UIManager
+//                                .getColor("Tree.selectionBorderColor"));
+//                        //g.drawRect(imageOffset, 0, d.width -1 - imageOffset,
+//                        // d.height+2); //-1
+//                        g.drawRect(0, 0, d.width - 1, d.height + 2); //-1
+//
+//                    }
                 }
             }
             super.paintComponent(g);
