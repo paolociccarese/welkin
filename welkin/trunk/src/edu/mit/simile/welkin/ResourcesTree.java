@@ -35,13 +35,11 @@ public class ResourcesTree extends JPanel {
     public static final String ROOT_LABEL = "Resources";
     
     public static final Color BACKGROUND = Color.WHITE;
-    public static final Color ACTIVE_FOREG = Color.BLACK;
-    public static final Color PASSIVE_FOREG = Color.GRAY;
     
     public static final int MIN_VALUE = 0;
-    public static final int MAX_VALUE = 255;
-    public static final int INIT_VALUE = 10;
-    public static final float FACTOR = 255;
+    public static final int MAX_VALUE = 360;
+    public static final int INIT_VALUE = 0;
+    //public static final float FACTOR = 360;
     
     static final String ICON_PATH = "resources/icons/";
     static final String OPEN_ICON = ICON_PATH + "openIcon.gif"; 
@@ -82,17 +80,16 @@ public class ResourcesTree extends JPanel {
     }
     
     public void buildTree() {
-        FullNode rootNode = new FullNode(ROOT_LABEL,null);
-        elements.add(rootNode);
+        root = new FullNode(ROOT_LABEL,null);
+        elements.add(root);
         
         for(Iterator it = welkin.wrapper.cache.resourcesBases.iterator(); it.hasNext();) {
         	PartialUri predicate = ((PartialUri)it.next());
         	String[] parts = Util.getBasisParts(predicate.getBase());
-        	createNode(rootNode, parts, predicate, 0);
+        	createNode(root, parts, predicate, 0);
         }
         
-        root = rootNode;
-        calculateValues(root, root.value);
+        calculateValues(root, root.slider.getValue());
         this.displayTree();
     	this.repaint();
     	
@@ -136,7 +133,7 @@ public class ResourcesTree extends JPanel {
         this.setLayout(null);
         this.setBackground(BACKGROUND);
         
-        root.value = root.slider.getValue()/FACTOR;
+        root.slider.getValue();
         
         xPos=5;
         vPos=5;
@@ -178,13 +175,15 @@ public class ResourcesTree extends JPanel {
     }
     
     private void calculateValues(FullNode node, float ancestorValue) {
-    	if(node.resource!=null)
-    			node.adjustValue();
+    	//if(node.resource!=null) 
+    	//node.adjustValue();
         for(int i=0; i<node.children.size();i++) {
-            ((FullNode) node.children.get(i)).sum = ancestorValue;
+            //((FullNode) node.children.get(i)).sum = ancestorValue;
             ((FullNode) node.children.get(i)).adjustValue(ancestorValue);
-            calculateValues((FullNode) node.children.get(i),((FullNode) node.children.get(i)).value);
-            ((FullNode) node.children.get(i)).setFace();
+            //calculateValues((FullNode) node.children.get(i),((FullNode) node.children.get(i)).slider.getValue());
+            calculateValues((FullNode) node.children.get(i),ancestorValue);
+
+            //((FullNode) node.children.get(i)).setFace(((FullNode) node.children.get(i)).slider.getValue());
         }
         
         welkin.notifyBaseUriColorChange();
@@ -222,18 +221,8 @@ public class ResourcesTree extends JPanel {
     
     class FullNode extends JPanel implements ChangeListener {
         private JLabel iconLabel;
-        //private JLabel weight;
         private JSlider slider;
         private TreeLabel label;
-        
-        /**
-         * Actual value of the node
-         */
-        private float value;
-        /**
-         * Sum of values of the ancestors
-         */
-        private float sum;
         
         boolean isVisible;
         boolean isAllowed;
@@ -253,13 +242,6 @@ public class ResourcesTree extends JPanel {
             iconLabel = new JLabel();
             iconLabel.setSize(20,18);
             
-//            weight = new JLabel();
-//            weight.setHorizontalAlignment(JTextField.RIGHT);
-//            weight.setBackground(BACKGROUND);
-//            weight.setFont(font);
-//            weight.setSize(30,16);
-//            weight.setBorder(null);
-            
             slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
             slider.addChangeListener(this);
             slider.setBackground(BACKGROUND);
@@ -277,15 +259,11 @@ public class ResourcesTree extends JPanel {
             this.add(iconLabel);
             this.add(slider);
             this.add(this.label);
-           
-            //this.add(weight);
-            
-            this.value = INIT_VALUE;
             
             this.isVisible = true;
             this.isAllowed = true;
             
-            setFace();
+            adjustValue(INIT_VALUE);
             
             this.setSize(getDimension().width,18);
             
@@ -300,18 +278,14 @@ public class ResourcesTree extends JPanel {
         }
         
 		public void adjustValue(float f) {
-			value = f;
 			slider.setValue((int)(f));
-			float col = 1677721.5f * f;
-			if(resource!=null) resource.color =  Color.getHSBColor(f/255,1,1);
-			slider.setBackground(Color.getHSBColor(f/255,1,1));
+			if(resource!=null) resource.color =  Color.getHSBColor(f/(float)MAX_VALUE,1,1);
+			label.setForeground(Color.getHSBColor(f/(float)MAX_VALUE,1,1));
 		}
 		
 		public void adjustValue() {
-			value = (float)slider.getValue() * 65535f;
-			float col = 65535f * value;
-			if(resource!=null) resource.color = Color.getHSBColor(((float)slider.getValue()/255),1,1);
-			slider.setBackground(Color.getHSBColor(((float)slider.getValue()/255),1,1)) ;
+			if(resource!=null) resource.color = Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,1,1);
+			label.setForeground(Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,1,1)) ;
 		}
 
 		private void openCloseNodeChildren (FullNode node) {
@@ -335,30 +309,9 @@ public class ResourcesTree extends JPanel {
         }
         
         public void stateChanged(ChangeEvent e) { 
-            this.setFace();      
-            this.value=slider.getValue()*65535;
-            slider.setBackground(new Color((((int)(value % 65535))), (((int)(value % 255))), (int)(value % 255)));
+            label.setForeground(Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,1,1));
             calculateValues(this,slider.getValue());
             this.repaint();
-        }
-        
-        private void setFace() {
-            float sliderValue = slider.getValue();
-            //weight.setText("("+Float.toString(sliderValue/FACTOR)+")");
-            if(resource!=null)
-            //weight.setText("(sum="+this.sum+",value="+this.value+",pred="+this.resource.getUri()+",value="+this.predicate.weight+")");
-            if (sliderValue==0) {
-                label.setForeground(PASSIVE_FOREG);
-                //weight.setForeground(PASSIVE_FOREG);
-            } else if (sliderValue==10) {
-                label.setFont(bold);
-                //weight.setFont(bold);
-            } else {
-                label.setForeground(ACTIVE_FOREG);
-                //weight.setForeground(ACTIVE_FOREG);
-                label.setFont(font);
-                //weight.setFont(font);
-            } 
         }
         
         public Dimension getDimension() {
