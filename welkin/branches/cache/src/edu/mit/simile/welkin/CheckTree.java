@@ -20,12 +20,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 import edu.mit.simile.welkin.InfoCache.Node;
+import edu.mit.simile.welkin.tree.NamespaceTreeNode;
+import edu.mit.simile.welkin.tree.PropertyToLiteralTreeNode;
+import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
 
 /**
  * @author Paolo Ciccarese
@@ -45,7 +49,10 @@ public class CheckTree extends JTree {
         public Namespace(String namespace) {
             this.namespace = namespace;
         }
-        public void addProperty(Property property) {
+        public void addProperty(PropertyToLiteralTreeNode property) {
+            properties.add(property);
+        }
+        public void addProperty(PropertyToResourceTreeNode property) {
             properties.add(property);
         }
         public boolean equals(String namespace) {
@@ -95,8 +102,12 @@ public class CheckTree extends JTree {
             Node node=((Node)it.next());
             Resource res=welkin.wrapper.getModel().getResource(node.unique);
             for(Iterator i=welkin.wrapper.getModel().listStatements(res,null,(RDFNode)null);i.hasNext();) {
-                Property property = ((Statement)i.next()).getPredicate();
-                findNamespace(property.getNameSpace()).addProperty(property);
+                Statement st = (Statement)i.next();
+                Property property = st.getPredicate();
+                if(st.getObject() instanceof Resource)
+                    findNamespace(property.getNameSpace()).addProperty(new PropertyToResourceTreeNode(property));
+                else if(st.getObject() instanceof Literal)
+                    findNamespace(property.getNameSpace()).addProperty(new PropertyToLiteralTreeNode(property));
             }
         }
     }
@@ -126,8 +137,8 @@ public class CheckTree extends JTree {
             NamespaceTreeNode nsTreeNode=new NamespaceTreeNode(ns.namespace);
             model.insertNodeInto(nsTreeNode,root,root.getChildCount());
             for(Iterator i=ns.properties.iterator();i.hasNext();) {
-                PropertyTreeNode pTreeNode=new PropertyTreeNode(((Property)i.next()));
-                model.insertNodeInto(pTreeNode,nsTreeNode,nsTreeNode.getChildCount());
+                //PropertyTreeNode pTreeNode=new PropertyTreeNode(((Property)i.next()));
+                model.insertNodeInto(((DefaultMutableTreeNode)i.next()),nsTreeNode,nsTreeNode.getChildCount());
             }
         }
         
@@ -148,16 +159,12 @@ public class CheckTree extends JTree {
     public void setPathCheck(boolean pathcheck) {
         this.pathcheck = pathcheck;
         if (this.pathcheck == false)
-            removePathCheck();
+            checked.clear();
         else {
-            removePathCheck();
+            checked.clear();
             includePathCheck();
         }
         repaint();
-    }
-
-    private void removePathCheck() {
-        checked.clear();
     }
 
     private void includePathCheck() {
@@ -217,10 +224,6 @@ public class CheckTree extends JTree {
             checkNodes(ae - be, i + row);
             collapseRow(i + row);
         }
-    }
-
-    public boolean getPathCheck() {
-        return this.pathcheck;
     }
 
     public boolean isChecked(Object value) {
