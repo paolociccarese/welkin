@@ -268,7 +268,7 @@ public class ModelWrapper {
                         + " not found");
             }
 
-            addModel(inChaching(model.read(in, "")), fileName.getName());
+            addModel(inCache(model.read(in, "")), fileName.getName());
 
             Welkin.log("Statements processed: " + model.size());
             return true;
@@ -276,63 +276,24 @@ public class ModelWrapper {
         return false;
     }
     
-    Model inChaching(Model model) {
-        Iterator its = model.listSubjects();
-        Iterator ito = model.listObjects();
-        
-        List total = new ArrayList();
-        while (its.hasNext()) {
-            total.add(its.next());
-        }
-        while (ito.hasNext()) {
-            total.add(ito.next());
+    Model inCache(Model model) {
+        // Put subjects in cache
+        Iterator itSubjects = model.listSubjects();
+        while(itSubjects.hasNext()) {
+            addResource((Resource) itSubjects.next(), true);
         }
         
-        for(Iterator it=total.iterator();it.hasNext();) {
-            float x=0;
-            float y=0;
-            boolean flagX=false;
-            boolean flagY=false;
-            String unique;
-            Node node;
-            
-            // Querying the model for coordinates
-            Object o=it.next(); 
-            if(!(o instanceof Resource)) continue;          
-            Resource res = (Resource) o;
-            for(Iterator ix=model.listStatements(res,nodeX,(RDFNode)null);ix.hasNext();) {
-                Statement st = (Statement) ix.next();
-                x = st.getFloat();
-                flagX=true;
-                break;
-            }
-            for(Iterator ix=model.listStatements(res,nodeY,(RDFNode)null);ix.hasNext();) {
-                Statement st = (Statement) ix.next();
-                y = st.getFloat();
-                flagY=true;
-                break;
-            }
-            
-            // Querying the model for URI or Id
-            unique=res.isAnon()?res.getId().toString():res.getURI();
-            if(flagX && flagY)
-                node = cache.addNode(unique, unique,x,y);
-            else
-                node = cache.addNode(unique, unique);
-            
-            if(node!=null) {
-	            for(Iterator ix=model.listStatements(res,fix,(RDFNode)null);ix.hasNext();) {
-	                Statement st = (Statement) ix.next();
-	                node.fixed=st.getBoolean();
-	                break;
-	            }    
-            }
+        Iterator itObjects = model.listObjects();
+        while(itObjects.hasNext()) {
+            Object  obj = itObjects.next();
+            if (obj instanceof Resource)
+                addResource((Resource) obj, false);
         }
         
-        for (Iterator it1 = cache.nodes.iterator();it1.hasNext();) {
-            Node node = (Node) it1.next();
-            for (Iterator io = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); io.hasNext();) {
-                Statement st = (Statement) io.next();
+        for (Iterator itNodes = cache.nodes.iterator();itNodes.hasNext();) {
+            Node node = (Node) itNodes.next();
+            for (Iterator itQuery = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); itQuery.hasNext();) {
+                Statement st = (Statement) itQuery.next();
                 RDFNode subj = st.getSubject();
                 String sn = ((Resource) subj).isAnon() ? ((Resource) subj).getId().toString() : ((Resource) subj).getURI();
                 Node subjectNode = cache.getNode(sn);
@@ -350,6 +311,7 @@ public class ModelWrapper {
             }
         }
         
+        // Load rdf label
         for (Iterator it = cache.nodes.iterator(); it.hasNext();) {
             Node node = (Node) it.next();
             for (Iterator i = model.listStatements(model.getResource(node.unique),label,(RDFNode) null); i.hasNext();) {
@@ -360,6 +322,44 @@ public class ModelWrapper {
         }
         
         return model;
+    }
+    
+    private void addResource(Resource res, boolean isSubject) {
+        String unique = res.isAnon()?res.getId().toString():res.getURI();
+        cache.addNode(unique, getCoordinates(res), isNodeFixed(res), isSubject);
+    }
+    
+    private float[] getCoordinates (Resource res) {
+ 
+        boolean flagX=false;
+        boolean flagY=false;
+        
+        float coordinates[] = new float[2];
+        
+        for(Iterator ix=model.listStatements(res,nodeX,(RDFNode)null);ix.hasNext();) {
+            Statement st = (Statement) ix.next();
+            coordinates[0] = st.getFloat();
+            flagX=true;
+            break;
+        }
+        for(Iterator ix=model.listStatements(res,nodeY,(RDFNode)null);ix.hasNext();) {
+            Statement st = (Statement) ix.next();
+            coordinates[1] = st.getFloat();
+            flagY=true;
+            break;
+        }
+        
+        if(flagX && flagY) return coordinates;
+        else return null;
+    }
+    
+    private boolean isNodeFixed (Resource res) {
+        for(Iterator ix=model.listStatements(res,fix,(RDFNode)null);ix.hasNext();) {
+            Statement st = (Statement) ix.next();
+            return st.getBoolean();
+        }   
+        
+        return false;
     }
     
     void outCaching(Model model) {

@@ -22,6 +22,7 @@ public class InfoCache {
         boolean fixed = false;
         boolean isVisible = true;
         boolean highlighted = false;
+        boolean isObjectOnly = true;
 
         String label;
         final String unique;
@@ -29,19 +30,22 @@ public class InfoCache {
         List linkedSubjectNodes = new ArrayList();
         List linkedObjectNodes = new ArrayList();
         List linkedLiterals = new ArrayList();
-
-        Node(final String unique) {
+        
+        Node(final String unique, final boolean isObjectOnly) {
             this.unique = this.label = unique;
+            this.isObjectOnly = isObjectOnly;
             setHashCode();
 
             this.x = (float) ((Math.random() - 0.5d) * 200.0d);
             this.y = (float) ((Math.random() - 0.5d) * 200.0d);
         }
-
-        Node(final String unique, final float x, final float y) {
+        
+        Node(final String unique, final float x, final float y, final boolean isNodeFixed, final boolean isSubjectOnly) {
             this.unique = this.label = unique;
             setHashCode();
 
+            this.fixed = isNodeFixed;
+            this.isObjectOnly = isSubjectOnly;
             this.x = x;
             this.y = y;
         }
@@ -169,16 +173,21 @@ public class InfoCache {
         return null;
     }
 
-    public Node addNode(String unique, String label) {
-        Node node = new Node(unique);
+    public Node addNode(String unique, float[] coordinates, boolean isNodeFixed, boolean isSubject) {
+        Node node;
+        if(coordinates!=null) {
+        	node = new Node(unique, coordinates[0], coordinates[1], isNodeFixed, isSubject);
+        } else {
+            node = new Node(unique, isSubject);
+        }
         if (nodes.add(node))
             return node;
         else
             return null;
     }
-
-    public Node addNode(String unique, String label, float x, float y) {
-        Node node = new Node(unique, x, y);
+    
+    public Node addNode(String unique, boolean isSubject) {
+        Node node = new Node(unique, isSubject);
         if (nodes.add(node))
             return node;
         else

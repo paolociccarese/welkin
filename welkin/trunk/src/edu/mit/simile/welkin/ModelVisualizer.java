@@ -40,6 +40,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     final Color edgeColor = new Color(150, 150, 150, 100);
     final Color edgeValueColor = new Color(50, 50, 50, 100);
     final Color nodeColor = Color.red;
+    final Color externalNodeColor = Color.blue;
     final Color timeColor = Color.black;
     final Color tooltipBorderColor = Color.black;
     final Color pickedBGColor = new Color(255, 255, 0, 100);
@@ -433,7 +434,11 @@ public class ModelVisualizer extends JComponent implements Runnable {
                     g2.setColor(selectColor);
                     g2.fill(nodeshape);
                 } else {
-                    g2.setColor(n.fixed ? fixedColor : nodeColor);
+                    if (n.fixed) {
+                        g2.setColor(fixedColor);
+                    } else {
+                        g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                    }
                     g2.draw(nodeshape);
                 }
             }
