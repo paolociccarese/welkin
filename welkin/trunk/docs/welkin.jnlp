@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<jnlp spec="1.0+" codebase="http://simile.mit.edu/repository/welkin/trunk/" href="docs/welkin-rio.jnlp">
+<jnlp spec="1.0+" codebase="http://simile.mit.edu/repository/welkin/trunk/" href="docs/welkin.jnlp">
 	<information>
 		<title>Welkin</title>
 		<vendor>The SIMILE Project</vendor>
