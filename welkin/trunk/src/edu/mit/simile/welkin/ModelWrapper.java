@@ -280,14 +280,14 @@ public class ModelWrapper {
         // Put subjects in cache
         Iterator itSubjects = model.listSubjects();
         while(itSubjects.hasNext()) {
-            addResource((Resource) itSubjects.next(), true);
+            addResource((Resource) itSubjects.next(), false);
         }
         
         Iterator itObjects = model.listObjects();
         while(itObjects.hasNext()) {
             Object  obj = itObjects.next();
             if (obj instanceof Resource)
-                addResource((Resource) obj, false);
+                addResource((Resource) obj, true);
         }
         
         for (Iterator itNodes = cache.nodes.iterator();itNodes.hasNext();) {

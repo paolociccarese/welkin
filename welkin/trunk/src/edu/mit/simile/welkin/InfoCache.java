@@ -40,12 +40,12 @@ public class InfoCache {
             this.y = (float) ((Math.random() - 0.5d) * 200.0d);
         }
         
-        Node(final String unique, final float x, final float y, final boolean isNodeFixed, final boolean isSubjectOnly) {
+        Node(final String unique, final float x, final float y, final boolean isNodeFixed, final boolean isObjectOnly) {
             this.unique = this.label = unique;
             setHashCode();
 
             this.fixed = isNodeFixed;
-            this.isObjectOnly = isSubjectOnly;
+            this.isObjectOnly = isObjectOnly;
             this.x = x;
             this.y = y;
         }
