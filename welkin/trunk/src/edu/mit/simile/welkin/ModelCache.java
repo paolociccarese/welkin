@@ -51,38 +51,40 @@ public class ModelCache {
         }
     }
     
+    PredicateUri ns;
     public PredicateUri addPredicatesUri(URI uri) {
-    	PredicateUri ns = new PredicateUri(uri, 1);
+    	ns = new PredicateUri(uri, 1);
     	int index = predicates.indexOf(ns);
         if(index == -1) {
             predicates.add(ns);
             return ns;
         }        
-        
         return (PredicateUri) predicates.get(index);
     }
     
+    private PartialUri pu;
     public PartialUri addResourcesUri(URI uri) {
-
-    	//PartialUri pu = new PartialUri(Util.getUriBase(uri.toString()), Color.RED);
-    	PartialUri pu = new PartialUri(uri.getNamespace(), Color.RED);
+    	pu = new PartialUri(uri.getNamespace(), Color.RED);
         int index = resourcesBases.indexOf(pu);
         if(index == -1) {
             resourcesBases.add(pu);
             return pu;
         }
-        
-        return (PartialUri) resourcesBases.get(index);
+        pu = (PartialUri) resourcesBases.get(index);
+        pu.incCount();
+        return pu;
     }
     
     public PartialUri addBlankResourcesUri(String uri) {
-    	PartialUri pu = new PartialUri(ANONYMOUS_RES, Color.RED);
+    	pu = new PartialUri(ANONYMOUS_RES, Color.RED);
         int index = resourcesBases.indexOf(pu);
         if(index == -1) {
             resourcesBases.add(pu);
             return pu;
-        }
-        return (PartialUri) resourcesBases.get(index);
+        } 
+        pu = (PartialUri) resourcesBases.get(index);
+        pu.incCount();
+        return pu;
     }
 
     WDoubleHashKey tmp = new WDoubleHashKey();  
@@ -99,16 +101,17 @@ public class ModelCache {
         } else {
             resource = new WResource(unique, isNotSubject);
         }
-        if (resources.add(resource))
-            return resource;
-        else
-            return null;
+        
+        if (resources.add(resource)) return resource;
+        else return null;
     }
     
-    public WResource addResource(String unique, boolean isNotSubject) {
-        WResource res = new WResource(unique, isNotSubject);
-        if (resources.add(res)) return res;
-        else {
+    public WResource addResource(Object value, boolean isNotSubject) {
+        WResource res = new WResource(value.toString(), isNotSubject);
+        if (resources.add(res)) {
+        	addResourcesUri((URI)value);
+        	return res;
+        } else {
             for(Iterator it = resources.iterator(); it.hasNext();) {
                 WResource tmp = (WResource) it.next();
                 if(res.equals(tmp)) {
@@ -137,14 +140,6 @@ public class ModelCache {
             }
         }
         return null;
-    }
-    
-    public void clearUriColors() {
-    	// TODO Reset colors
-//        for(Iterator it = resourcesBases.iterator(); it.hasNext();) {
-//        	ResourceUri uri = (ResourceUri) it.next();
-//            uri.color = ResourcesTree.DEFAULT_URI_COLOR;
-//        }
     }
     
     public void setUriColor(String prefix, Color color) {

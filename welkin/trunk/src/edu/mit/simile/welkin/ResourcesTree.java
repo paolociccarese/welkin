@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -12,15 +11,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.UIManager;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ColorUIResource;
 
 import edu.mit.simile.welkin.resource.PartialUri;
 
@@ -79,13 +76,13 @@ public class ResourcesTree extends JPanel {
     }
     
     public void buildTree() {
-        root = new FullNode(ROOT_LABEL,null);
+        root = new FullNode(ROOT_LABEL, null, false);
+        root.incCount(welkin.wrapper.cache.resources.size());
         elements.add(root);
         
         for(Iterator it = welkin.wrapper.cache.resourcesBases.iterator(); it.hasNext();) {
         	PartialUri predicate = ((PartialUri)it.next());
-        	String[] parts = Util.splitUriBases(predicate.getBase());
-        	createNode(root, parts, predicate, 0);
+        	createNode(root, Util.splitUriBases(predicate.getBase()), predicate, 0);
         }
         
         calculateValues(root, root.slider.getValue());
@@ -100,12 +97,7 @@ public class ResourcesTree extends JPanel {
     	if(parts[0]==null) return; // TODO Blank Nodes
     	
     	if(level == parts.length-1) {
-        	for(int i = 0; i < root.children.size(); i++) {
-        		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
-        			return;
-        		} 
-        	}
-        	FullNode tmp = new FullNode(parts[parts.length-1], all);
+        	FullNode tmp = new FullNode(parts[parts.length-1], all, true);
         	if(level == 0) tmp.isVisible = true;
         	else tmp.isVisible = false;
         	root.children.add(tmp);
@@ -114,16 +106,17 @@ public class ResourcesTree extends JPanel {
     	boolean flag = false;
     	for(int i = 0; i < root.children.size(); i++) {
     		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
-    			level++;
+     			level++;
     			createNode(((FullNode)root.children.get(i)), parts, all, level);
+    			((FullNode)root.children.get(i)).incCount(all.getCount());
     			flag = true;
     		}
     	}
     	
     	if(!flag) {
-    		FullNode child = new FullNode(parts[level++], null);
+    		FullNode child = new FullNode(parts[level++], all, false);
     		if(level == 2) child.isVisible = false;
-    		root.children.add(child);
+    		root.children.add(child); 
     		createNode(child, parts, all, level);
     	}
     }
@@ -216,17 +209,21 @@ public class ResourcesTree extends JPanel {
     class FullNode extends JPanel implements ChangeListener {
         private JLabel iconLabel;
         private JSlider slider;
-        private TreeLabel label;
+        private JLabel label;
+        private JLabel weight;
         
         boolean isVisible;
         boolean isAllowed;
+        boolean isLeaf;
+        
+        int count = 0;
         
         FullNode me;
         FullNode father;
         Vector children = new Vector();
         PartialUri resource;
         
-        FullNode(String labelT, PartialUri resource) {
+        FullNode(String labelT, PartialUri resource, boolean isLeaf) {
         	this.resource = resource;
             me=this;
             
@@ -245,17 +242,27 @@ public class ResourcesTree extends JPanel {
             slider.setSnapToTicks(false);
             slider.setPaintTicks(false);
             
-            this.label = new TreeLabel();
+            this.label = new JLabel();
             this.label.setFont(font);
             this.label.setText(labelT);
             this.label.setBackground(BACKGROUND);
             
+            weight = new JLabel();
+            weight.setHorizontalAlignment(JTextField.RIGHT);
+            weight.setBackground(BACKGROUND);
+            weight.setFont(font);
+            weight.setSize(30,16);
+            weight.setBorder(null);
+            if(resource != null) incCount(resource.getCount());
+            
             this.add(iconLabel);
             this.add(slider);
             this.add(this.label);
+            this.add(weight);
             
             this.isVisible = true;
             this.isAllowed = true;
+            this.isLeaf = isLeaf;
             
             adjustValue(INIT_VALUE);
             
@@ -269,6 +276,11 @@ public class ResourcesTree extends JPanel {
                     }
                 }
             });
+        }
+        
+        public void incCount(int count) {
+        	this.count += count;
+        	weight.setText(" (" + this.count + ")");
         }
         
 		public void adjustValue(float f) {
@@ -309,53 +321,6 @@ public class ResourcesTree extends JPanel {
         
         public Dimension getDimension() {
             return new Dimension (140+label.getPreferredSize().width,16);
-        }
-    }
-    
-    public class TreeLabel extends JLabel {
-        boolean isSelected;
-        boolean hasFocus;
-
-        public TreeLabel() {
-        }
-
-        public void setBackground(Color color) {
-            if (color instanceof ColorUIResource)
-                color = null;
-            super.setBackground(color);
-        }
-
-        public void paintComponent(Graphics g) {
-            String str;
-            if ((str = getText()) != null) {
-                if (0 < str.length()) {
-
-                    g.setColor(UIManager.getColor("Tree.textBackground"));
-                    
-                    Dimension d = getPreferredSize();
-                    int imageOffset = 0;
-                    Icon currentI = getIcon();
-                    if (currentI != null) {
-                        imageOffset = currentI.getIconWidth()
-                                + Math.max(0, getIconTextGap() - 1);
-                    }
-                    g.fillRect(0, 0, d.width + 1, d.height + 10);
-                }
-            }
-            super.paintComponent(g);
-        }
-
-        public Dimension getPreferredSize() {
-            Dimension retDimension = super.getPreferredSize();
-            if (retDimension != null) {
-                retDimension = new Dimension(retDimension.width + 3,
-                        retDimension.height);
-            }
-            return retDimension;
-        }
-
-        public void setFocus(boolean hasFocus) {
-            this.hasFocus = hasFocus;
         }
     }
 }

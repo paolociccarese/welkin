@@ -32,20 +32,19 @@ public class ModelManager implements StatementHandler {
 	{    
         WResource sub = null;
         if (resource instanceof URI) {
-            sub = cache.addResource(resource.toString(), false);
-            cache.addResourcesUri((URI)resource);
+            sub = cache.addResource(resource, false);
+            //cache.addResourcesUri((URI)resource);
         } else if (resource instanceof BNode) {
             sub = cache.addBlankResource(resource.toString());
             cache.addBlankResourcesUri(resource.toString());
         }
          
         if (value instanceof URI) {
-            WResource obj = cache.addResource(value.toString(), true);
+            WResource obj = cache.addResource(value, true);
         	
             PredicateUri puri = cache.addPredicatesUri(uri);
         	
             sub.addObjectStatement(cache.getStatement(sub, puri, obj));
-            cache.addResourcesUri((URI)value);
             cache.addStatement(sub.hash, obj.hash, puri);
             
         } else if (value instanceof Literal) {
