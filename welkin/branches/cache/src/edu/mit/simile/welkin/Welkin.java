@@ -344,6 +344,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             }
 		} else if (source == dataClearButton) {
 		    wrapper.clear();
+		    tree.clear();
         } else if (source == delayField) {
             visualizer.delay = Integer.parseInt(delayField.getText());
         } else if (source == massField) {

@@ -6,6 +6,7 @@ package edu.mit.simile.welkin;
 import java.awt.Rectangle;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class CheckTree extends JTree {
     Hashtable checked;
     boolean pathcheck = false;
     
-    List namespaces = new ArrayList();
+    List namespaces;
     
     public class Namespace {
         String namespace;
@@ -61,11 +62,18 @@ public class CheckTree extends JTree {
         super();
         this.welkin = welkin;
         init();
+        defineEmptyRoot();
+    }
+    
+    public void clear() {
+        init();
+        defineEmptyRoot();
     }
     
     public void init() {
         map = new Hashtable();
         checked = new Hashtable();
+        namespaces = new ArrayList();
         super.setCellRenderer(renderer = new CheckTreeRenderer(map, checked));
         this.addMouseListener(new Mouse());
     }
@@ -101,8 +109,17 @@ public class CheckTree extends JTree {
         return null;
     }
     
+    private void defineEmptyRoot() {
+        DefaultMutableTreeNode root=new DefaultMutableTreeNode("Any ontology");
+        DefaultTreeModel model=new DefaultTreeModel(root);
+        this.setModel(model);
+        this.revalidate();
+        this.validate();
+        this.repaint();
+    }
+    
     public void fillTree() {
-        DefaultMutableTreeNode root=new DefaultMutableTreeNode("ontologies");
+        DefaultMutableTreeNode root=new DefaultMutableTreeNode("Ontologies");
         DefaultTreeModel model=new DefaultTreeModel(root);
         for(Iterator it=namespaces.iterator();it.hasNext();) {
             Namespace ns=((Namespace)it.next());
@@ -114,6 +131,8 @@ public class CheckTree extends JTree {
             }
         }
         
+        this.setTreeCheck(new TreePath(root.getPath()));
+        forwardPropagation(root, true);
         this.setModel(model);
         this.revalidate();
         this.validate();
@@ -267,21 +286,45 @@ public class CheckTree extends JTree {
             removeCheck(path.getParentPath(), false);
     }
     
-    public class Mouse implements MouseListener {
-
-        private void propagate(DefaultMutableTreeNode node, boolean bool) {
-            checkManagement(new TreePath(node.getPath()),bool);
-            for (int i = 0; i < CheckTree.this.getModel().getChildCount(node); i++) {
-                propagate((DefaultMutableTreeNode) CheckTree.this.getModel().getChild(node,i),bool);
-            }
+    private void forwardPropagation(DefaultMutableTreeNode node, boolean bool) {
+        checkManagement(new TreePath(node.getPath()),bool);
+        for (int i = 0; i < CheckTree.this.getModel().getChildCount(node); i++) {
+            forwardPropagation((DefaultMutableTreeNode) CheckTree.this.getModel().getChild(node,i),bool);
         }
-
-        private void checkManagement(TreePath path, boolean bool) {
+    }
+    
+    private void backwardPropagation(DefaultMutableTreeNode node, boolean bool) {
+        boolean allSelectedFlag = true;
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+        if(parent==null) return;
+        for(Enumeration e = parent.children(); e.hasMoreElements(); ) {
+            if(!CheckTree.this.isChecked(e.nextElement()))
+                allSelectedFlag = false;
+        }
+        
+        boolean allNotSelectedFlag = true;
+        for(Enumeration e = parent.children(); e.hasMoreElements(); ) {
+            if(CheckTree.this.isChecked(e.nextElement()))
+                allNotSelectedFlag = false;
+        }
+        
+        if(allSelectedFlag||allNotSelectedFlag) {
             if (bool)
-                CheckTree.this.setTreeCheck(path);
+                CheckTree.this.setTreeCheck(new TreePath(parent.getUserObjectPath()));
             else
-                CheckTree.this.removeTreeCheck(path);
+                CheckTree.this.removeTreeCheck(new TreePath(parent.getUserObjectPath()));
         }
+        backwardPropagation(parent,bool);
+    }
+    
+    private void checkManagement(TreePath path, boolean bool) {
+        if (bool)
+            CheckTree.this.setTreeCheck(path);
+        else
+            CheckTree.this.removeTreeCheck(path);
+    }
+    
+    public class Mouse implements MouseListener {
 
         public void mousePressed(java.awt.event.MouseEvent mouseEvent) {
 
@@ -312,7 +355,8 @@ public class CheckTree extends JTree {
             }
             
             boolean bool=CheckTree.this.isChecked(value);
-            propagate((DefaultMutableTreeNode) value,bool);
+            forwardPropagation((DefaultMutableTreeNode) value, bool);
+            backwardPropagation((DefaultMutableTreeNode) value, bool);
             CheckTree.this.welkin.notifyTreeChange();
             CheckTree.this.repaint();
         }
