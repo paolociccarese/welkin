@@ -32,6 +32,7 @@ public class ResourcesTree extends JPanel {
     public static final String ROOT_LABEL = "Resources";
     
     public static final Color BACKGROUND = Color.WHITE;
+    public static final Color IDLE = Color.GRAY;
     
     public static final int MIN_VALUE = 0;
     public static final int MAX_VALUE = 360;
@@ -42,7 +43,7 @@ public class ResourcesTree extends JPanel {
     static final String CLOSED_ICON = ICON_PATH + "closedIcon.gif"; 
     static final String LEAF_ICON = ICON_PATH + "leafIcon.gif"; 
     
-    private int maxWidth=200;
+    private int maxWidth = 200;
     
     Welkin welkin;
     FullNode root;
@@ -66,12 +67,13 @@ public class ResourcesTree extends JPanel {
         JLabel emptyLabel = new JLabel(EMPTY_LABEL);
         emptyLabel.setBounds(2,2,200,16);
         emptyLabel.setFont(font);
+        emptyLabel.setForeground(IDLE);
         
         this.removeAll();
         this.setLayout(null);
         this.setBackground(BACKGROUND);
         this.add(emptyLabel);
-        this.setPreferredSize(new Dimension(300,20));
+        this.setPreferredSize(emptyLabel.getPreferredSize());
         this.repaint();
     }
     
@@ -149,7 +151,7 @@ public class ResourcesTree extends JPanel {
 		        
 		        if(node.children.size()>0) xPos+=15;
 		        for(int i=0; i<node.children.size();i++) {
-		        	if(!((FullNode) node.children.get(i)).isVisible) open = false;
+		            if(!((FullNode) node.children.get(i)).isVisible) open = false;
 		            printNodes((FullNode) node.children.get(i));
 		        }
 		        if(node.children.size()>0) xPos-=15;
@@ -158,9 +160,9 @@ public class ResourcesTree extends JPanel {
 	        if(node.children.size()==0) {
 	            node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(LEAF_ICON)));
 	        } else if(open) {
-	        	node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(OPEN_ICON)));
+	        	    node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(OPEN_ICON)));
 	        } else {
-	        	node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(CLOSED_ICON)));
+	        	    node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(CLOSED_ICON)));
 	        }
 	        	
 	        this.setPreferredSize(new Dimension(xPos+maxWidth, vPos+5));
@@ -279,8 +281,8 @@ public class ResourcesTree extends JPanel {
         }
         
         public void incCount(int count) {
-        	this.count += count;
-        	weight.setText(" [" + this.count + "]");
+            this.count += count;
+            weight.setText(" [" + this.count + "]");
         }
         
 		public void adjustValue(float f) {
@@ -315,7 +317,7 @@ public class ResourcesTree extends JPanel {
         }
         
         public void stateChanged(ChangeEvent e) { 
-        	adjustValue();
+            adjustValue();
             calculateValues(this,slider.getValue());
             this.repaint();
         }

@@ -226,9 +226,15 @@ public abstract class ModelChart extends JComponent {
         reset();
     }
 
-    void clear() {
+    void update() {
         analyze(false);
         repaint();
+    }
+
+    void clear() {
+        this.maxCount = 150;
+        this.maxValue = 150;
+        update();
     }
     
     void reset() {
@@ -273,8 +279,7 @@ public abstract class ModelChart extends JComponent {
             for (int j = 0; j < 10; j++) {
                 float ox = (float) ((double) j * Math.pow(10.0d,(double) i));
                 float x = scale(ox,maxValue,w);
-                g2.draw(new Line2D.Float(x,0.0f,x,-h));
-                
+                if (x < w) g2.draw(new Line2D.Float(x,0.0f,x,-h));
             }
         }
         int ydecades = (int) Math.round(Math.log((double) maxCount) / Math.log(10.0d));
@@ -282,7 +287,7 @@ public abstract class ModelChart extends JComponent {
             for (int j = 0; j < 10; j++) {
                 float oy = (float) ((double) j * Math.pow(10.0d,(double) i));
                 float y = scale(oy,maxCount,h);
-                g2.draw(new Line2D.Float(0.0f,-y,w,-y));
+                if (y < h) g2.draw(new Line2D.Float(0.0f,-y,w,-y));
             }
         }
  

@@ -32,6 +32,7 @@ public class PredicatesTree extends JPanel {
     public static final Color BACKGROUND = Color.WHITE;
     public static final Color ACTIVE_FOREG = Color.BLACK;
     public static final Color PASSIVE_FOREG = Color.GRAY;
+    public static final Color IDLE = Color.GRAY;
     
     public static final int MIN_VALUE = 0;
     public static final int MAX_VALUE = 10;
@@ -66,12 +67,13 @@ public class PredicatesTree extends JPanel {
         JLabel emptyLabel = new JLabel(EMPTY_LABEL);
         emptyLabel.setBounds(2,2,200,16);
         emptyLabel.setFont(font);
+        emptyLabel.setForeground(IDLE);
         
         this.removeAll();
         this.setLayout(null);
         this.setBackground(BACKGROUND);
         this.add(emptyLabel);
-        this.setPreferredSize(new Dimension(300,20));
+        this.setPreferredSize(emptyLabel.getPreferredSize());
         this.repaint();
     }
     
@@ -81,48 +83,49 @@ public class PredicatesTree extends JPanel {
         elements.add(root);
         
         for(Iterator it = welkin.wrapper.cache.predicates.iterator(); it.hasNext();) {
-        	PredicateUri predicate = ((PredicateUri)it.next());
-        	String[] parts = Util.splitUri(predicate.getUri());
-        	createNode(root, parts, predicate, 0);
+            PredicateUri predicate = ((PredicateUri)it.next());
+            String[] parts = Util.splitUri(predicate.getUri());
+            createNode(root, parts, predicate, 0);
         }
-
+        
         calculateValues(root, root.value);
         this.displayTree();
-    	this.repaint();
-    	
-    	welkin.scrollingPredTree.validate();
+        this.repaint();
+        
+        welkin.scrollingPredTree.validate();
     }
     
     private void createNode(FullNode root, String[] parts, PredicateUri all, int level) {
 //    	if(level == 2) {
-    	if(level == parts.length-1) {
+        if(level == parts.length-1) {
 //        	for(int i = 0; i < root.children.size(); i++) {
 //        		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
 //        			return;
 //        		} 
 //        	}
-        	FullNode tmp = new FullNode(parts[2], all, true);
-        	if(level == 0) tmp.isVisible = true;
-        	else tmp.isVisible = false;
-        	root.children.add(tmp);
-    		return;
-    	}
-    	boolean flag = false;
-    	for(int i = 0; i < root.children.size(); i++) {
-    		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
-    			level++;
-    			createNode(((FullNode)root.children.get(i)), parts, all, level);
-    			((FullNode)root.children.get(i)).incCount(all.getCount());
-    			flag = true;
-    		}
-    	}
-    	
-    	if(!flag) {
-    		FullNode child = new FullNode(parts[level++], all, false);
-    		if(level==2) child.isVisible = false;
-    		root.children.add(child);
-    		createNode(child, parts, all, level);
-    	}
+            FullNode tmp = new FullNode(parts[2], all, true);
+            if(level == 0) tmp.isVisible = true;
+            else tmp.isVisible = false;
+            root.children.add(tmp);
+            return;
+        }
+
+        boolean flag = false;
+        for(int i = 0; i < root.children.size(); i++) {
+            if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
+                level++;
+                createNode(((FullNode)root.children.get(i)), parts, all, level);
+                ((FullNode)root.children.get(i)).incCount(all.getCount());
+                flag = true;
+            }
+        }
+        
+        if(!flag) {
+            FullNode child = new FullNode(parts[level++], all, false);
+            if(level==2) child.isVisible = false;
+            root.children.add(child);
+            createNode(child, parts, all, level);
+        }
     }
     
     private void displayTree() {
@@ -144,8 +147,8 @@ public class PredicatesTree extends JPanel {
     
     private void printNodes(FullNode node) {
         if(node.isAllowed) {
-        	boolean open = true;
-	        if(node.isVisible) {
+        boolean open = true;
+        if(node.isVisible) {
 	        	node.setLocation(xPos,vPos);
 	        	maxWidth = maxWidth > (node.getDimension().width) ? maxWidth : (node.getDimension().width);
 	        	this.add(node);
@@ -172,7 +175,7 @@ public class PredicatesTree extends JPanel {
     }
     
     private void calculateValues(FullNode node, float ancestorValue) {
-    	if(node.predicate!=null)
+    	    if(node.predicate!=null)
     			node.adjustValue();
         for(int i=0; i<node.children.size();i++) {
             ((FullNode) node.children.get(i)).sum = ancestorValue;
@@ -263,8 +266,8 @@ public class PredicatesTree extends JPanel {
             slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
             slider.addChangeListener(this);
             slider.setBackground(BACKGROUND);
-            slider.setSize(new Dimension(80,14));
-            slider.setPreferredSize(new Dimension(80,14));
+            slider.setSize(new Dimension(60,14));
+            slider.setPreferredSize(new Dimension(60,14));
             slider.setMajorTickSpacing(1);
             slider.setSnapToTicks(true);
             slider.setPaintTicks(false);
@@ -334,9 +337,9 @@ public class PredicatesTree extends JPanel {
                 ((FullNode)node.children.get(i)).isVisible = false;
         }
         
-        public void stateChanged(ChangeEvent e) { 
+        public void stateChanged(ChangeEvent e) {
             this.setFace();      
-            this.value=Math.min(slider.getValue()/FACTOR,1);
+            this.value = Math.min(slider.getValue()/FACTOR,1);
             calculateValues(this,value);
             this.repaint();
         }

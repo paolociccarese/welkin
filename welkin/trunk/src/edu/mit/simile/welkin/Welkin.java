@@ -394,37 +394,32 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         clustCoeffPane.add(clustCoeffChart, BorderLayout.CENTER);
 
         JPanel charts = new JPanel();
-        charts.setLayout(new BoxLayout(charts, BoxLayout.Y_AXIS));
+        charts.setLayout(new BoxLayout(charts, BoxLayout.X_AXIS));
         charts.add(inDegreePane);
         charts.add(outDegreePane);
         charts.add(clustCoeffPane);
-        charts.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        charts.setBorder(BorderFactory.createEmptyBorder());
         
-        JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charts, visualizer);
+        JSplitPane chartPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,visualizer,charts);
         chartPane.setOneTouchExpandable(true);
-        chartPane.setResizeWeight(0.01);
-        chartPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        chartPane.setResizeWeight(0.80);
+        chartPane.setBorder(BorderFactory.createEmptyBorder());
         
-        JSplitPane visualizerPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,chartPane,toolsPane);
-        visualizerPane.setOneTouchExpandable(true);
-        visualizerPane.setResizeWeight(1.0);
-        visualizerPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-
-        JSplitPane infoPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scrollingPredTree,scrollingResTree);
-        infoPane.setOneTouchExpandable(true);
-        infoPane.setResizeWeight(0.25);
-        infoPane.setDividerLocation(350);        
-        infoPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        JSplitPane infoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,scrollingPredTree,scrollingResTree);
+        infoPane.setOneTouchExpandable(false);
+        infoPane.setResizeWeight(0.50);
+        infoPane.setBorder(BorderFactory.createEmptyBorder());
         
-        JSplitPane bodyPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,infoPane,visualizerPane);
+        JSplitPane bodyPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,infoPane,chartPane);
         bodyPane.setOneTouchExpandable(true);
         bodyPane.setResizeWeight(0.25);
-        bodyPane.setDividerLocation(120);        
+        bodyPane.setDividerLocation(200);        
         bodyPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         
         this.setLayout(new BorderLayout());
         this.add(dataPane, BorderLayout.NORTH);
         this.add(bodyPane, BorderLayout.CENTER);
+        this.add(toolsPane, BorderLayout.SOUTH);
     }
 	
 	public void internalStart() {
@@ -444,9 +439,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     public void notifyTreeChange() {
         wrapper.cache.uriBasedVisualization(predTree);
         visualizer.repaint();
-        inDegreeChart.clear();
-        outDegreeChart.clear();
-        clustCoeffChart.clear();
+        inDegreeChart.update();
+        outDegreeChart.update();
+        clustCoeffChart.update();
     }
     
     public void notifyBaseUriColorChange() {
