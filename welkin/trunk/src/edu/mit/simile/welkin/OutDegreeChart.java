@@ -8,7 +8,7 @@ import edu.mit.simile.welkin.ModelCache.WStatement;
 public class OutDegreeChart extends ModelChart {
 
     public OutDegreeChart(ModelManager model) {
-        super(model, "OutDegree");
+        super(model);
     }
     
     public int process(WResource node) {

@@ -44,6 +44,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 
@@ -55,6 +56,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 	
     static final int X_WIN_DIM = 860;
     static final int Y_WIN_DIM = 700;
+
+    static final Font titleFont = new Font("Verdana", Font.PLAIN, 9);
     
     static final String ICON_PATH = "resources/icons/";
     static final String LOGO_SMALL_ICON = ICON_PATH + "logo-small.gif"; 
@@ -348,36 +351,51 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 		parameters.add(Box.createHorizontalGlue());
 		parameters.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         
-		JPanel drawing = new JPanel();
-		drawing.setLayout(new BoxLayout(drawing, BoxLayout.X_AXIS));
+        JPanel drawing = new JPanel();
+        drawing.setLayout(new BoxLayout(drawing, BoxLayout.X_AXIS));
         drawing.add(controlButton);
         drawing.add(Box.createHorizontalGlue());
         drawing.add(circleButton);
         drawing.add(scrambleButton);
         drawing.add(shakeButton);
-		drawing.add(Box.createHorizontalGlue());
-		drawing.add(nodesCheckbox);
-		drawing.add(edgesCheckbox);
-		drawing.add(arrowCheckbox);
+        drawing.add(Box.createHorizontalGlue());
+        drawing.add(nodesCheckbox);
+        drawing.add(edgesCheckbox);
+        drawing.add(arrowCheckbox);
         //drawing.add(edgeValuesCheckbox);
         drawing.add(Box.createHorizontalGlue());
-		//drawing.add(timeCheckbox);
+        //drawing.add(timeCheckbox);
         drawing.add(antialiasCheckbox);
-		drawing.add(backgroundCheckbox);
-		drawing.add(Box.createHorizontalGlue());
-		drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        drawing.add(backgroundCheckbox);
+        drawing.add(Box.createHorizontalGlue());
+        drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 		
 		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
 		toolsPane.addTab("Drawing", drawing);
 		toolsPane.addTab("Highlight",highlight);
 		toolsPane.addTab("Parameters",parameters);
 
+        JPanel inDegreePane = new JPanel();
+        inDegreePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "In Degree", TitledBorder.TOP, TitledBorder.LEFT, titleFont));
+        inDegreePane.setLayout(new BorderLayout());
+        inDegreePane.add(inDegreeChart, BorderLayout.CENTER);
+
+        JPanel outDegreePane = new JPanel();
+        outDegreePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Out Degree", TitledBorder.TOP, TitledBorder.LEFT, titleFont));
+        outDegreePane.setLayout(new BorderLayout());
+        outDegreePane.add(outDegreeChart, BorderLayout.CENTER);
+
+        JPanel clustCoeffPane = new JPanel();
+        clustCoeffPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Clustering Coefficient", TitledBorder.TOP, TitledBorder.LEFT, titleFont));
+        clustCoeffPane.setLayout(new BorderLayout());
+        clustCoeffPane.add(clustCoeffChart, BorderLayout.CENTER);
+
         JPanel charts = new JPanel();
         charts.setLayout(new BoxLayout(charts, BoxLayout.Y_AXIS));
-        charts.add(inDegreeChart);
-        charts.add(outDegreeChart);
-        charts.add(clustCoeffChart);
-        charts.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        charts.add(inDegreePane);
+        charts.add(outDegreePane);
+        charts.add(clustCoeffPane);
+        charts.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         
         JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charts, visualizer);
         chartPane.setOneTouchExpandable(true);

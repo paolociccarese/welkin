@@ -8,9 +8,9 @@ import edu.mit.simile.welkin.ModelCache.WStatement;
 public class ClusteringCoefficientChart extends ModelChart {
 
     public ClusteringCoefficientChart(ModelManager model) {
-        super(model, "Clustering Coefficient");
+        super(model);
     }
-
+    
     public int process(WResource node) {
         int neighbors = 0;
         int neighborEdges = 0;

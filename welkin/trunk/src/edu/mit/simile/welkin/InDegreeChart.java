@@ -8,9 +8,9 @@ import edu.mit.simile.welkin.ModelCache.WStatement;
 public class InDegreeChart extends ModelChart {
 
     public InDegreeChart(ModelManager model) {
-        super(model, "InDegree");
+        super(model);
     }
-
+    
     public int process(WResource node) {
         int counter = 0;
         for (Iterator it = node.linkedSubjectNodes.iterator(); it.hasNext();) {
