@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jnlp spec="1.0+" codebase="http://localhost:8080/" href="docs/welkin-rio.jnlp">
+	<information>
+		<title>Welkin</title>
+		<vendor>The SIMILE Project</vendor>
+		<description>A graphical RDF visualizer</description>
+		<homepage href="http://simile.mit.edu/"/>
+                <offline-allowed/>   
+                <shortcut online="false">
+                    <menu submenu="SIMILE Project"/>   
+                </shortcut>
+	</information>
+	<security>
+		<all-permissions />
+	</security>
+	<resources>
+		<j2se version="1.4.2+" href="http://java.sun.com/products/autodl/j2se"/>
+		<jar href="lib/welkin.jar" main="true"/>
+                <jar href="lib/rio.jar"/>
+                <jar href="lib/xml-apis.jar"/>
+                <jar href="lib/xercesImpl.jar"/>
+	</resources>
+	<application-desc main-class="edu.mit.simile.welkin.Welkin" />
+</jnlp>
