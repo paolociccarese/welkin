@@ -20,6 +20,7 @@ import javax.swing.JComponent;
 
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 
 /**
  * @author Stefano Mazzocchi <stefanom@mit.edu>
@@ -721,6 +722,51 @@ public class ModelVisualizer extends JComponent implements Runnable
                         g2.draw(rectangle);
                         g2.setColor(fontColor);
                         g2.drawString(n.getURI(), x + BORDER, y + BORDER);
+                        
+                        if ((n == pick))
+                        {
+                            // count properties and max text length
+                            int count = 0;
+                            float max = width;
+                            for (Iterator it = model.getLiterals(n); it
+                                    .hasNext();)
+                            {
+                                Statement no = (Statement) it.next();
+                                fm = g2.getFontMetrics(smallFont);
+                                float length = fm.stringWidth(no.getPredicate()
+                                        .toString()
+                                        + " -> " + no.getObject())
+                                        + BORDERs;
+                                if (length > max)
+                                    max = length;
+                                count++;
+                            }
+                            
+                            float startY=0;
+                            float rectHeigh=count * 12 + BORDER;
+                            if((y+rectHeigh)>cy)
+                                startY=-(rectHeigh+height+2);
+
+                            // Draw properties rect
+                            Shape rect = new Rectangle2D.Float(x, y + 21 +startY
+                                    - halfHeight, max, rectHeigh);
+                            g2.setColor(Color.WHITE);
+                            g2.fill(rect);
+                            g2.setColor(Color.BLACK);
+                            g2.draw(rect);
+                            g2.setFont(smallFont);
+
+                            int ddy = 18;
+                            for (Iterator it = model.getLiterals(n); it
+                                    .hasNext();)
+                            {
+                                Statement no = (Statement) it.next();
+                                g2.drawString(no.getPredicate().toString()
+                                        + " -> " + no.getObject().toString(), x
+                                        + BORDER, y + BORDER + ddy+ startY);
+                                ddy += 12;
+                            }
+                        }
                     }
                 }
             }

@@ -159,7 +159,7 @@ public class ModelWrapper
      * 
      * @return The list of unique resources in the rdf model.
      */
-    public synchronized List getNodes(Model model)
+    public List getNodes(Model model)
     {
         List nodes = new ArrayList();
 
@@ -302,6 +302,12 @@ public class ModelWrapper
         return 0;
     }
 
+    /**
+     * Returns all the properties connecting to resources.
+     * @param from
+     * @param to
+     * @return
+     */
     public Property getConnection(Resource from, Resource to)
     {
         for (Iterator i = model.listStatements(
@@ -316,6 +322,11 @@ public class ModelWrapper
         return null;
     }
 
+    /**
+     * Returns the list of the connections exiting from the specified resource.
+     * @param res
+     * @return
+     */
     public List getConnectionTo(Resource res)
     {
         List finale = new ArrayList();
@@ -340,6 +351,11 @@ public class ModelWrapper
         //		}
     }
 
+    /**
+     * Sets the fixed status of a resource.
+     * @param res	The resource to modify
+     * @param bol	The new status
+     */
     public void setFixedNode(Resource res, boolean bol)
     {
         if (bol)
@@ -348,6 +364,11 @@ public class ModelWrapper
             freeFixedNode(res);
     }
 
+    /**
+     * Returns if the node in the panel has been fixed or not.
+     * @param res	
+     * @return true if the node has been fixed
+     */
     public boolean getFixedNode(Resource res)
     {
         for (Iterator i = model.listStatements(res, fix, true); i.hasNext();)
@@ -358,6 +379,10 @@ public class ModelWrapper
         return false;
     }
 
+    /**
+     * Remove the fixed property of the specified resource.
+     * @param res
+     */
     public void freeFixedNode(Resource res)
     {
         Collection coll = new ArrayList();
@@ -384,12 +409,16 @@ public class ModelWrapper
         // TODO Clear Highlights
     }
 
+    /**
+     * Loads the rdf statements into the model
+     * @throws FileNotFoundException
+     */
     public void load() throws FileNotFoundException
     {
         File fileName;
 
-        // Save File Manager
         JFileChooser openWin = new JFileChooser();
+        // TODO Rdf Filter
         //saveWin.setFileFilter(new GeneDataFilter());
 
         int returnVal = openWin.showOpenDialog(null);
@@ -419,7 +448,24 @@ public class ModelWrapper
     }
 
     /**
-     *  
+     * Returns all the literals related to the specified resource.
+     * @param res	
+     * @return The literal iterator
+     */
+    public Iterator getLiterals(Resource res)
+    {
+        List lits=new ArrayList();
+        for(Iterator it=model.listStatements(res,null,(RDFNode)null);it.hasNext();)
+        {
+            Statement st=(Statement) it.next();
+            if(!(st.getObject() instanceof Resource)) lits.add(st);
+        }
+        
+        return lits.iterator();
+    }
+    
+    /**
+     *  Removes all the nodes in the model.
      */
     public void clear()
     {
