@@ -248,7 +248,7 @@ public class ModelWrapper {
         // TODO Clear Highlights
     }
     
-    public void importModel() throws FileNotFoundException {
+    public boolean importModel() throws FileNotFoundException {
         File fileName;
 
         // Save File Manager
@@ -256,7 +256,7 @@ public class ModelWrapper {
         //saveWin.setFileFilter(new GeneDataFilter());
 
         int returnVal = openWin.showOpenDialog(null);
-
+        
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             fileName = openWin.getSelectedFile();
 
@@ -272,7 +272,9 @@ public class ModelWrapper {
             addModel(inChaching(model.read(in, "")), fileName.getName());
 
             Welkin.log("Statements processed: " + model.size());
+            return true;
         }
+        return false;
     }
     
     private Model inChaching(Model model) {

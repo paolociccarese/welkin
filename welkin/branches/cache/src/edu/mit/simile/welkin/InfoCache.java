@@ -193,7 +193,7 @@ public class InfoCache {
             boolean in = false;
             for (Iterator i = node.linkedNodes.iterator(); i.hasNext();) {
                 in = true;
-                if (tree.isChecked((((Edge) i.next()).predicate.namespace)))
+                if (tree.isChecked((((Edge) i.next()).predicate.property)))
                     flag = true;
             }
             if (in) {

@@ -5,17 +5,26 @@ package edu.mit.simile.welkin;
 
 import java.awt.Rectangle;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+
+import edu.mit.simile.welkin.InfoCache.Node;
 
 /**
  * @author Paolo Ciccarese
@@ -26,20 +35,31 @@ public class CheckTree extends JTree {
     Hashtable map;
     Hashtable checked;
     boolean pathcheck = false;
+    
+    List namespaces = new ArrayList();
+    
+    public class Namespace {
+        String namespace;
+        Set properties=new HashSet();
+        public Namespace(String namespace) {
+            this.namespace = namespace;
+        }
+        public void addProperty(Property property) {
+            properties.add(property);
+        }
+        public boolean equals(String namespace) {
+            if (namespace == null) return false;
 
+            if (this.namespace.equals(namespace))
+                return true;
+            else
+                return false;
+        }
+    }
+    
     public CheckTree(Welkin welkin) {
         super();
         this.welkin = welkin;
-        init();
-    }
-    
-    public CheckTree(TreeModel model) {
-        super(model);
-        init();
-    }
-
-    public CheckTree(TreeNode node, boolean bool) {
-        super(node, bool);
         init();
     }
     
@@ -50,11 +70,48 @@ public class CheckTree extends JTree {
         this.addMouseListener(new Mouse());
     }
  
-    public void fillTree(Iterator iter) {
-        DefaultMutableTreeNode root=new DefaultMutableTreeNode("base");
+    public void buildTree() {
+        listNamespaces();
+        fillNamespaces();
+        fillTree();
+    }
+    
+    private void listNamespaces() {
+        for(Iterator it=welkin.wrapper.getModel().listNameSpaces();it.hasNext();) {
+            namespaces.add(new Namespace((String)it.next()));
+        }       
+    }
+    
+    private void fillNamespaces() {
+        for(Iterator it=welkin.wrapper.cache.nodes.iterator();it.hasNext();) {
+            Node node=((Node)it.next());
+            Resource res=welkin.wrapper.getModel().getResource(node.unique);
+            for(Iterator i=welkin.wrapper.getModel().listStatements(res,null,(RDFNode)null);i.hasNext();) {
+                Property property = ((Statement)i.next()).getPredicate();
+                findNamespace(property.getNameSpace()).addProperty(property);
+            }
+        }
+    }
+    
+    private Namespace findNamespace(String namespace) {
+        for(Iterator it=namespaces.iterator();it.hasNext();) {
+            Namespace ns=(Namespace) it.next();
+            if(ns.equals(namespace)) return ns;
+        }
+        return null;
+    }
+    
+    public void fillTree() {
+        DefaultMutableTreeNode root=new DefaultMutableTreeNode("ontologies");
         DefaultTreeModel model=new DefaultTreeModel(root);
-        for(Iterator it=iter;it.hasNext();) {
-            model.insertNodeInto(new NamespaceTreeNode((String)it.next()),root,root.getChildCount());
+        for(Iterator it=namespaces.iterator();it.hasNext();) {
+            Namespace ns=((Namespace)it.next());
+            NamespaceTreeNode nsTreeNode=new NamespaceTreeNode(ns.namespace);
+            model.insertNodeInto(nsTreeNode,root,root.getChildCount());
+            for(Iterator i=ns.properties.iterator();i.hasNext();) {
+                PropertyTreeNode pTreeNode=new PropertyTreeNode(((Property)i.next()));
+                model.insertNodeInto(pTreeNode,nsTreeNode,nsTreeNode.getChildCount());
+            }
         }
         
         this.setModel(model);
