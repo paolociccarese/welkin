@@ -508,7 +508,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                     	String ext = fileName.getAbsolutePath().substring(extIndex+1);
                     	if(ext.equals("n3")) 
                     		res = wrapper.addModel(in, ModelManager.NTRIPLES);
-                    	else if(ext.equals("rdf"))
+                    	else if(ext.equals("rdf") || ext.equals("rdfs"))
                     		res = wrapper.addModel(in, ModelManager.RDFXML);
                     	else 
                             throw new IllegalArgumentException("Extension not recognized!");
