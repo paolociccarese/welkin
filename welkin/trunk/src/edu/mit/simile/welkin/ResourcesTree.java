@@ -239,8 +239,8 @@ public class ResourcesTree extends JPanel {
             slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
             slider.addChangeListener(this);
             slider.setBackground(BACKGROUND);
-            slider.setSize(new Dimension(80,14));
-            slider.setPreferredSize(new Dimension(80,14));
+            slider.setSize(new Dimension(60,14));
+            slider.setPreferredSize(new Dimension(60,14));
             slider.setMajorTickSpacing(1);
             slider.setSnapToTicks(false);
             slider.setPaintTicks(false);
@@ -323,7 +323,12 @@ public class ResourcesTree extends JPanel {
         }
         
         public Dimension getDimension() {
-            return new Dimension (140+label.getPreferredSize().width,16);
+            return new Dimension (
+            		this.getLocation().x +
+					iconLabel.getWidth() +
+					slider.getPreferredSize().width +
+            		label.getPreferredSize().width +
+					weight.getPreferredSize().width,16);
         }
     }
 }

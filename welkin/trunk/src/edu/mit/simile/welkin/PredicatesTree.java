@@ -96,13 +96,7 @@ public class PredicatesTree extends JPanel {
     }
     
     private void createNode(FullNode root, String[] parts, PredicateUri all, int level) {
-//    	if(level == 2) {
         if(level == parts.length-1) {
-//        	for(int i = 0; i < root.children.size(); i++) {
-//        		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
-//        			return;
-//        		} 
-//        	}
             FullNode tmp = new FullNode(parts[2], all, true);
             if(level == 0) tmp.isVisible = true;
             else tmp.isVisible = false;
@@ -300,7 +294,7 @@ public class PredicatesTree extends JPanel {
                 }
             });
         }
-        
+
         public void incCount(int count) {
         	this.count += count;
         	weight.setText(" [" + this.count + "]");
@@ -358,7 +352,8 @@ public class PredicatesTree extends JPanel {
         }
         
         public Dimension getDimension() {
-            return new Dimension (140+label.getPreferredSize().width,16);
+            return new Dimension (this.getLocation().x+iconLabel.getWidth()+slider.getPreferredSize().width
+            		+label.getPreferredSize().width+weight.getPreferredSize().width,16);
         }
     }
 }

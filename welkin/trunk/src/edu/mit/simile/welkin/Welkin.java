@@ -438,7 +438,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
     public void notifyTreeChange() {
         wrapper.cache.uriBasedVisualization(predTree);
-        visualizer.repaint();
+        if(!running) visualizer.repaint();
         inDegreeChart.update();
         outDegreeChart.update();
         clustCoeffChart.update();
@@ -446,7 +446,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     
     public void notifyBaseUriColorChange() {
         wrapper.cache.adjustResourcesUriBaseColor();
-        visualizer.repaint();
+        if(!running) visualizer.repaint();
     }
     
     public void itemStateChanged(ItemEvent e) {
