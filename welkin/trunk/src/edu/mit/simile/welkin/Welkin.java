@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,27 +37,28 @@ import javax.swing.UIManager;
 public class Welkin extends JApplet implements ActionListener, ItemListener {
 
     public static final String NAME = "Welkin";
-	public static final String VERSION = "@version@";
+    public static final String VERSION = "@version@";
 	
-	static final String ICON_PATH = "resources/icons/";
-	static final String LOGO_SMALL_ICON = ICON_PATH + "logo-small.gif"; 
-	static final String LOGO_ICON = ICON_PATH + "logo.gif"; 
-	static final String START_ICON = ICON_PATH + "start.gif"; 
-	static final String STOP_ICON = ICON_PATH + "stop.gif"; 
-	static final String UNSELECTED_ICON = ICON_PATH + "file.gif"; 
-	static final String SELECTED_ICON = ICON_PATH + "selected.gif"; 
+    static final String ICON_PATH = "resources/icons/";
+    static final String LOGO_SMALL_ICON = ICON_PATH + "logo-small.gif"; 
+    static final String LOGO_ICON = ICON_PATH + "logo.gif"; 
+    static final String START_ICON = ICON_PATH + "start.gif"; 
+    static final String STOP_ICON = ICON_PATH + "stop.gif"; 
+    static final String UNSELECTED_ICON = ICON_PATH + "file.gif"; 
+    static final String SELECTED_ICON = ICON_PATH + "selected.gif"; 
     
-	CheckTree tree;
-	ModelVisualizer visualizer;
+    CheckTree tree;
+    ModelVisualizer visualizer;
     ModelWrapper wrapper;
-
+    ModelCharter charter;
+    
     boolean running = false;
     
-	JLabel delayLabel = new JLabel("Delay(ms)");
-	JLabel massLabel = new JLabel("Mass");
-	JLabel dragLabel = new JLabel("Drag");
-	JLabel attractionLabel = new JLabel("Attraction");
-	JLabel repulsionLabel = new JLabel("Repulsion");
+    JLabel delayLabel = new JLabel("Delay(ms)");
+    JLabel massLabel = new JLabel("Mass");
+    JLabel dragLabel = new JLabel("Drag");
+    JLabel attractionLabel = new JLabel("Attraction");
+    JLabel repulsionLabel = new JLabel("Repulsion");
     
     JButton dataLoadButton;
     JButton dataClearButton;
@@ -67,7 +69,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     JButton shakeButton;
     JButton highlightButton;
     JButton clearButton;
-
+    
     JCheckBox antialiasCheckbox;
     JCheckBox nodesCheckbox;
     JCheckBox edgesCheckbox;
@@ -82,85 +84,96 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     JTextField attractionField;
     JTextField repulsionField;
     JTextField highlightField;
+    
+    ImageIcon startIcon;
+    ImageIcon stopIcon;
+    ImageIcon logoIcon;
 
-	ImageIcon startIcon;
-	ImageIcon stopIcon;
-	ImageIcon logoIcon;
+    class AboutDialog extends JDialog {
+        public void init() {
+            logoIcon = createImageIcon(LOGO_ICON);
 
+            JLabel logoLabel = new JLabel();
+            logoLabel.setIcon(logoIcon);
+
+            JLabel nameLabel = new JLabel();        
+            nameLabel.setText(NAME + " " + VERSION);
+
+            JPanel about = new JPanel();
+            about.setLayout(new BoxLayout(about, BoxLayout.X_AXIS));
+            about.add(nameLabel);
+            about.add(Box.createRigidArea(new Dimension(5,0)));
+            about.add(logoLabel);
+        }
+    }
+    
     // called by the applet sandbox
     public void init() {
-    	initPanel();
+    	    initPanel();
     }
 	            
     public void initPanel(){
 
-		wrapper = new ModelWrapper();
+        wrapper = new ModelWrapper();
         visualizer = new ModelVisualizer(wrapper);
+        charter = new ModelCharter(wrapper);
+
         tree = new CheckTree(this);
 
-		dataClearButton = new JButton("Clear");
-		dataLoadButton = new JButton("Load");
-		
-		dataClearButton.addActionListener(this);
-		dataLoadButton.addActionListener(this);
-		
-		JPanel dataButtons = new JPanel();
-		dataButtons.setLayout(new BorderLayout());
-		dataButtons.add(dataClearButton, BorderLayout.WEST);
-		dataButtons.add(dataLoadButton, BorderLayout.EAST);
-		
-		JPanel dataControls = new JPanel();
-		dataControls.setLayout(new BorderLayout());
-		dataControls.add(dataButtons, BorderLayout.SOUTH);
+        JScrollPane scrollingTree = new JScrollPane(tree);
+        charter.setBorder(scrollingTree.getBorder());
+        visualizer.setBorder(scrollingTree.getBorder());
 
-		logoIcon = createImageIcon(LOGO_ICON);
-
-		JLabel logoLabel = new JLabel();
-		logoLabel.setIcon(logoIcon);
-
-		JLabel nameLabel = new JLabel();        
-		nameLabel.setText(NAME + " " + VERSION);
-
-		JPanel about = new JPanel();
-		about.setLayout(new BoxLayout(about, BoxLayout.X_AXIS));
-		about.add(nameLabel);
-		about.add(Box.createRigidArea(new Dimension(5,0)));
-		about.add(logoLabel);
-
-		JScrollPane scroll = new JScrollPane(tree);
+        dataClearButton = new JButton("Clear");
+        dataLoadButton = new JButton("Load");
+        
+        dataClearButton.addActionListener(this);
+        dataLoadButton.addActionListener(this);
+        
+        JPanel dataButtons = new JPanel();
+        dataButtons.setLayout(new BoxLayout(dataButtons, BoxLayout.X_AXIS));
+        dataButtons.add(Box.createHorizontalGlue());
+        dataButtons.add(dataLoadButton);
+        dataButtons.add(dataClearButton);
+        dataButtons.add(Box.createHorizontalGlue());
 		
-		JPanel dataPane = new JPanel();
-		dataPane.setLayout(new BorderLayout());
-		dataPane.add(about, BorderLayout.NORTH);
-		dataPane.add(scroll, BorderLayout.CENTER);
-		dataPane.add(dataControls, BorderLayout.SOUTH);
-		dataPane.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-		
-		startIcon = createImageIcon(START_ICON);
-		stopIcon = createImageIcon(STOP_ICON);
+        JPanel dataControls = new JPanel();
+        dataControls.setLayout(new BorderLayout());
+        dataControls.add(dataButtons, BorderLayout.SOUTH);
+        
+        
+        startIcon = createImageIcon(START_ICON);
+        stopIcon = createImageIcon(STOP_ICON);
 
-		if ((startIcon != null) && (stopIcon != null)) {
-			controlButton = new JButton("Start", startIcon);
-			controlButton.setVerticalTextPosition(AbstractButton.CENTER);
-			controlButton.setHorizontalTextPosition(AbstractButton.TRAILING);
-		} else {
-			controlButton = new JButton("Start");
-		}
+        if ((startIcon != null) && (stopIcon != null)) {
+            controlButton = new JButton("Start", startIcon);
+            controlButton.setVerticalTextPosition(AbstractButton.CENTER);
+            controlButton.setHorizontalTextPosition(AbstractButton.TRAILING);
+        } else {
+            controlButton = new JButton("Start");
+        }
+
+        JButton welkinButton = new JButton(NAME);
+        
+        JPanel dataPane = new JPanel();
+        dataPane.setLayout(new BorderLayout());
+        dataPane.add(controlButton, BorderLayout.WEST);
+        dataPane.add(dataButtons, BorderLayout.CENTER);
+        dataPane.add(welkinButton, BorderLayout.EAST);
 		
-		circleButton = new JButton("Circle");
-		scrambleButton = new JButton("Scramble");
-		shakeButton = new JButton("Shake");
-		highlightButton = new JButton("Highlight");
-		clearButton = new JButton("Clear");
-		
+        circleButton = new JButton("Circle");
+        scrambleButton = new JButton("Scramble");
+        shakeButton = new JButton("Shake");
+        highlightButton = new JButton("Highlight");
+        clearButton = new JButton("Clear");
+        
         antialiasCheckbox = new JCheckBox("Antialias",visualizer.antialias);
         nodesCheckbox = new JCheckBox("Nodes",visualizer.drawnodes);
         edgesCheckbox = new JCheckBox("Edges",visualizer.drawedges);
         edgeValuesCheckbox = new JCheckBox("Edge Values",visualizer.drawedgevalues);
-        groupsCheckbox = new JCheckBox("Groups",visualizer.drawgroups);
         timeCheckbox = new JCheckBox("Timing",visualizer.timing);
-		backgroundCheckbox = new JCheckBox("Background",visualizer.background);
-		    
+        backgroundCheckbox = new JCheckBox("Background",visualizer.background);
+            
         delayField = new JTextField(Integer.toString(visualizer.delay),4);
         massField = new JTextField(Float.toString(visualizer.mass),4);
         dragField = new JTextField(Float.toString(visualizer.drag),4);
@@ -184,83 +197,95 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         antialiasCheckbox.addItemListener(this);
         nodesCheckbox.addItemListener(this);
         edgesCheckbox.addItemListener(this);
-		edgeValuesCheckbox.addItemListener(this);
-		groupsCheckbox.addItemListener(this);
+        edgeValuesCheckbox.addItemListener(this);
         timeCheckbox.addItemListener(this);
-		backgroundCheckbox.addItemListener(this);
-
-        JPanel controls = new JPanel();
-        controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
-        controls.add(controlButton);
-		controls.add(Box.createHorizontalGlue());
-        controls.add(circleButton);
-        controls.add(scrambleButton);
-        controls.add(shakeButton);
-		controls.add(Box.createHorizontalGlue());
-		controls.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-
+        backgroundCheckbox.addItemListener(this);
+        
         JPanel highlight = new JPanel();
-		highlight.setLayout(new BoxLayout(highlight, BoxLayout.X_AXIS));
+        highlight.setLayout(new BoxLayout(highlight, BoxLayout.X_AXIS));
+        highlight.add(Box.createHorizontalGlue());
         highlight.add(highlightField);
-		highlight.add(Box.createRigidArea(new Dimension(5,0)));
+        highlight.add(Box.createRigidArea(new Dimension(5,0)));
         highlight.add(highlightButton);
-		highlight.add(Box.createRigidArea(new Dimension(5,0)));
+        highlight.add(Box.createRigidArea(new Dimension(5,0)));
         highlight.add(clearButton);
-		highlight.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        highlight.add(Box.createHorizontalGlue());
+        highlight.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
         JPanel parameters = new JPanel();
 		parameters.setLayout(new BoxLayout(parameters, BoxLayout.X_AXIS));
-        parameters.add(delayLabel);
+		parameters.add(Box.createHorizontalGlue());
+		parameters.add(delayLabel);
 		parameters.add(Box.createRigidArea(new Dimension(5,0)));
 		parameters.add(delayField);
 		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-        parameters.add(massLabel);
+		parameters.add(massLabel);
 		parameters.add(Box.createRigidArea(new Dimension(5,0)));
 		parameters.add(massField);
 		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-        parameters.add(dragLabel);
+		parameters.add(dragLabel);
 		parameters.add(Box.createRigidArea(new Dimension(5,0)));
 		parameters.add(dragField);
 		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-        parameters.add(attractionLabel);
+		parameters.add(attractionLabel);
 		parameters.add(Box.createRigidArea(new Dimension(5,0)));
 		parameters.add(attractionField);
 		parameters.add(Box.createRigidArea(new Dimension(30,0)));
 		parameters.add(repulsionLabel);
 		parameters.add(Box.createRigidArea(new Dimension(5,0)));
 		parameters.add(repulsionField);
-		parameters.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+		parameters.add(Box.createHorizontalGlue());
+		parameters.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         
 		JPanel drawing = new JPanel();
 		drawing.setLayout(new BoxLayout(drawing, BoxLayout.X_AXIS));
-		drawing.add(antialiasCheckbox);
+        drawing.add(Box.createHorizontalGlue());
+        drawing.add(circleButton);
+        drawing.add(scrambleButton);
+        drawing.add(shakeButton);
+		drawing.add(Box.createHorizontalGlue());
 		drawing.add(nodesCheckbox);
 		drawing.add(edgesCheckbox);
-		drawing.add(edgeValuesCheckbox);
-		drawing.add(groupsCheckbox);
-		drawing.add(timeCheckbox);
+        //drawing.add(edgeValuesCheckbox);
+        drawing.add(Box.createHorizontalGlue());
+		//drawing.add(timeCheckbox);
+        drawing.add(antialiasCheckbox);
 		drawing.add(backgroundCheckbox);
-		drawing.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+		drawing.add(Box.createHorizontalGlue());
+		drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 		        
-		JTabbedPane tools = new JTabbedPane(JTabbedPane.TOP);
-        tools.addTab("Controls",controls);
-		tools.addTab("Drawing", drawing);
-		tools.addTab("Highlight",highlight);
-		tools.addTab("Parameters",parameters);
-		
-		JPanel graphPane = new JPanel();
-		graphPane.setLayout(new BorderLayout());
-		graphPane.add(visualizer, BorderLayout.CENTER);
-		graphPane.add(tools, BorderLayout.SOUTH);
+		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
+		//toolsPane.addTab("Controls",controls);
+		toolsPane.addTab("Drawing", drawing);
+		//tools.addTab("Highlight",highlight);
+		toolsPane.addTab("Parameters",parameters);
 
-		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,dataPane,graphPane);
+        JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,visualizer,charter);
+        chartPane.setOneTouchExpandable(true);
+        chartPane.setResizeWeight(1.0);
+        chartPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
-		this.getContentPane().add(split);
+        JSplitPane graphPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scrollingTree,chartPane);
+        graphPane.setOneTouchExpandable(true);
+        graphPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        
+        JSplitPane bodyPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,graphPane,toolsPane);
+        bodyPane.setOneTouchExpandable(true);
+        bodyPane.setResizeWeight(1.0);
+        bodyPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        
+        JPanel pane = new JPanel();
+        pane.setLayout(new BorderLayout());
+        pane.add(dataPane, BorderLayout.NORTH);
+        pane.add(bodyPane, BorderLayout.CENTER);
+        pane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+
+        this.getContentPane().add(pane);
     }
 	
     public void start() {
 		super.start();
-    	if (running) internalStart();
+		if (running) internalStart();
     }
     
     public void stop() {
@@ -302,8 +327,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.drawedges = selected;
 		} else if (source == edgeValuesCheckbox) {
 			visualizer.drawedgevalues = selected;
-		} else if (source == groupsCheckbox) {
-			visualizer.drawgroups = selected;
         } else if (source == timeCheckbox) {
             visualizer.timing = selected;
 		} else if (source == backgroundCheckbox) {
@@ -316,9 +339,9 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         Object source = e.getSource();
         if (source == controlButton) {
             if (visualizer.isRunning()) {
-            	internalStop();
+            	    internalStop();
             } else {
-            	internalStart();
+            	    internalStart();
             }
         } else if (source == circleButton) {
             visualizer.circle();
@@ -376,11 +399,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 	}
 	    
     public static void main(String[] args) {
-//        if (args.length == 0) {
-//            System.out.println("Usage: " + Welkin.class + " dataURI");
-//            System.exit(1);
-//        }
-        
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) { }
@@ -391,11 +409,12 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         JFrame frame = new JFrame(NAME);
         URL logo = Welkin.class.getResource(LOGO_SMALL_ICON);
         if (logo != null) {
-        	frame.setIconImage(Toolkit.getDefaultToolkit().createImage(logo));
+        	    frame.setIconImage(Toolkit.getDefaultToolkit().createImage(logo));
         } else {
-			System.err.println("Couldn't find image resource: " + LOGO_ICON);
+        	    System.err.println("Couldn't find image resource: " + LOGO_ICON);
         }
-		frame.getContentPane().add(welkin, BorderLayout.CENTER);
+
+        frame.getContentPane().add(welkin, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 System.exit(0);
