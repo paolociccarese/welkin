@@ -68,7 +68,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     JDialog chooser;
     
     PredicatesTree tree;
-    ResourceUriBasePanel uriBases;
+    ResourcesTree resTree;
+//    ResourceUriBasePanel uriBases;
     ModelVisualizer visualizer;
     ModelManager wrapper;
     ModelCharter charter;
@@ -204,10 +205,14 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         
-        uriBases = new ResourceUriBasePanel(this);
-        uriBases.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-        scrollingUriBases = new JScrollPane(uriBases);
+//        uriBases = new ResourceUriBasePanel(this);
+//        uriBases.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+//        scrollingUriBases = new JScrollPane(uriBases);
 
+        resTree = new ResourcesTree(this);
+        resTree.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        scrollingUriBases = new JScrollPane(resTree);
+        
         dataClearButton = new JButton("Clear");
         dataLoadButton = new JButton("Load");
         
@@ -427,6 +432,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     
     public void notifyBaseUriColorChange() {
         wrapper.cache.adjustResourcesUriBaseColor();
+        visualizer.repaint();
     }
     
     public void itemStateChanged(ItemEvent e) {
@@ -470,7 +476,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             visualizer.shake();
         } else if (source == resetColorsButton) {
             wrapper.cache.clearUriColors();
-            uriBases.repaint();
+            //uriBases.repaint();
+            resTree.repaint();
             notifyBaseUriColorChange();
         } else if (source == colorsFilteringField || source == pickColorButton) {
             if(jc==null) jc = new JColorChooser();
@@ -479,7 +486,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         } else if (e.getActionCommand().equals("OK")) {
             // TODO make it stronger
             wrapper.cache.setUriColor(colorsFilteringField.getText().trim() , jc.getColor());
-            uriBases.repaint();
+            //uriBases.repaint();
+            resTree.repaint();
             notifyBaseUriColorChange();
 		} else if (source == dataLoadButton) {
             try {
@@ -504,7 +512,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                     if (res) {
                         tree.buildTree();
                         charter.analyze();
-                        uriBases.init();
+                        //uriBases.init();
+                        resTree.buildTree();
                         this.notifyBaseUriColorChange();
                         scrollingUriBases.revalidate();
                         scrollingTree.revalidate();
@@ -517,7 +526,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             wrapper.clear();
             tree.clear();
             charter.clear();
-            uriBases.clear();
+            resTree.clear();
+            //uriBases.clear();
             scrollingUriBases.revalidate();
             scrollingTree.revalidate();
         } else if (source == aboutButton) {

@@ -24,15 +24,12 @@ import javax.swing.plaf.ColorUIResource;
 
 import edu.mit.simile.welkin.resource.PredicateUri;
 
-/**
- * @author Paolo Ciccarese
- */
 public class PredicatesTree extends JPanel {
     
     final Font font = new Font("Verdana", Font.PLAIN, 11);
     final Font bold = new Font("Verdana", Font.BOLD, 10);
     
-    public static final String EMPTY_LABEL = "Any predicates in the model!";
+    public static final String EMPTY_LABEL = "Empty model!";
     public static final String ROOT_LABEL = "Predicates";
     
     public static final Color BACKGROUND = Color.WHITE;
@@ -76,7 +73,7 @@ public class PredicatesTree extends JPanel {
     }
     
     public void buildTree() {
-        FullNode rootNode = new FullNode("Predicates",null);
+        FullNode rootNode = new FullNode(ROOT_LABEL,null);
         elements.add(rootNode);
         
         for(Iterator it = welkin.wrapper.cache.predicates.iterator(); it.hasNext();) {

@@ -12,12 +12,13 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
+import edu.mit.simile.welkin.resource.PartialUri;
 import edu.mit.simile.welkin.resource.PredicateUri;
 import edu.mit.simile.welkin.resource.ResourceUri;
 
 public class ModelCache {
 
-    public static final String ANONYMOUS_RES = "Anonymous resource";
+    public static final String ANONYMOUS_RES = "Anonymous";
     
     boolean blankNodes = false;    
     Set resources = new HashSet();
@@ -61,14 +62,26 @@ public class ModelCache {
         return (PredicateUri) predicates.get(index);
     }
     
-    public int addResourcesUri(URI uri) {
-        ResourceUri ns = new ResourceUri(uri, ResourceUriBasePanel.DEFAULT_URI_COLOR);
-        if(!resourcesBases.contains(ns)) {
-            resourcesBases.add(ns);
-            return resourcesBases.indexOf(ns);
+    public PartialUri addResourcesUri(URI uri) {
+
+    	PartialUri pu = new PartialUri(Util.getBase(uri.toString()), Color.RED);
+        int index = resourcesBases.indexOf(pu);
+        if(index == -1) {
+            resourcesBases.add(pu);
+            return pu;
         }
         
-        return resourcesBases.indexOf(ns);
+        return (PartialUri) resourcesBases.get(index);
+    }
+    
+    public PartialUri addBlankResourcesUri(String uri) {
+    	PartialUri pu = new PartialUri(ANONYMOUS_RES, Color.RED);
+        int index = resourcesBases.indexOf(pu);
+        if(index == -1) {
+            resourcesBases.add(pu);
+            return pu;
+        }
+        return (PartialUri) resourcesBases.get(index);
     }
 
     WDoubleHashKey tmp = new WDoubleHashKey();  
@@ -108,11 +121,8 @@ public class ModelCache {
         if(!blankNodes) {
             blankNodes = true;
             ResourceUri ns = new ResourceUri(
-            		factory.createURI(ModelCache.ANONYMOUS_RES), 
+            		factory.createURI("_:"+unique), 
 					ResourceUriBasePanel.DEFAULT_URI_COLOR);
-            if(!resourcesBases.contains(ns)) {
-                resourcesBases.add(ns);
-            }
         }
         
         WResource res = new WResource(unique, true, true);
@@ -135,8 +145,8 @@ public class ModelCache {
     
     public void setUriColor(String prefix, Color color) {
         for(Iterator it = resourcesBases.iterator(); it.hasNext();) {
-        	ResourceUri uri = (ResourceUri) it.next();
-            if(uri.getUri().startsWith(prefix))
+        	PartialUri uri = (PartialUri) it.next();
+            if(uri.getBase().startsWith(prefix))
                 uri.color = color;
         }
     }
@@ -189,12 +199,12 @@ public class ModelCache {
     
     public void adjustResourcesUriBaseColor() {
         for(Iterator i=resourcesBases.iterator();i.hasNext();) {
-        	ResourceUri ns = (ResourceUri) i.next();
+        	PartialUri ns = (PartialUri) i.next();
 	        for(Iterator it=resources.iterator();it.hasNext();) {
 	            WResource tmp = (WResource) it.next();
-	            if(blankNodes && ns.getUri().equals(ModelCache.ANONYMOUS_RES) && tmp.isBlankNode ) {
+	            if(blankNodes && ns.getBase().equals(ModelCache.ANONYMOUS_RES) && tmp.isBlankNode ) {
 	                tmp.color = ns.color;
-	            } else if(Util.getNameSpace(tmp.unique).equals(ns.getUri())) {
+	            } else if(tmp.unique.startsWith(ns.getBase())) {
 	                tmp.color = ns.color;
 	            }
 	        }

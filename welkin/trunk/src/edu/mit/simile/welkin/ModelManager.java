@@ -36,6 +36,7 @@ public class ModelManager implements StatementHandler {
             cache.addResourcesUri((URI)resource);
         } else if (resource instanceof BNode) {
             sub = cache.addBlankResource(resource.toString());
+            cache.addBlankResourcesUri(resource.toString());
         }
          
         if (value instanceof URI) {
