@@ -2,16 +2,16 @@ package edu.mit.simile.welkin;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Hashtable;
 
 public class InfoCache {
 
     Set nodes = new HashSet();
-    Hashtable hash = new Hashtable();
+    HashMap hash = new HashMap();
     
     class Node {
         float x, y;
@@ -133,7 +133,6 @@ public class InfoCache {
             this.literal = literal;
         }
     }
-
     
     public void addEntry(int hashSubject, int hashObject, String prNamespace, String prURI) {
         if (hashSubject == hashObject) return;
@@ -244,22 +243,29 @@ public class InfoCache {
         }
     }
 
+    Set tmpNodes = new HashSet();
     public void verifyVisualized(CheckTree tree) {
         for (Iterator it = nodes.iterator(); it.hasNext();) {
             Node node = (Node) it.next();
+            
+            tmpNodes.clear();
+            
             boolean flag = false;
-//          boolean in = false;
             for (Iterator i = node.linkedObjectNodes.iterator(); i.hasNext();) {
-//                in = true;
-                if (tree.isChecked((((Edge) i.next()).predicate.property)))
+                Edge edge = (Edge) i.next();
+                if (tree.isChecked(edge.predicate.property)) {
                     flag = true;
+                    tmpNodes.add(edge.object);
+                }
             }
-//            if (in) {
-                if (flag)
-                    node.isVisible = true;
-                else
-                    node.isVisible = false;
-//            }
+
+            if (flag) {
+                node.isVisible = true;
+                for(Iterator ite = tmpNodes.iterator(); ite.hasNext();) 
+                    ((Node)ite.next()).isVisible = true;
+            } else
+                node.isVisible = false;
+
         }
     }
 }

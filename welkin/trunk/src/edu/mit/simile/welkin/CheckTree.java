@@ -27,6 +27,7 @@ import edu.mit.simile.welkin.InfoCache.Node;
 import edu.mit.simile.welkin.tree.NamespaceTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToLiteralTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
+import edu.mit.simile.welkin.tree.TreeNode;
 
 public class CheckTree extends JTree {
     Welkin welkin;
@@ -128,10 +129,9 @@ public class CheckTree extends JTree {
         DefaultTreeModel model=new DefaultTreeModel(root);
         for(Iterator it=namespaces.iterator();it.hasNext();) {
             Namespace ns=((Namespace)it.next());
-            NamespaceTreeNode nsTreeNode=new NamespaceTreeNode(ns.namespace);
+            TreeNode nsTreeNode=new NamespaceTreeNode(ns.namespace);
             model.insertNodeInto(nsTreeNode,root,root.getChildCount());
             for(Iterator i=ns.properties.iterator();i.hasNext();) {
-                //PropertyTreeNode pTreeNode=new PropertyTreeNode(((Property)i.next()));
                 model.insertNodeInto(((DefaultMutableTreeNode)i.next()),nsTreeNode,nsTreeNode.getChildCount());
             }
         }
