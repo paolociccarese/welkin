@@ -30,6 +30,7 @@ import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
 import edu.mit.simile.welkin.tree.TreeNode;
 
 public class CheckTree extends JTree {
+    Mouse mouseListener;
     Welkin welkin;
     CheckTreeRenderer renderer;
     Hashtable map;
@@ -73,11 +74,13 @@ public class CheckTree extends JTree {
     }
     
     public void init() {
+        if(mouseListener!=null) this.removeMouseListener(mouseListener);
+        mouseListener = new Mouse();
         map = new Hashtable();
         checked = new Hashtable();
         namespaces = new ArrayList();
         super.setCellRenderer(renderer = new CheckTreeRenderer(map, checked));
-        this.addMouseListener(new Mouse());
+        this.addMouseListener(mouseListener);
     }
  
     public void buildTree() {
