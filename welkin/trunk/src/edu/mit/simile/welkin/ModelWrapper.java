@@ -394,5 +394,6 @@ public class ModelWrapper {
     void clear() {
         model = ModelFactory.createDefaultModel();
         cache.nodes.clear();
+        cache.hash.clear();
     }
 }
