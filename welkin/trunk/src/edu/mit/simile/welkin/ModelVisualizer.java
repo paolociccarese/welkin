@@ -79,6 +79,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean drawgroups = true;
     public boolean drawedgevalues = false;
     public boolean background = false;
+    public boolean highlightOnLabel = true;
 
     ModelWrapper model;
     Node pick;
@@ -526,7 +527,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 	   Font subjectFont = null;
                     if (n == pick) {
                 	     subjectFont = pickedFont;
-                    } else if (n.fixed) {
+                    } else if (n.fixed || n.highlighted) {
                 		 subjectFont = fixedFont;
                     }
 

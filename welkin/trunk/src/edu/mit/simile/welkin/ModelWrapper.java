@@ -240,12 +240,23 @@ public class ModelWrapper {
         }
     }
 
-    public void highlightNode(String text, boolean highlight) {
-        // TODO Highlighting
+    public void highlightNode(String text, boolean highlight, boolean highlightOnLabel) {
+        for(Iterator it=cache.nodes.iterator(); it.hasNext();) {
+            Node node = ((Node) it.next());
+            if(highlightOnLabel) {
+	            if(node.label.startsWith(text))
+	                node.highlighted = true;
+            } else {
+	            if(node.unique.startsWith(text))
+	                node.highlighted = true;               
+            }
+        }
     }
 
     public void clearHighlights() {
-        // TODO Clear Highlights
+        for(Iterator it=cache.nodes.iterator(); it.hasNext();) {
+            ((Node) it.next()).highlighted = false;
+        }
     }
     
     public boolean importModel() throws FileNotFoundException {

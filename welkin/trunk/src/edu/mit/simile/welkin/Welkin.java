@@ -88,6 +88,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     JCheckBox groupsCheckbox;
     JCheckBox timeCheckbox;
     JCheckBox backgroundCheckbox;
+    JCheckBox highlightOnLabelCheckbox;
     
     JTextField delayField;
     JTextField massField;
@@ -231,13 +232,14 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         edgeValuesCheckbox = new JCheckBox("Edge Values",visualizer.drawedgevalues);
         timeCheckbox = new JCheckBox("Timing",visualizer.timing);
         backgroundCheckbox = new JCheckBox("Background",visualizer.background);
+        highlightOnLabelCheckbox = new JCheckBox("Label",visualizer.highlightOnLabel);
             
         delayField = new JTextField(Integer.toString(visualizer.delay),4);
         massField = new JTextField(Float.toString(visualizer.mass),4);
         dragField = new JTextField(Float.toString(visualizer.drag),4);
         attractionField = new JTextField(Float.toString(visualizer.attraction),4);
         repulsionField = new JTextField(Float.toString(visualizer.repulsion),4);
-        highlightField = new JTextField("http",15);
+        highlightField = new JTextField("",15);
     
         delayField.addActionListener(this);
         massField.addActionListener(this);
@@ -259,11 +261,14 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         edgeValuesCheckbox.addItemListener(this);
         timeCheckbox.addItemListener(this);
         backgroundCheckbox.addItemListener(this);
+        highlightOnLabelCheckbox.addItemListener(this);
         
         JPanel highlight = new JPanel();
         highlight.setLayout(new BoxLayout(highlight, BoxLayout.X_AXIS));
         highlight.add(Box.createHorizontalGlue());
         highlight.add(highlightField);
+        highlight.add(Box.createRigidArea(new Dimension(5,0)));
+        highlight.add(highlightOnLabelCheckbox);
         highlight.add(Box.createRigidArea(new Dimension(5,0)));
         highlight.add(highlightButton);
         highlight.add(Box.createRigidArea(new Dimension(5,0)));
@@ -318,7 +323,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
 		//toolsPane.addTab("Controls",controls);
 		toolsPane.addTab("Drawing", drawing);
-		//tools.addTab("Highlight",highlight);
+		toolsPane.addTab("Highlight",highlight);
 		toolsPane.addTab("Parameters",parameters);
 
         JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charter, visualizer);
@@ -396,6 +401,8 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.timing = selected;
 		} else if (source == backgroundCheckbox) {
 			visualizer.background = selected;
+		} else if (source == highlightOnLabelCheckbox) {
+			visualizer.highlightOnLabel = selected;
         }
         visualizer.repaint();
     }
@@ -441,7 +448,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         } else if (source == repulsionField) {
             visualizer.repulsion = Float.parseFloat(repulsionField.getText());
         } else if ((source == highlightField) || (source == highlightButton)) {
-            visualizer.getGraph().highlightNode(highlightField.getText(),true);
+            visualizer.getGraph().highlightNode(highlightField.getText(),true,visualizer.highlightOnLabel);
         } else if (source == clearButton) {
             visualizer.getGraph().clearHighlights();
         }
