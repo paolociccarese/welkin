@@ -81,6 +81,7 @@ public class CheckTree extends JTree {
     }
  
     public void buildTree() {
+        init();
         listNamespaces();
         fillNamespaces();
         fillTree();

@@ -69,6 +69,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     JCheckBox antialiasCheckbox;
     JCheckBox nodesCheckbox;
     JCheckBox edgesCheckbox;
+    JCheckBox arrowCheckbox;
     JCheckBox edgeValuesCheckbox;
     JCheckBox groupsCheckbox;
     JCheckBox timeCheckbox;
@@ -137,7 +138,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         dataControls.setLayout(new BorderLayout());
         dataControls.add(dataButtons, BorderLayout.SOUTH);
         
-        
         startIcon = createImageIcon(START_ICON);
         stopIcon = createImageIcon(STOP_ICON);
 
@@ -166,6 +166,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         antialiasCheckbox = new JCheckBox("Antialias",visualizer.antialias);
         nodesCheckbox = new JCheckBox("Nodes",visualizer.drawnodes);
         edgesCheckbox = new JCheckBox("Edges",visualizer.drawedges);
+        arrowCheckbox = new JCheckBox("Arrows",visualizer.drawarrows);
         edgeValuesCheckbox = new JCheckBox("Edge Values",visualizer.drawedgevalues);
         timeCheckbox = new JCheckBox("Timing",visualizer.timing);
         backgroundCheckbox = new JCheckBox("Background",visualizer.background);
@@ -193,6 +194,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         antialiasCheckbox.addItemListener(this);
         nodesCheckbox.addItemListener(this);
         edgesCheckbox.addItemListener(this);
+        arrowCheckbox.addItemListener(this);
         edgeValuesCheckbox.addItemListener(this);
         timeCheckbox.addItemListener(this);
         backgroundCheckbox.addItemListener(this);
@@ -242,6 +244,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 		drawing.add(Box.createHorizontalGlue());
 		drawing.add(nodesCheckbox);
 		drawing.add(edgesCheckbox);
+		drawing.add(arrowCheckbox);
         //drawing.add(edgeValuesCheckbox);
         drawing.add(Box.createHorizontalGlue());
 		//drawing.add(timeCheckbox);
@@ -321,6 +324,8 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.drawnodes = selected;
         } else if (source == edgesCheckbox) {
             visualizer.drawedges = selected;
+        } else if (source == arrowCheckbox) {
+            visualizer.drawarrows = selected;
 		} else if (source == edgeValuesCheckbox) {
 			visualizer.drawedgevalues = selected;
         } else if (source == timeCheckbox) {

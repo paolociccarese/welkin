@@ -73,6 +73,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean antialias = true;
     public boolean drawedges = true;
     public boolean drawnodes = true;
+    public boolean drawarrows = false;
     public boolean timing = true;
     public boolean drawgroups = true;
     public boolean drawedgevalues = false;
@@ -410,6 +411,29 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
                     g2.setColor(edgeColor);
                     g2.draw(new Line2D.Float(x1, y1, x2, y2));
+                    
+                    if(drawarrows) {
+						double dx = x2 - x1;
+						double dy = y2 - y1;
+						double alfa;
+	
+						if (dx == 0) {
+							if (dy > 0) alfa = -Math.PI / 2;
+							else alfa = Math.PI / 2;
+						} else alfa = -Math.atan(dy / dx);
+						
+						if (dx < 0) alfa = alfa + Math.PI;
+						alfa = Math.toDegrees(alfa);
+	
+						if (alfa <= 20) alfa = alfa + 360;
+						alfa = alfa +170;
+	
+						g2.fillArc(
+							(int) ((x2 - 15)), (int) ((y2 - 15)),
+							(int) ((30)), (int) ((30)),
+							(int) alfa, 20);
+                    }
+                    
                     if (drawedgevalues) {
                         float x = (x2 + x1) / 2.0f;
                         float y = (y2 + y1) / 2.0f + ascent;
