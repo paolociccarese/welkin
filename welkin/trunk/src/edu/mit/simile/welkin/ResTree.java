@@ -14,8 +14,7 @@ public class ResTree extends GeneralTree {
 	}
     
 	public void refresh() {
-		// TODO Auto-generated method stub
-
+		welkin.scrollingResTree.validate();
 	}
 
 	public void createTree() {
