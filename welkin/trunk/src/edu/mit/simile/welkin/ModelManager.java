@@ -96,13 +96,14 @@ public class ModelManager implements StatementHandler {
     //       Highlights
     // -----------------------
     public void highlightNode(String text, boolean highlight, boolean highlightOnLabel) {
-        for(Iterator it=cache.resources.iterator(); it.hasNext();) {
-            WResource node = ((WResource) it.next());
+    	WResource node;
+    	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+            node = ((WResource) it.next());
             if(highlightOnLabel) {
-	            if(node.label.startsWith(text))
+	            if(node.label.lastIndexOf(text)!=-1)
 	                node.highlighted = true;
             } else {
-	            if(node.unique.startsWith(text))
+	            if(node.unique.lastIndexOf(text)!=-1)
 	                node.highlighted = true;               
             }
         }
