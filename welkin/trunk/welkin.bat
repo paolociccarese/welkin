@@ -18,8 +18,8 @@ goto end
 :: ----- Check System Properties -----------------------------------------------
 
 if not "%JAVA_OPTIONS%" == "" goto gotJavaOptions
-set JAVA_OPTIONS="-Xmx512M -Xms32M"
-:: set JAVA_OPTIONS="-Xmx512M -Xms32M -Xrunhprof:heap=all,cpu=samples,thread=y,depth=3"
+set JAVA_OPTIONS=-Xmx512M -Xms32M
+:: set JAVA_OPTIONS=-Xmx512M -Xms32M -Xrunhprof:heap=all,cpu=samples,thread=y,depth=3
 :gotJavaOptions
 
 :: ----- Set Up The Classpath --------------------------------------------------
