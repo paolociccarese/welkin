@@ -10,17 +10,17 @@ public class InDegreeChart extends ModelChart {
     public InDegreeChart(ModelManager model) {
         super(model);
     }
-    
+
     public int process(WResource node) {
         int counter = 0;
         for (Iterator it = node.linkedSubjectNodes.iterator(); it.hasNext();) {
             Object o = it.next();
             if (o instanceof WStatement) {
                 WResource n = ((WStatement) o).subject;
-                if (n.isVisible) counter++;
+                if (n.isVisible()) counter++;
             }
         }
-        return counter; 
+        return counter;
     }
-}    
+}
 

@@ -28,13 +28,20 @@ import edu.mit.simile.welkin.ModelCache.WResource;
 
 public abstract class ModelChart extends JComponent {
 
-    final static float DRAG_TOLERANCE = 5.0f;
-    
+    final static float TOLERANCE = 5.0f;
+
+    final static int NONE = 0;
+    final static int NORTH = 1;
+    final static int SOUTH = 2;
+    final static int EAST = 3;
+    final static int WEST = 4;
+    final static int WINDOW = 5;
+
     private int lowValue;
     private int highValue;
     private int lowCount;
     private int highCount;
-    
+
     private int westDelta;
     private int eastDelta;
     private int northDelta;
@@ -47,9 +54,11 @@ public abstract class ModelChart extends JComponent {
     private int maxCount = 150;
 
     private ModelManager model;
-    
+
+    private int draggingState = NONE;
+
     private List listenerList = new ArrayList();
-    
+
     class MyMouseListener extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             int x = e.getX();
@@ -59,65 +68,86 @@ public abstract class ModelChart extends JComponent {
             northDelta = highCount - y;
             southDelta = y - lowCount;
         }
+
         public void mouseReleased(MouseEvent e) {
+            draggingState = NONE;
             signalAction();
         }
     }
-    
+
     class MyMouseMotionListener extends MouseMotionAdapter {
         JComponent parent;
-        
+
         public MyMouseMotionListener(JComponent parent) {
             this.parent = parent;
         }
-        
+
         public void mouseMoved(MouseEvent e) {
             int x = e.getX();
             int y = e.getY();
-            
-            if (Math.abs(x - highValue) < DRAG_TOLERANCE) {
+
+            if (Math.abs(x - highValue) < TOLERANCE) {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
-            } else if (Math.abs(x - lowValue) < DRAG_TOLERANCE) {
+            } else if (Math.abs(x - lowValue) < TOLERANCE) {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
-            } else if (Math.abs(y - highCount) < DRAG_TOLERANCE) {
+            } else if (Math.abs(y - highCount) < TOLERANCE) {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
-            } else if (Math.abs(y - lowCount) < DRAG_TOLERANCE) {
+            } else if (Math.abs(y - lowCount) < TOLERANCE) {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
             } else {
-                this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
         }
-        
+
         public void mouseDragged(MouseEvent e) {
             int x = e.getX();
             int y = e.getY();
-            
-            if (Math.abs(x - highValue) < DRAG_TOLERANCE) {
-                highValue = x;
-            } else if (Math.abs(x - lowValue) < DRAG_TOLERANCE) {
-                lowValue = x;
-            } else if (Math.abs(y - highCount) < DRAG_TOLERANCE) {
-                highCount = y;
-            } else if (Math.abs(y - lowCount) < DRAG_TOLERANCE) {
-                lowCount = y;
+
+            if (draggingState == NONE) {
+                if (Math.abs(x - highValue) < TOLERANCE) {
+                    draggingState = EAST;
+                } else if (Math.abs(x - lowValue) < TOLERANCE) {
+                    draggingState = WEST;
+                } else if (Math.abs(y - highCount) < TOLERANCE) {
+                    draggingState = NORTH;
+                } else if (Math.abs(y - lowCount) < TOLERANCE) {
+                    draggingState = SOUTH;
+                } else {
+                    draggingState = WINDOW;
+                }
             } else {
-                highValue = x + westDelta;
-                lowValue = x - eastDelta;
-                highCount = y + northDelta;
-                lowCount = y - northDelta;
+                switch (draggingState) {
+                    case(EAST):
+                        highValue = x;
+                        break;
+                    case(WEST):
+                        lowValue = x;
+                        break;
+                    case(NORTH):
+                        highCount = y;
+                        break;
+                    case(SOUTH):
+                        lowCount = y;
+                        break;
+                    case(WINDOW):
+                        highValue = Math.min(x + westDelta,parent.getWidth() - 1);
+                        lowValue = Math.max(x - eastDelta,0);
+                        highCount = Math.min(y + northDelta,parent.getHeight() - 1);
+                        lowCount = Math.max(y - southDelta,0);
+                }
             }
-            
+
             parent.repaint();
         }
     }
 
     class Count extends ArrayList {
         boolean visible = true;
-        
+
         public Count(Object o) {
             this.add(o);
         }
-        
+
         public void hide() {
             for (Iterator i = this.iterator(); i.hasNext();) {
                 WResource r = (WResource) i.next();
@@ -125,7 +155,7 @@ public abstract class ModelChart extends JComponent {
             }
             this.visible = false;
         }
-        
+
         public void show() {
             for (Iterator i = this.iterator(); i.hasNext();) {
                 WResource r = (WResource) i.next();
@@ -144,13 +174,13 @@ public abstract class ModelChart extends JComponent {
     public void addActionListener(ActionListener l) {
         listenerList.add(l);
     }
-    
+
     public void removeFooListener(ActionListener l) {
         listenerList.remove(l);
     }
-    
+
     public abstract int process(WResource node);
-    
+
     public float scale(float value,float max,float scale) {
         return (float) (Math.log((double) value) / Math.log((double) max)) * scale;
     }
@@ -158,16 +188,16 @@ public abstract class ModelChart extends JComponent {
     public float unscale(float value,float max,float scale) {
         return (float) (Math.exp((double) (value/scale) * Math.log((double) max)));
     }
-    
+
     void filter() {
         float w = (float) getWidth() - 1.0f;
         float h = (float) getHeight() - 1.0f;
-        
+
         float hv = unscale(highValue,maxValue,w);
         float lv = unscale(lowValue,maxValue,w);
         float hc = unscale(h - lowCount,maxCount,h);
         float lc = unscale(h - highCount,maxCount,h);
-        
+
         processValueVisibility(lv,hv);
         processCountVisibility(lc,hc);
     }
@@ -183,23 +213,24 @@ public abstract class ModelChart extends JComponent {
             }
         }
     }
-    
+
     private void processValueVisibility(float low, float high) {
         for (Iterator i = this.distributionByValue.keySet().iterator(); i.hasNext();) {
-            Count c = (Count) this.distributionByValue.get(i.next());
-            float size = (float) c.size();
-            if (size < low || size > high) {
+            Integer v = (Integer) i.next();
+            Count c = (Count) this.distributionByValue.get(v);
+            float value = v.intValue();
+            if (value < low || value > high) {
                 c.hide();
             } else {
                 c.show();
             }
         }
     }
-    
+
     void analyze(boolean rescale) {
         this.distributionByValue.clear();
         this.distributionByCount.clear();
-        
+
         if (rescale) {
             this.maxCount = 0;
             this.maxValue = 0;
@@ -207,7 +238,7 @@ public abstract class ModelChart extends JComponent {
 
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
-            if (!n.isVisible) continue;
+            if (!n.isVisible()) continue;
 
             int value = process(n);
             Integer _value = new Integer(value);
@@ -222,7 +253,7 @@ public abstract class ModelChart extends JComponent {
             }
             if (rescale && value > maxValue) maxValue = value;
         }
-        
+
         reset();
     }
 
@@ -236,7 +267,7 @@ public abstract class ModelChart extends JComponent {
         this.maxValue = 150;
         update();
     }
-    
+
     void reset() {
         this.lowValue = 0;
         this.highValue = getWidth() - 1;
@@ -253,7 +284,7 @@ public abstract class ModelChart extends JComponent {
     final static Color xFilterBorderColor = new Color(0, 192, 0, 100);
     final static Color yFilterColor = new Color(0, 0, 128, 50);
     final static Color yFilterBorderColor = new Color(0, 0, 192, 100);
-    
+
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -263,7 +294,7 @@ public abstract class ModelChart extends JComponent {
 
         float h = getHeight() - 1.0f;
         float w = getWidth() - 1.0f;
-                
+
         Shape chartRect = new Rectangle2D.Float(0,0,w,h);
         g2.setColor(backgroundColor);
         g2.fill(chartRect);
@@ -290,7 +321,7 @@ public abstract class ModelChart extends JComponent {
                 if (y < h) g2.draw(new Line2D.Float(0.0f,-y,w,-y));
             }
         }
- 
+
         // paint chart
         g2.setColor(drawColor);
         for (Iterator it = this.distributionByValue.keySet().iterator(); it.hasNext();) {
@@ -337,9 +368,9 @@ public abstract class ModelChart extends JComponent {
         super.reshape(x,y,width,height);
         reset();
     }
-    
+
     public Dimension getMinimumSize() {
         return new Dimension(100,50);
     }
-}    
+}
 

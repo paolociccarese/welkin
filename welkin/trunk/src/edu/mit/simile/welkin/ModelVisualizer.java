@@ -83,7 +83,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean highlightOnLabel = true;
 
     public boolean colors = false;
-    
+
     ModelManager model;
     WResource pick;
 
@@ -107,7 +107,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
                 for (Iterator i = model.cache.resources.iterator(); i.hasNext();) {
                     WResource n = (WResource) i.next();
-                    if(!n.isVisible) continue;
+                    if(!n.isVisible()) continue;
                     if (n != null) {
                         float dx = n.x - x;
                         float dy = n.y - y;
@@ -177,11 +177,12 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public ModelVisualizer(ModelManager model) {
         this.addMouseMotionListener(new MyMouseMotionListener());
         this.addMouseListener(new MyMouseListener());
-        this.model = model;
+        setGraph(model);
     }
 
     public void setGraph(ModelManager model) {
         this.model = model;
+        scramble();
     }
 
     public ModelManager getGraph() {
@@ -238,8 +239,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
             if (!n.fixed) {
-                n.x = (float) ((double) (cx - 50.0f) * (Math.random() - 0.5d));
-                n.y = (float) ((double) (cy - 50.0f) * (Math.random() - 0.5d));
+                n.x = (float) ((double) (cx - 50.0f) * 2.0f * (Math.random() - 0.5d));
+                n.y = (float) ((double) (cy - 50.0f) * 2.0f * (Math.random() - 0.5d));
             }
         }
         repaint();
@@ -294,12 +295,12 @@ public class ModelVisualizer extends JComponent implements Runnable {
         if (timing) startTime = System.currentTimeMillis();
 
         PredicateUri[] pu;
-        float somma = 0;
-        
+        float sum = 0;
+
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
-            
-            if (!n.isVisible) continue;
+
+            if (!n.isVisible()) continue;
 
             float xi = n.x;
             float yi = n.y;
@@ -311,8 +312,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
             for (Iterator j = model.cache.resources.iterator(); j.hasNext();) {
                 WResource m = (WResource) j.next();
-                
-                if (!m.isVisible) continue;
+
+                if (!m.isVisible()) continue;
 
                 float xj = m.x;
                 float yj = m.y;
@@ -324,17 +325,16 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 float d = (float) Math.sqrt(d2);
                 if (d == 0) d = 0.0001f; // avoid dividing by zero
 
-                pu = model.cache.getEntries(n.hash,m.hash);
-                
-                somma = 0;
-                if(pu!=null && pu.length>0)
-                for (int i=0; i<pu.length;i++) {
-                	somma+=pu[i].weight;
-                }
-                
                 // get the weight of the link between n and m
-                float weight = somma>1 ? 1.0f : somma;
-                
+                sum = 0;
+                pu = model.cache.getEntries(n.hash,m.hash);
+                if ((pu != null) && (pu.length > 0)) {
+                    for (int i = 0; i < pu.length; i++) {
+                        sum += pu[i].weight;
+                    }
+                }
+                float weight = sum > 1 ? 1.0f : sum;
+
                 // attractive force
                 float af = attractive(d, weight);
 
@@ -413,10 +413,10 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
             for (Iterator nodes = model.cache.resources.iterator(); nodes.hasNext();) {
                 WResource n1 = (WResource) nodes.next();
-                if (!n1.isVisible) continue;
+                if (!n1.isVisible()) continue;
                 for (Iterator edges = n1.linkedObjectNodes.iterator(); edges .hasNext();) {
                     WResource n2 = ((WStatement) edges.next()).object;
-                    if (!n2.isVisible) continue;
+                    if (!n2.isVisible()) continue;
                     float z1 = zoom(n1.x, n1.y);
                     float z2 = zoom(n2.x, n2.y);
                     float x1 = n1.x + (n1.x - zoomX) * z1 + cx;
@@ -426,29 +426,29 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
                     g2.setColor(edgeColor);
                     g2.draw(new Line2D.Float(x1, y1, x2, y2));
-                    
+
                     if (drawarrows) {
 						double dx = x2 - x1;
 						double dy = y2 - y1;
 						double alfa;
-	
+
 						if (dx == 0) {
 							if (dy > 0) alfa = -Math.PI / 2;
 							else alfa = Math.PI / 2;
 						} else alfa = -Math.atan(dy / dx);
-						
+
 						if (dx < 0) alfa = alfa + Math.PI;
 						alfa = Math.toDegrees(alfa);
-	
+
 						if (alfa <= 20) alfa = alfa + 360;
 						alfa = alfa +170;
-	
+
 						g2.fillArc(
 							(int) ((x2 - 15)), (int) ((y2 - 15)),
 							(int) ((30)), (int) ((30)),
 							(int) alfa, 20);
                     }
-                    
+
                     if (drawedgevalues) {
                         float x = (x2 + x1) / 2.0f;
                         float y = (y2 + y1) / 2.0f + ascent;
@@ -460,24 +460,24 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 }
             }
         }
-        
+
         if (drawnodes) {
             for (Iterator i = model.cache.resources.iterator(); i.hasNext();) {
                 WResource n = (WResource) i.next();
-                if (!n.isVisible) continue;
+                if (!n.isVisible()) continue;
                 float z = zoom(n.x, n.y);
                 float x = n.x + (n.x - zoomX) * z + cx;
                 float y = n.y + (n.y - zoomY) * z + cy;
-                
+
                 Shape border, inside;
-                if(n.isNotSubject) {
-                    border = new Ellipse2D.Float(x - 3.1f, y - 3.1f, 6.2f, 6.2f);
+                if (n.isNotSubject) {
+                    border = new Ellipse2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
                     inside = new Ellipse2D.Float(x - 1.5f, y - 1.5f, 3.0f, 3.0f);
                 } else {
-                    border = new Rectangle2D.Float(x - 3.1f, y - 3.1f, 6.2f, 6.2f);
+                    border = new Rectangle2D.Float(x - 3.5f, y - 3.5f, 7.0f, 7.0f);
                     inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
                 }
-                
+
                 if (n == pick) {
                     g2.setColor(n.color);
                     g2.fill(inside);
@@ -485,14 +485,14 @@ public class ModelVisualizer extends JComponent implements Runnable {
                     g2.draw(border);
                 } else {
                     if (n.fixed) {
-                        g2.setColor(fixedColor);                     
+                        g2.setColor(fixedColor);
                         g2.fill(inside);
                         g2.setColor(n.color);
                         g2.draw(border);
                     } else {
                         g2.setColor(n.color);
                         g2.fill(inside);
-                        g2.draw(border);
+                        //g2.draw(border);
                     }
                 }
             }
@@ -503,7 +503,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
 
-            if (!n.isVisible) continue;
+            if (!n.isVisible()) continue;
 
             if (zoom) {
                 float z = zoom(n.x, n.y);
@@ -535,7 +535,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
                     g2.translate(zoomX + cx, zoomY + cy);
                     g2.rotate(theta);
-                    
+
                     Shape rectangle = new RoundRectangle2D.Float(d, -ascent, width, height, height, height);
                     g2.setColor(highlightBGColor);
                     g2.fill(rectangle);
@@ -567,14 +567,14 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
                     float rectWidth = width;
                     float rectHeight = height + yBORDER;
-                    
+
                     if (n == pick) {
                         // count properties and find text length
                         fm = g2.getFontMetrics(propertiesFont);
                         float a = fm.getAscent();
                         float d = fm.getDescent();
                         float line = a + d + yBORDERs;
-                        
+
                         for (Iterator i = n.getLiterals(); i.hasNext();) {
                             WLiteral lit = (WLiteral) i.next();
                             float length = fm.stringWidth(lit.predicate.toString() + " -> " + lit.literal) + xBORDERs;
@@ -583,7 +583,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                             count++;
                         }
                     }
-                    
+
                     // make sure the properties box is placed in the canvas
 
                     float x = n.x;
@@ -600,7 +600,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                               x = - rectWidth / 2.0f;
                     		}
                     }
-                    
+
                     float y = n.y;
                     float h = rectHeight + yBORDERs;
                     if ((y - h) > -cy) {
@@ -615,9 +615,9 @@ public class ModelVisualizer extends JComponent implements Runnable {
                               y = - rectHeight / 2.0f;
                     	    }
                     }
-                    
+
                     g2.translate(cx,cy); // translate to the center (since we use a center based coordinate system)
-                    
+
                     if (count > 0) {
                         // Draw the literal box
                         Shape rectangle = new RoundRectangle2D.Float(x, y, rectWidth, rectHeight, height, height);
@@ -638,7 +638,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                             g2.drawString(lit.predicate.toString() + " -> " + lit.literal, x + xBORDER, y + asc + lineHeight * i + yBORDER + height);
                         }
                     }
-                    
+
                     // Draw the subject
                     Shape rectangle = new RoundRectangle2D.Float(x, y, width, height, height, height);
                     g2.setColor(highlightBGColor);
@@ -666,7 +666,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
             g.drawString("calculation: " + simulationTime + " ms", 0, 0);
             g2.setTransform(t);
         }
-        
+
         if (zoom) {
             if (alpha < MAX_ALPHA) {
                 alpha += ALPHA_INC;
@@ -682,7 +682,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
     static final Dimension minimum = new Dimension(200,120);
     static final Dimension preferred = new Dimension(300,200);
-    
+
     public Dimension getMinimumSize() {
         return minimum;
     }
@@ -690,5 +690,5 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public Dimension getPreferredSize() {
         return preferred;
     }
-    
+
 }
