@@ -207,8 +207,11 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         wrapper = new ModelManager();
         visualizer = new ModelVisualizer(wrapper);
         inDegreeChart = new InDegreeChart(wrapper);
+        inDegreeChart.addActionListener(this);
         outDegreeChart = new OutDegreeChart(wrapper);
+        outDegreeChart.addActionListener(this);
         clustCoeffChart = new ClusteringCoefficientChart(wrapper);
+        clustCoeffChart.addActionListener(this);
 
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         
@@ -441,9 +444,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     public void notifyTreeChange() {
         wrapper.cache.uriBasedVisualization(predTree);
         visualizer.repaint();
-        inDegreeChart.reanalyze();
-        outDegreeChart.reanalyze();
-        clustCoeffChart.reanalyze();
+        inDegreeChart.clear();
+        outDegreeChart.clear();
+        clustCoeffChart.clear();
     }
     
     public void notifyBaseUriColorChange() {
@@ -544,7 +547,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             }
 		} else if (source == dataClearButton) {
             if (visualizer.isRunning()) {
-        	    internalStop();
+                internalStop();
             }
             wrapper.clear();
             predTree.clear();
@@ -570,8 +573,12 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             visualizer.getGraph().highlightNode(highlightField.getText(),true,visualizer.highlightOnLabel);
         } else if (source == clearButton) {
             visualizer.getGraph().clearHighlights();
+        } else if (source == inDegreeChart || source == outDegreeChart || source == clustCoeffChart) {
+            inDegreeChart.filter();
+            outDegreeChart.filter();
+            clustCoeffChart.filter();
         }
-		visualizer.repaint();
+        visualizer.repaint();
     }
 	
 	protected static ImageIcon createImageIcon(String path) {
@@ -584,14 +591,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 		}
 	}
 	
-	public static void error(String msg) {
-		System.err.println(msg);
-	}
-
-	public static void log(String msg) {
-		System.out.println(msg);
-	}
-	    
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

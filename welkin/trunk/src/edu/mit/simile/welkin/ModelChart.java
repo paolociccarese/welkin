@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -17,6 +19,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -25,19 +28,27 @@ import edu.mit.simile.welkin.ModelCache.WResource;
 
 public abstract class ModelChart extends JComponent {
 
+    final static float DRAG_TOLERANCE = 5.0f;
+    
     private int lowValue;
     private int highValue;
     private int lowCount;
     private int highCount;
     
-    private ModelManager model;
-    
-    final static float DRAG_TOLERANCE = 10.0f;
-
     private int westDelta;
     private int eastDelta;
     private int northDelta;
     private int southDelta;
+
+    private Map distributionByValue = new HashMap();
+    private Map distributionByCount = new HashMap();
+
+    private int maxValue = 100;
+    private int maxCount = 100;
+
+    private ModelManager model;
+    
+    private List listenerList = new ArrayList();
     
     class MyMouseListener extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
@@ -49,7 +60,7 @@ public abstract class ModelChart extends JComponent {
             southDelta = y - lowCount;
         }
         public void mouseReleased(MouseEvent e) {
-            filter();
+            signalAction();
         }
     }
     
@@ -130,6 +141,14 @@ public abstract class ModelChart extends JComponent {
         this.addMouseListener(new MyMouseListener());
     }
 
+    public void addActionListener(ActionListener l) {
+        listenerList.add(l);
+    }
+    
+    public void removeFooListener(ActionListener l) {
+        listenerList.remove(l);
+    }
+    
     public abstract int process(WResource node);
     
     public float scale(float value,float max,float scale) {
@@ -140,12 +159,6 @@ public abstract class ModelChart extends JComponent {
         return (float) (Math.exp((double) (value/scale) * Math.log((double) max)));
     }
     
-    private Map distributionByValue = new HashMap();
-    private Map distributionByCount = new HashMap();
-
-    private int maxValue = 100;
-    private int maxCount = 100;
-
     void filter() {
         float w = (float) getWidth() - 1.0f;
         float h = (float) getHeight() - 1.0f;
@@ -159,8 +172,33 @@ public abstract class ModelChart extends JComponent {
         processCountVisibility(lc,hc);
     }
 
+    private void processCountVisibility(float low, float high) {
+        for (Iterator i = this.distributionByCount.keySet().iterator(); i.hasNext();) {
+            Count c = (Count) this.distributionByCount.get(i.next());
+            float size = (float) c.size();
+            if (size < low || size > high) {
+                c.hide();
+            } else {
+                c.show();
+            }
+        }
+    }
+    
+    private void processValueVisibility(float low, float high) {
+        for (Iterator i = this.distributionByValue.keySet().iterator(); i.hasNext();) {
+            Count c = (Count) this.distributionByValue.get(i.next());
+            float size = (float) c.size();
+            if (size < low || size > high) {
+                c.hide();
+            } else {
+                c.show();
+            }
+        }
+    }
+    
     void analyze(boolean rescale) {
         this.distributionByValue.clear();
+        this.distributionByCount.clear();
         
         if (rescale) {
             this.maxCount = 0;
@@ -185,61 +223,30 @@ public abstract class ModelChart extends JComponent {
             if (rescale && value > maxValue) maxValue = value;
         }
         
+        reset();
+    }
+
+    void clear() {
+        analyze(false);
+        repaint();
+    }
+    
+    void reset() {
         this.lowValue = 0;
         this.highValue = getWidth() - 1;
         this.lowCount = 0;
         this.highCount = getHeight() - 1;
     }
 
-    void clear() {
-        reanalyze();
-    }
-    
-    void reanalyze() {
-        analyze(false);
-        repaint();
-    }
-
-    public void processCountVisibility(float low, float high) {
-        System.out.println("count: " + low + " " + high);
-        for (Iterator i = this.distributionByCount.keySet().iterator(); i.hasNext();) {
-            Count c = (Count) this.distributionByCount.get(i.next());
-            float size = (float) c.size();
-            if (size < low || size > high) {
-                c.hide();
-            } else {
-                c.show();
-            }
-        }
-    }
-    
-    public void processValueVisibility(float low, float high) {
-        System.out.println("value: " + low + " " + high);
-        for (Iterator i = this.distributionByValue.keySet().iterator(); i.hasNext();) {
-            Count c = (Count) this.distributionByValue.get(i.next());
-            float size = (float) c.size();
-            if (size < low || size > high) {
-                c.hide();
-            } else {
-                c.show();
-            }
-        }
-    }
-    
     final static Color titleColor = Color.BLACK;
     final static Color axisColor = new Color(0x80,0x80,0x80);
     final static Color backgroundColor = Color.WHITE;
     final static Color gridColor = new Color(150, 150, 150, 100);
     final static Color drawColor = Color.RED;
-    final static Color xFilterColor = new Color(0, 128, 0, 100);
-    final static Color xFilterBorderColor = new Color(0, 192, 0, 200);
-    final static Color yFilterColor = new Color(0, 0, 128, 100);
-    final static Color yFilterBorderColor = new Color(0, 0, 192, 200);
-
-    final static int XTICKS = 20;
-    final static int YTICKS = 20;
-    
-    final static float SIDE = 10.0f;
+    final static Color xFilterColor = new Color(0, 128, 0, 50);
+    final static Color xFilterBorderColor = new Color(0, 192, 0, 100);
+    final static Color yFilterColor = new Color(0, 0, 128, 50);
+    final static Color yFilterBorderColor = new Color(0, 0, 192, 100);
     
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
@@ -260,22 +267,17 @@ public abstract class ModelChart extends JComponent {
         g2.translate(0.0f, h);
 
         // paint grid
-        
-        int x_inc = maxValue / XTICKS;
-        int y_inc = maxCount / YTICKS;
-
         g2.setColor(gridColor);
-        for (int i = 1; i < XTICKS; i++) {
-            float x = scale(i * x_inc,maxValue,w);
+        for (int i = 1; i < maxValue; i++) {
+            float x = scale(i,maxValue,w);
             g2.draw(new Line2D.Float(x,0.0f,x,-h));
         }
-        for (int i = 1; i < YTICKS; i++) {
-            float y = scale(i * y_inc,maxCount,h);
+        for (int i = 1; i < maxCount; i++) {
+            float y = scale(i,maxCount,h);
             g2.draw(new Line2D.Float(0.0f,-y,w,-y));
         }
  
         // paint chart
-        
         g2.setColor(drawColor);
         for (Iterator it = this.distributionByValue.keySet().iterator(); it.hasNext();) {
             Integer degree = (Integer) it.next();
@@ -288,7 +290,6 @@ public abstract class ModelChart extends JComponent {
         }
 
         // paint filters
-        
         float hv = highValue;
         Shape westRect = new Rectangle2D.Float(hv,-h,w - hv,h);
         float lv = lowValue;
@@ -311,6 +312,18 @@ public abstract class ModelChart extends JComponent {
         g2.draw(southRect);
     }
 
+    private void signalAction() {
+        for (Iterator i = listenerList.iterator(); i.hasNext();) {
+            ActionListener l = (ActionListener) i.next();
+            l.actionPerformed(new ActionEvent(this,0,"filtered"));
+        }
+    }
+
+    public void reshape(int x, int y, int width, int height) {
+        super.reshape(x,y,width,height);
+        reset();
+    }
+    
     public Dimension getMinimumSize() {
         return new Dimension(100,50);
     }
