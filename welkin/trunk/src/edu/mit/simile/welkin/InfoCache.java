@@ -107,6 +107,10 @@ public class InfoCache {
             this.namespace = namespace;
             this.property = property;
         }
+        
+        public String toString() {
+        	    return this.property;
+        }
     }
 
     public class Edge {
@@ -188,7 +192,7 @@ public class InfoCache {
     }
     
     public void setLabel(String unique, String label) {
-        getNode(unique).label = "rdfs#label: " + label;
+        getNode(unique).label = label;
     }
 
     public float[] getCoordinatesXY(String unique) {

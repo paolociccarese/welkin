@@ -35,7 +35,7 @@ import javax.swing.UIManager;
  */
 public class Welkin extends JApplet implements ActionListener, ItemListener {
 
-    public static final String NAME = "@name@";
+    public static final String NAME = "Welkin";
 	public static final String VERSION = "@version@";
 	
 	static final String ICON_PATH = "resources/icons/";
@@ -68,7 +68,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     JButton highlightButton;
     JButton clearButton;
 
-    JCheckBox randomCheckbox;
     JCheckBox antialiasCheckbox;
     JCheckBox nodesCheckbox;
     JCheckBox edgesCheckbox;
@@ -154,7 +153,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 		highlightButton = new JButton("Highlight");
 		clearButton = new JButton("Clear");
 		
-        randomCheckbox = new JCheckBox("Random Jumps",visualizer.random);
         antialiasCheckbox = new JCheckBox("Antialias",visualizer.antialias);
         nodesCheckbox = new JCheckBox("Nodes",visualizer.drawnodes);
         edgesCheckbox = new JCheckBox("Edges",visualizer.drawedges);
@@ -183,7 +181,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         highlightButton.addActionListener(this);
         clearButton.addActionListener(this);
         
-        randomCheckbox.addItemListener(this);
         antialiasCheckbox.addItemListener(this);
         nodesCheckbox.addItemListener(this);
         edgesCheckbox.addItemListener(this);
@@ -200,7 +197,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         controls.add(scrambleButton);
         controls.add(shakeButton);
 		controls.add(Box.createHorizontalGlue());
-        controls.add(randomCheckbox);
 		controls.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
         JPanel highlight = new JPanel();
@@ -298,9 +294,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     public void itemStateChanged(ItemEvent e) {
         Object source = e.getItemSelectable();
         boolean selected = (e.getStateChange() == ItemEvent.SELECTED);
-        if (source == randomCheckbox) {
-            visualizer.random = selected;
-        } else if (source == antialiasCheckbox) {
+        if (source == antialiasCheckbox) {
             visualizer.antialias = selected;
         } else if (source == nodesCheckbox) {
             visualizer.drawnodes = selected;
