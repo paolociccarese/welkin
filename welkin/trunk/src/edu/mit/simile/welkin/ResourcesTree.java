@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -78,7 +81,7 @@ public class ResourcesTree extends JPanel {
     }
     
     public void buildTree() {
-        root = new FullNode(ROOT_LABEL, null, false);
+        root = new FullNode(ROOT_LABEL, null, null, false);
         root.incCount(welkin.wrapper.cache.resources.size());
         elements.add(root);
         
@@ -99,7 +102,7 @@ public class ResourcesTree extends JPanel {
     	if(parts[0]==null) return; // TODO Blank Nodes
     	
     	if(level == parts.length-1) {
-        	FullNode tmp = new FullNode(parts[parts.length-1], all, true);
+        	FullNode tmp = new FullNode(parts[parts.length-1], all, root, true);
         	if(level == 0) tmp.isVisible = true;
         	else tmp.isVisible = false;
         	root.children.add(tmp);
@@ -116,7 +119,7 @@ public class ResourcesTree extends JPanel {
     	}
     	
     	if(!flag) {
-    		FullNode child = new FullNode(parts[level++], all, false);
+    		FullNode child = new FullNode(parts[level++], all, root, false);
     		if(level == 2) child.isVisible = false;
     		root.children.add(child); 
     		createNode(child, parts, all, level);
@@ -190,6 +193,29 @@ public class ResourcesTree extends JPanel {
         }
     }
     
+    private void forwardPropagation(boolean selection, FullNode node) {
+    	for(int i=0; i<node.children.size();i++) {
+    		((FullNode)node.children.get(i)).check.setSelected(selection);
+    		forwardPropagation(selection, (FullNode)node.children.get(i));
+    	}
+    }
+    
+    private void backwardPropagation(boolean selection, FullNode node) {
+
+    	boolean somethingSelectedFlag = false;
+    	if(node.father == null) return;
+    	for(int i=0; i<node.father.children.size(); i++) {
+    		if(((FullNode)node.father.children.get(i)).check.isSelected())
+    			somethingSelectedFlag = true;
+    	}
+    	
+    	if(somethingSelectedFlag)
+    		node.father.check.setSelected(true);
+    	else node.father.check.setSelected(false);
+    	
+    	backwardPropagation(selection, node.father);
+    }
+    
     public void crawlingTree(String prefix) {
         devisualizeAll();
         for(Iterator it=elements.iterator();it.hasNext();) {
@@ -208,8 +234,9 @@ public class ResourcesTree extends JPanel {
         }
     }
     
-    class FullNode extends JPanel implements ChangeListener {
+    class FullNode extends JPanel implements ChangeListener, ActionListener {
         private JLabel iconLabel;
+        private JCheckBox check;
         private JSlider slider;
         private JLabel label;
         private JLabel weight;
@@ -225,8 +252,9 @@ public class ResourcesTree extends JPanel {
         Vector children = new Vector();
         PartialUri resource;
         
-        FullNode(String labelT, PartialUri resource, boolean isLeaf) {
+        FullNode(String labelT, PartialUri resource, FullNode father, boolean isLeaf) {
         	this.resource = resource;
+        	this.father = father;
         	this.isLeaf = isLeaf;
             me=this;
             
@@ -235,6 +263,11 @@ public class ResourcesTree extends JPanel {
             
             iconLabel = new JLabel();
             iconLabel.setSize(20,18);
+            
+            check = new JCheckBox();
+            check.setSelected(true);
+            check.setBackground(Color.WHITE);
+            check.addActionListener(this);
             
             slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
             slider.addChangeListener(this);
@@ -259,6 +292,7 @@ public class ResourcesTree extends JPanel {
             if(resource != null) incCount(resource.getCount());
             
             this.add(iconLabel);
+            this.add(check);
             this.add(slider);
             this.add(this.label);
             this.add(weight);
@@ -278,6 +312,11 @@ public class ResourcesTree extends JPanel {
                     }
                 }
             });
+        }
+        
+        public void actionPerformed(ActionEvent evt) {
+        	forwardPropagation(this.check.isSelected(), this);
+        	backwardPropagation(this.check.isSelected(), this);
         }
         
         public void incCount(int count) {
@@ -326,6 +365,7 @@ public class ResourcesTree extends JPanel {
             return new Dimension (
             		this.getLocation().x +
 					iconLabel.getWidth() +
+					check.getPreferredSize().width +
 					slider.getPreferredSize().width +
             		label.getPreferredSize().width +
 					weight.getPreferredSize().width,16);

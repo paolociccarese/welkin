@@ -182,8 +182,7 @@ public class ModelCache {
             boolean flag = false;
             for (Iterator i = node.linkedObjectNodes.iterator(); i.hasNext();) {
                 WStatement edge = (WStatement) i.next();
-//                String tmp = edge.predicate.toString();
-                if (edge.predicate.weight>0) {
+                if (edge.predicate.weight>0 && edge.predicate.included) {
                     flag = true;
                     validatedNodes.add(edge.object);
                 }

@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -78,7 +81,7 @@ public class PredicatesTree extends JPanel {
     }
     
     public void buildTree() {
-        root = new FullNode(ROOT_LABEL, null, false);
+        root = new FullNode(ROOT_LABEL, null, null, false);
         //root.incCount(welkin.wrapper.cache.predicates.size());
         elements.add(root);
         
@@ -97,10 +100,11 @@ public class PredicatesTree extends JPanel {
     
     private void createNode(FullNode root, String[] parts, PredicateUri all, int level) {
         if(level == parts.length-1) {
-            FullNode tmp = new FullNode(parts[2], all, true);
+            FullNode tmp = new FullNode(parts[2], all, root, true);
             if(level == 0) tmp.isVisible = true;
             else tmp.isVisible = false;
             root.children.add(tmp);
+            elements.add(tmp);
             return;
         }
 
@@ -115,9 +119,10 @@ public class PredicatesTree extends JPanel {
         }
         
         if(!flag) {
-            FullNode child = new FullNode(parts[level++], all, false);
+            FullNode child = new FullNode(parts[level++], all, root, false);
             if(level==2) child.isVisible = false;
             root.children.add(child);
+            elements.add(child);
             createNode(child, parts, all, level);
         }
     }
@@ -192,6 +197,46 @@ public class PredicatesTree extends JPanel {
         }
     }
     
+    private void forwardPropagation(boolean selection, FullNode node) {
+    	for(int i=0; i<node.children.size();i++) {
+    		((FullNode)node.children.get(i)).check.setSelected(selection);
+    		if(((FullNode)node.children.get(i)).isLeaf) {
+    			System.out.println(((FullNode)node.children.get(i)).label.getText()+" "+node.predicate.getUri());
+    			((FullNode)node.children.get(i)).predicate.included = selection;
+    			//node.predicate.included = selection;
+    		}
+
+    		forwardPropagation(selection, (FullNode)node.children.get(i));
+    	}
+    }
+    
+    private void backwardPropagation(boolean selection, FullNode node) {
+
+    	boolean somethingSelectedFlag = false;
+    	if(node.father == null) return;
+    	for(int i=0; i<node.father.children.size(); i++) {
+    		if(((FullNode)node.father.children.get(i)).check.isSelected())
+    			somethingSelectedFlag = true;
+    	}
+    	
+    	if(somethingSelectedFlag) 
+    		node.father.check.setSelected(true);
+    	else node.father.check.setSelected(false);
+    	
+    	backwardPropagation(selection, node.father);
+    }
+    
+//    public boolean isSelected(String path) {
+//    	for(int i=0; i<elements.size(); i++) {
+//    		if(((FullNode)elements.get(i)).isLeaf)
+//    			if(((FullNode)elements.get(i)).absolute.equals(path))
+//    				if(((FullNode)elements.get(i)).check.isSelected())
+//    					return true;
+//    	}
+//    	
+//    	return false;
+//    }
+    
     public void crawlingTree(String prefix) {
         devisualizeAll();
         for(Iterator it=elements.iterator();it.hasNext();) {
@@ -210,8 +255,9 @@ public class PredicatesTree extends JPanel {
         }
     }
     
-    class FullNode extends JPanel implements ChangeListener {
+    class FullNode extends JPanel implements ChangeListener, ActionListener {
         private JLabel iconLabel;
+        private JCheckBox check;
         private JLabel weight;
         private JSlider slider;
         private JLabel label;
@@ -238,8 +284,9 @@ public class PredicatesTree extends JPanel {
         Vector children = new Vector();
         PredicateUri predicate;
         
-        FullNode(String labelT, PredicateUri predicate, boolean isLeaf) {
+        FullNode(String labelT, PredicateUri predicate, FullNode father, boolean isLeaf) {
         	this.predicate = predicate;
+        	this.father = father;
         	this.isLeaf = isLeaf;
             me=this;
             
@@ -248,6 +295,11 @@ public class PredicatesTree extends JPanel {
             
             iconLabel = new JLabel();
             iconLabel.setSize(20,18);
+            
+            check = new JCheckBox();
+            check.setSelected(true);
+            check.setBackground(Color.WHITE);
+            check.addActionListener(this);
             
             weight = new JLabel();
             weight.setHorizontalAlignment(JTextField.RIGHT);
@@ -272,6 +324,7 @@ public class PredicatesTree extends JPanel {
             this.label.setBackground(BACKGROUND);
             
             this.add(iconLabel);
+            this.add(check);
             this.add(slider);
             this.add(this.label);
             this.add(weight);
@@ -295,6 +348,13 @@ public class PredicatesTree extends JPanel {
             });
         }
 
+        public void actionPerformed(ActionEvent evt) {
+        	forwardPropagation(this.check.isSelected(), this);
+        	backwardPropagation(this.check.isSelected(), this);
+        	if(predicate!=null) predicate.included = this.check.isSelected();
+        	welkin.notifyTreeChange();
+        }
+        
         public void incCount(int count) {
         	this.count += count;
         	weight.setText(" [" + this.count + "]");
@@ -352,7 +412,10 @@ public class PredicatesTree extends JPanel {
         }
         
         public Dimension getDimension() {
-            return new Dimension (this.getLocation().x+iconLabel.getWidth()+slider.getPreferredSize().width
+            return new Dimension (this.getLocation().x+
+            		iconLabel.getWidth()+
+            		check.getPreferredSize().width +
+					slider.getPreferredSize().width
             		+label.getPreferredSize().width+weight.getPreferredSize().width,16);
         }
     }
