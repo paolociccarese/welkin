@@ -29,94 +29,58 @@ import com.hp.hpl.jena.rdf.model.Statement;
 public class ModelVisualizer extends JComponent implements Runnable
 {
     final static float BORDER = 3.0f;
-
     final static float BORDERs = BORDER * 2.0f;
 
     final float MIN_ALPHA = 1.0f;
-
     final float MAX_ALPHA = MIN_ALPHA + 80.0f;
-
     final float ALPHA_INC = 20.0f;
-
     final float ZOOM_FACTOR = 2.0f;
 
     final Color fixedColor = Color.green;
-
     final Color selectColor = Color.red;
-
     final Color edgeColor = new Color(150, 150, 150, 100);
-
     final Color edgeValueColor = new Color(50, 50, 50, 100);
-
     final Color nodeColor = Color.red;
-
     final Color timeColor = Color.black;
-
     final Color tooltipBorderColor = Color.black;
-
     final Color pickedBGColor = new Color(255, 255, 0, 100);
-
     final Color pickedFontColor = Color.black;
-
     final Color highlightBGColor = new Color(255, 255, 0, 150);
-
     final Color highlightFontColor = Color.black;
-
     final Color groupColor = new Color(0, 0, 0, 200);
-
     final Color groupFontColor = groupColor;
-
     final Color groupBGColor = new Color(255, 255, 255, 100);
-
     final Color groupBorderColor = Color.black;
 
     final Font bigFont = new Font("Verdana", Font.BOLD, 10);
-
     final Font smallFont = new Font("Verdana", Font.PLAIN, 8);
-
     final Font tinyFont = new Font("Verdana", Font.PLAIN, 9);
 
     public int delay = 50; // time (milliseconds)
-
     public float mass = 10.0f; // mass (kg)
-
     public float drag = 2.0f; // drag coefficient (kg / second)
-
     public float attraction = 1.0f; // force (kg * pixel / second^2) [/100]
-
     public float repulsion = 1.0f; // force (kg * pixel / second^2) [*100]
-
+    
     float REPULSION_END = 40.0f; // distance (pixel)
-
     float REPULSION_ENDs = 2.0f * REPULSION_END;
 
     public boolean random = false;
-
     public boolean antialias = true;
-
     public boolean drawedges = true;
-
     public boolean drawnodes = true;
-
     public boolean timing = true;
-
     public boolean drawgroups = true;
-
     public boolean drawedgevalues = false;
-
     public boolean background = false;
 
     //    Node pick;
     Resource pick;
 
     boolean pickfixed;
-
     boolean zoom = false;
-
     float zoomX = 0.0f;
-
     float zoomY = 0.0f;
-
     float alpha = MIN_ALPHA;
 
     class MyMouseListener extends MouseAdapter
@@ -525,15 +489,20 @@ public class ModelVisualizer extends JComponent implements Runnable
                     Resource n2 = (Resource) edges.next();
                     if ((n1 != null) && (n2 != null))
                     {
-                        float z1 = zoom(model.getX(n1), model.getY(n1));
-                        float z2 = zoom(model.getX(n2), model.getY(n2));
-                        float x1 = model.getX(n1) + (model.getX(n1) - zoomX)
+                        float xn1 = model.getX(n1);
+                        float xn2 = model.getX(n2);
+                        float yn1 = model.getY(n1);
+                        float yn2 = model.getY(n2);
+                        
+                        float z1 = zoom(xn1, yn1);
+                        float z2 = zoom(xn2, model.getY(n2));
+                        float x1 = xn1 + (xn1 - zoomX)
                                 * z1 + cx;
-                        float x2 = model.getX(n2) + (model.getX(n2) - zoomX)
+                        float x2 = xn2 + (xn2 - zoomX)
                                 * z2 + cx;
-                        float y1 = model.getY(n1) + (model.getY(n1) - zoomY)
+                        float y1 = yn1 + (yn1 - zoomY)
                                 * z1 + cy;
-                        float y2 = model.getY(n2) + (model.getY(n2) - zoomY)
+                        float y2 = yn2 + (yn2 - zoomY)
                                 * z2 + cy;
 
                         g2.setColor(edgeColor);
@@ -561,9 +530,11 @@ public class ModelVisualizer extends JComponent implements Runnable
                 Resource n = (Resource) i.next();
                 if (n != null)
                 {
-                    float z = zoom(model.getX(n), model.getY(n));
-                    float x = model.getX(n) + (model.getX(n) - zoomX) * z + cx;
-                    float y = model.getY(n) + (model.getY(n) - zoomY) * z + cy;
+                    float xn = model.getX(n);
+                    float yn = model.getY(n);
+                    float z = zoom(xn, yn);
+                    float x = xn + (xn - zoomX) * z + cx;
+                    float y = yn + (yn - zoomY) * z + cy;
                     Shape nodeshape = new Rectangle2D.Float(x - 3.0f, y - 3.0f,
                             6.0f, 6.0f);
                     if (n == pick)
@@ -652,8 +623,10 @@ public class ModelVisualizer extends JComponent implements Runnable
                     float z = zoom(model.getX(n), model.getY(n));
                     if (z > ZOOM_FACTOR * 0.95f)
                     {
-                        float x = model.getX(n) + (model.getX(n) - zoomX) * z;
-                        float y = model.getY(n) + (model.getY(n) - zoomY) * z;
+                        float xn = model.getX(n);
+                        float yn = model.getY(n);
+                        float x = xn + (xn - zoomX) * z;
+                        float y = yn + (yn - zoomY) * z;
                         float dx = x - zoomX;
                         float dy = y - zoomY;
                         double theta;
