@@ -333,8 +333,8 @@ public class ModelCharter extends JComponent {
             g.setFont(timeFont);
             FontMetrics fm2 = g2.getFontMetrics(timeFont);
             int height = (int) (fm2.getAscent() + fm2.getDescent());
-            g.drawString("calculation: " + analysisTime + " ms", 0, -height);
-            g.drawString("drawing: " + drawingTime + " ms", 0, 0);
+            g.drawString("drawing: " + drawingTime + " ms", 0, -height);
+            g.drawString("calculation: " + analysisTime + " ms", 0, 0);
             g2.setTransform(t);
         }
     }

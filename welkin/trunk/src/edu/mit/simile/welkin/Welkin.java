@@ -26,7 +26,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -41,7 +40,7 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 
-public class Welkin extends JApplet implements ActionListener, ItemListener {
+public class Welkin extends JPanel implements ActionListener, ItemListener {
 
     public static final String NAME = "Welkin";
     public static final String VERSION = "@version@";
@@ -343,25 +342,11 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         bodyPane.setDividerLocation(30);        
         bodyPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         
-        JPanel pane = new JPanel();
-        pane.setLayout(new BorderLayout());
-        pane.add(dataPane, BorderLayout.NORTH);
-        pane.add(bodyPane, BorderLayout.CENTER);
-        pane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-
-        this.getContentPane().add(pane);
+        this.setLayout(new BorderLayout());
+        this.add(dataPane, BorderLayout.NORTH);
+        this.add(bodyPane, BorderLayout.CENTER);
     }
 	
-    public void start() {
-		super.start();
-		if (running) internalStart();
-    }
-    
-    public void stop() {
-		super.stop();
-        if (running) internalStop();
-    }
-
 	public void internalStart() {
 		running = true;
 		visualizer.start();
@@ -375,10 +360,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 		controlButton.setText("Start");
 		if (startIcon != null) controlButton.setIcon(startIcon);
 	}
-
-    public String getAppletInfo() {
-        return NAME;
-    }    
 
     public void notifyTreeChange() {
         wrapper.cache.verifyVisualized(tree);

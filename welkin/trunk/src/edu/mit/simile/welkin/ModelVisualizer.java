@@ -666,9 +666,16 @@ public class ModelVisualizer extends JComponent implements Runnable {
             }
         }
     }
+
+    static final Dimension minimum = new Dimension(200,120);
+    static final Dimension preferred = new Dimension(300,200);
     
     public Dimension getMinimumSize() {
-        return new Dimension(400, 400);
+        return minimum;
+    }
+
+    public Dimension getPreferredSize() {
+        return preferred;
     }
     
 }
