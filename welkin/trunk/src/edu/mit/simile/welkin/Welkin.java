@@ -127,6 +127,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     
     JDialog about;
     
+    String dirBase;
+    
     class About extends JComponent {
         public void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
@@ -461,13 +463,18 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                 File fileName;
 
                 // Save File Manager
-                JFileChooser openWin = new JFileChooser();
+                JFileChooser openWin;
+                if(dirBase != null) openWin = new JFileChooser(dirBase);
+                else openWin = new JFileChooser();
+                
                 openWin.setFileFilter(new WFileFilter());
 
                 int returnVal = openWin.showOpenDialog(null);
                 
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     fileName = openWin.getSelectedFile();
+                    
+                    dirBase = fileName.getAbsolutePath().substring(0,fileName.toString().lastIndexOf("\\"));
 
                     FileInputStream in = new FileInputStream(fileName);
                     if (in == null) {

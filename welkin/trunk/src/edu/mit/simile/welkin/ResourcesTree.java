@@ -39,7 +39,6 @@ public class ResourcesTree extends JPanel {
     public static final int MIN_VALUE = 0;
     public static final int MAX_VALUE = 360;
     public static final int INIT_VALUE = 0;
-    //public static final float FACTOR = 360;
     
     static final String ICON_PATH = "resources/icons/";
     static final String OPEN_ICON = ICON_PATH + "openIcon.gif"; 
@@ -175,15 +174,9 @@ public class ResourcesTree extends JPanel {
     }
     
     private void calculateValues(FullNode node, float ancestorValue) {
-    	//if(node.resource!=null) 
-    	//node.adjustValue();
         for(int i=0; i<node.children.size();i++) {
-            //((FullNode) node.children.get(i)).sum = ancestorValue;
             ((FullNode) node.children.get(i)).adjustValue(ancestorValue);
-            //calculateValues((FullNode) node.children.get(i),((FullNode) node.children.get(i)).slider.getValue());
             calculateValues((FullNode) node.children.get(i),ancestorValue);
-
-            //((FullNode) node.children.get(i)).setFace(((FullNode) node.children.get(i)).slider.getValue());
         }
         
         welkin.notifyBaseUriColorChange();
@@ -279,8 +272,7 @@ public class ResourcesTree extends JPanel {
         
 		public void adjustValue(float f) {
 			slider.setValue((int)(f));
-			if(resource!=null) resource.color =  Color.getHSBColor(f/(float)MAX_VALUE,1,1);
-			label.setForeground(Color.getHSBColor(f/(float)MAX_VALUE,1,1));
+			adjustValue();
 		}
 		
 		public void adjustValue() {
