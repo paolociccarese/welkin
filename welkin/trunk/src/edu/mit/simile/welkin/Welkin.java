@@ -207,13 +207,12 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         outDegreeChart = new OutDegreeChart(wrapper);
         clustCoeffChart = new ClusteringCoefficientChart(wrapper);
 
+        visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        
         predTree = new PredicatesTree(this);
         scrollingPredTree = new JScrollPane(predTree);
-        
-        visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
         resTree = new ResourcesTree(this);
-        resTree.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         scrollingResTree = new JScrollPane(resTree);
         
         dataClearButton = new JButton("Clear");
@@ -604,7 +603,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     }    
     
     class WFileFilter extends FileFilter {
-        // Accept all directories and all gif, jpg, or tiff files.
+
         public boolean accept(File f) {
             if (f.isDirectory()) {
                 return true;
@@ -619,7 +618,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                     extension.equals("turtle")) { 
                         return true;
                 } 
-        	    }
+        	}
 
             return false;
         }

@@ -105,13 +105,16 @@ public class ModelCache {
     }
     
     public WResource addResource(String unique, boolean isNotSubject) {
+    	System.out.println(unique + " " + isNotSubject);
         WResource res = new WResource(unique, isNotSubject);
         if (resources.add(res)) return res;
         else {
             for(Iterator it = resources.iterator(); it.hasNext();) {
                 WResource tmp = (WResource) it.next();
-                if(!isNotSubject) tmp.isNotSubject = false;
-                if(res.equals(tmp)) return tmp;
+                if(res.equals(tmp)) {
+                	if(!isNotSubject) tmp.isNotSubject = false;
+                	return tmp;
+                }
             }
         }
         return null;
