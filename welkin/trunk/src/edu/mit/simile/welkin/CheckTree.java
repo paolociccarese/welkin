@@ -22,8 +22,8 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
-import edu.mit.simile.welkin.InfoCache.Node;
 import edu.mit.simile.welkin.tree.NamespaceTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToLiteralTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
@@ -97,18 +97,30 @@ public class CheckTree extends JTree {
     }
     
     private void fillNamespaces() {
-        for(Iterator it=welkin.wrapper.cache.nodes.iterator();it.hasNext();) {
-            Node node=((Node)it.next());
-            Resource res=welkin.wrapper.getModel().getResource(node.unique);
-            for(Iterator i=welkin.wrapper.getModel().listStatements(res,null,(RDFNode)null);i.hasNext();) {
-                Statement st = (Statement)i.next();
-                Property property = st.getPredicate();
-                if(st.getObject() instanceof Resource)
-                    findNamespace(property.getNameSpace()).addProperty(new PropertyToResourceTreeNode(property));
-                else if(st.getObject() instanceof Literal)
-                    findNamespace(property.getNameSpace()).addProperty(new PropertyToLiteralTreeNode(property));
-            }
+        for(StmtIterator stmts = welkin.wrapper.getModel().listStatements(); 
+        	stmts.hasNext();) {
+            Statement stmt      = stmts.nextStatement();  // get next statement
+            Resource  subject   = stmt.getSubject();     // get the subject
+            Property  predicate = stmt.getPredicate();   // get the predicate
+            RDFNode   object    = stmt.getObject();      // get the object     
+            
+            if(object instanceof Resource)
+                findNamespace(predicate.getNameSpace()).addProperty(new PropertyToResourceTreeNode(predicate));
+            else if(object instanceof Literal)
+                findNamespace(predicate.getNameSpace()).addProperty(new PropertyToLiteralTreeNode(predicate));           
         }
+//        for(Iterator it=welkin.wrapper.cache.nodes.iterator();it.hasNext();) {
+//            Node node=((Node)it.next());
+//            Resource res=welkin.wrapper.getModel().getResource(node.unique);
+//            for(Iterator i=welkin.wrapper.getModel().listStatements(res,null,(RDFNode)null);i.hasNext();) {
+//                Statement st = (Statement)i.next();
+//                Property property = st.getPredicate();
+//                if(st.getObject() instanceof Resource)
+//                    findNamespace(property.getNameSpace()).addProperty(new PropertyToResourceTreeNode(property));
+//                else if(st.getObject() instanceof Literal)
+//                    findNamespace(property.getNameSpace()).addProperty(new PropertyToLiteralTreeNode(property));
+//            }
+//        }
     }
     
     private Namespace findNamespace(String namespace) {

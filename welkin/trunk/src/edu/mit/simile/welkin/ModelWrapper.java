@@ -19,6 +19,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import edu.mit.simile.welkin.InfoCache.Node;
 
@@ -302,25 +303,24 @@ public class ModelWrapper {
                 addResource((Resource) obj, true);
         }
         
-        for (Iterator itNodes = cache.nodes.iterator();itNodes.hasNext();) {
-            Node node = (Node) itNodes.next();
-            for (Iterator itQuery = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); itQuery.hasNext();) {
-                Statement st = (Statement) itQuery.next();
-                RDFNode subj = st.getSubject();
-                String sn = ((Resource) subj).isAnon() ? ((Resource) subj).getId().toString() : ((Resource) subj).getURI();
-                Node subjectNode = cache.getNode(sn);
-                Property pr = st.getPredicate();
-                RDFNode obj = st.getObject();
-                if (obj instanceof Resource) {
-                    String on = ((Resource) obj).isAnon() ? ((Resource) obj).getId().toString() : ((Resource) obj).getURI();
-                    Node objectNode = cache.getNode(on);
-                    node.addObjectEdge(cache.getEdge(subjectNode, pr.getNameSpace(), pr.getURI(), objectNode));
-                    cache.addEntry(node.hash,objectNode.hash, pr.getNameSpace(), pr.getURI());           
-                } else {
-                    String literal = ((Literal) obj).toString();
-                    node.addLiteral(cache.getLiteral(pr.getNameSpace(), pr.getURI(), literal));
-                }
-            }
+        // Load edges
+        for(StmtIterator stmts=model.listStatements();stmts.hasNext();) {
+            Statement stmt      = stmts.nextStatement();  // get next statement
+            Resource  subject   = stmt.getSubject();     // get the subject
+            Property  predicate = stmt.getPredicate();   // get the predicate
+            RDFNode   object    = stmt.getObject();      // get the object
+            
+            Node subjectNode = cache.getNode(subject.isAnon() ? subject.getId().toString() : subject.getURI());
+            
+            if (object instanceof Resource) {
+                String on = ((Resource) object).isAnon() ? ((Resource) object).getId().toString() : ((Resource) object).getURI();
+                Node objectNode = cache.getNode(on);
+                subjectNode.addObjectEdge(cache.getEdge(subjectNode, predicate.getNameSpace(), predicate.getURI(), objectNode));
+                cache.addEntry(subjectNode.hash,objectNode.hash, predicate.getNameSpace(), predicate.getURI());           
+            } else {
+                String literal = ((Literal) object).toString();
+                subjectNode.addLiteral(cache.getLiteral(predicate.getNameSpace(), predicate.getURI(), literal));
+            }           
         }
         
         // Load rdf label
@@ -336,12 +336,10 @@ public class ModelWrapper {
         return model;
     }
     
-
-    
     private void addResource(Resource res, boolean isSubject) {
         String unique = res.isAnon()?res.getId().toString():res.getURI();
         Node result = cache.addNode(unique, getCoordinates(res), isNodeFixed(res), isSubject);
-        if (result!=null) result.namespaceCode = cache.addNamespace(Util.getNameSpace(res));
+        if (result!=null) result.namespaceCode = cache.addNamespace(res.isAnon()? "Anonymous":Util.getNameSpace(res));
     }
     
     private float[] getCoordinates (Resource res) {

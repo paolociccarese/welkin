@@ -329,9 +329,10 @@ public class InfoCache {
             Namespace ns = (Namespace) i.next();
 	        for(Iterator it=nodes.iterator();it.hasNext();) {
 	            Node tmp = (Node) it.next();
+	            String nss = Util.getNameSpace(tmp.unique);
 	            if(Util.getNameSpace(tmp.unique).equals(ns.name)) {
 	                tmp.color = ns.color;
-	            }
+	           }
 	        }
         }
     }
