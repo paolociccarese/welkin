@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -39,6 +40,11 @@ public class PredicatesTree extends JPanel {
     public static final int MAX_VALUE = 10;
     public static final int INIT_VALUE = 10;
     public static final float FACTOR = 10;
+    
+    static final String ICON_PATH = "resources/icons/";
+    static final String OPEN_ICON = ICON_PATH + "openIcon.gif"; 
+    static final String CLOSED_ICON = ICON_PATH + "closedIcon.gif"; 
+    static final String LEAF_ICON = ICON_PATH + "leafIcon.gif"; 
     
     Welkin welkin;
     FullNode root;
@@ -149,7 +155,7 @@ public class PredicatesTree extends JPanel {
 	        }
 	        
 	        if(node.children.size()==0) {
-	            node.iconLabel.setIcon(UIManager.getIcon("Tree.leafIcon"));
+	            node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(LEAF_ICON)));
 	        }
 	        
 	        this.setPreferredSize(new Dimension(xPos+maxWidth, vPos+5));
@@ -235,7 +241,7 @@ public class PredicatesTree extends JPanel {
             iconLabel = new JLabel();
             iconLabel.setSize(20,18);
             
-            icon = UIManager.getIcon("Tree.openIcon");
+            icon = new ImageIcon(Welkin.class.getResource(CLOSED_ICON));
             iconLabel.setIcon(icon);
             
 //            weight = new JLabel();
