@@ -19,7 +19,6 @@
 		<jar href="lib/welkin.jar" main="true"/>
                 <jar href="lib/rio.jar"/>
                 <jar href="lib/xml-apis.jar"/>
-                <jar href="lib/xercesImpl.jar"/>
 	</resources>
 	<application-desc main-class="edu.mit.simile.welkin.Welkin" />
 </jnlp>

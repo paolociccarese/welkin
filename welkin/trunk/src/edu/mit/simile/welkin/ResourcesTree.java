@@ -31,7 +31,7 @@ public class ResourcesTree extends JPanel {
     
     public static final Color DEFAULT_URI_COLOR = Color.red;
     
-    public static final String EMPTY_LABEL = "Empty model!";
+    public static final String EMPTY_LABEL = "No Resources Loaded!";
     public static final String ROOT_LABEL = "Resources";
     
     public static final Color BACKGROUND = Color.WHITE;
