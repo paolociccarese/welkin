@@ -99,7 +99,7 @@ public class ResourcesTree extends JPanel {
     	
     	if(parts[0]==null) return; // TODO Blank Nodes
     	
-    	if(level == parts.length || (parts.length == 1 && level == 0)) {
+    	if(level == parts.length-1) {
         	for(int i = 0; i < root.children.size(); i++) {
         		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
         			return;
