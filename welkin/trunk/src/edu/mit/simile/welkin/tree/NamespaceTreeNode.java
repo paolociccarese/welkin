@@ -1,12 +1,5 @@
-/*
- * Created on 17-ott-2004
- */
 package edu.mit.simile.welkin.tree;
 
-
-/**
- * @author Paolo Ciccarese
- */
 public class NamespaceTreeNode extends TreeNode {
 
     public NamespaceTreeNode(String namespace) {

@@ -22,10 +22,8 @@ import com.hp.hpl.jena.rdf.model.Statement;
 
 import edu.mit.simile.welkin.InfoCache.Node;
 
-/**
- * @author Paolo Ciccarese <paolo@hcklab.org>
- */
 public class ModelWrapper {
+
     private Model model;
     public InfoCache cache;
     
@@ -278,15 +276,15 @@ public class ModelWrapper {
         return false;
     }
     
-    private Model inChaching(Model model) {
+    Model inChaching(Model model) {
         Iterator its = model.listSubjects();
         Iterator ito = model.listObjects();
         
         List total = new ArrayList();
-        while(its.hasNext()) {
+        while (its.hasNext()) {
             total.add(its.next());
         }
-        while(ito.hasNext()) {
+        while (ito.hasNext()) {
             total.add(ito.next());
         }
         
@@ -331,31 +329,31 @@ public class ModelWrapper {
             }
         }
         
-        for(Iterator it1 = cache.nodes.iterator();it1.hasNext();) {
+        for (Iterator it1 = cache.nodes.iterator();it1.hasNext();) {
             Node node = (Node) it1.next();
-            for (Iterator io = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); io
-            .hasNext();) {
+            for (Iterator io = model.listStatements(model.getResource(node.unique), null, (RDFNode) null); io.hasNext();) {
                 Statement st = (Statement) io.next();
+                RDFNode subj = st.getSubject();
+                String sn = ((Resource) subj).isAnon() ? ((Resource) subj).getId().toString() : ((Resource) subj).getURI();
+                Node subjectNode = cache.getNode(sn);
                 Property pr = st.getPredicate();
-                RDFNode obj2 = st.getObject();
-                if (obj2 instanceof Resource) {
-                    String un = ((Resource) obj2).isAnon() ? ((Resource) obj2)
-                            .getId().toString() : ((Resource) obj2).getURI();
-                            
-                    Node objectNode = cache.getNode(un);
-                    node.addObjectEdge(cache.getEdge(pr.getNameSpace(), pr.getURI(),objectNode));
+                RDFNode obj = st.getObject();
+                if (obj instanceof Resource) {
+                    String on = ((Resource) obj).isAnon() ? ((Resource) obj).getId().toString() : ((Resource) obj).getURI();
+                    Node objectNode = cache.getNode(on);
+                    node.addObjectEdge(cache.getEdge(subjectNode, pr.getNameSpace(), pr.getURI(), objectNode));
                     cache.addEntry(node.hash,objectNode.hash, pr.getNameSpace(), pr.getURI());
                 } else {
-                    String literal = ((Literal)obj2).toString();
-                    node.addLiteral(cache.getLiteral(pr.getNameSpace(), pr.getURI(),literal));
+                    String literal = ((Literal) obj).toString();
+                    node.addLiteral(cache.getLiteral(pr.getNameSpace(), pr.getURI(), literal));
                 }
             }
         }
         
-        for(Iterator it = cache.nodes.iterator(); it.hasNext();) {
+        for (Iterator it = cache.nodes.iterator(); it.hasNext();) {
             Node node = (Node) it.next();
-            for(Iterator i=model.listStatements(model.getResource(node.unique),label,(RDFNode)null);i.hasNext();) {
-                String lab=((Statement)i.next()).getObject().toString();
+            for (Iterator i = model.listStatements(model.getResource(node.unique),label,(RDFNode) null); i.hasNext();) {
+                String lab = ((Statement) i.next()).getObject().toString();
                 cache.setLabel(node.unique,lab);
                 break;
             }          
@@ -364,11 +362,11 @@ public class ModelWrapper {
         return model;
     }
     
-    private void outCaching(Model model) {
+    void outCaching(Model model) {
         
     }
 
-    public Iterator getLiterals(Resource res) {
+    Iterator getLiterals(Resource res) {
         List lits = new ArrayList();
         for (Iterator it = model.listStatements(res, null, (RDFNode) null); it
                 .hasNext();) {
@@ -380,10 +378,7 @@ public class ModelWrapper {
         return lits.iterator();
     }
 
-    /**
-     *  Clears 
-     */
-    public void clear() {
+    void clear() {
         model = ModelFactory.createDefaultModel();
         cache.nodes.clear();
     }

@@ -8,15 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author Paolo Ciccarese <paolo@hcklab.org>
- */
 public class InfoCache {
-    //  Nodes (Rdf resources)
-    public Set nodes = new HashSet();
-    public Hashtable hash = new Hashtable();
+
+    Set nodes = new HashSet();
+    Hashtable hash = new Hashtable();
     
-    public class Node {
+    class Node {
         float x, y;
         float vx, vy;
 
@@ -29,6 +26,7 @@ public class InfoCache {
         String label;
         final String unique;
 
+        List linkedSubjectNodes = new ArrayList();
         List linkedObjectNodes = new ArrayList();
         List linkedLiterals = new ArrayList();
 
@@ -48,19 +46,20 @@ public class InfoCache {
             this.y = y;
         }
 
-        public void addObjectEdge(Edge edge) {
+        void addObjectEdge(Edge edge) {
             linkedObjectNodes.add(edge);
+            edge.object.linkedSubjectNodes.add(edge);
         }
         
-        public void addLiteral(CachedLiteral literal) {
+        void addLiteral(Literal literal) {
             linkedLiterals.add(literal);
         }
         
-        public Iterator getLiterals() {
+        Iterator getLiterals() {
             return linkedLiterals.iterator();
         }
 
-        public boolean isObjectOf(final Node node) {
+        boolean isObjectOf(final Node node) {
             for (Iterator it = linkedObjectNodes.iterator(); it.hasNext();) {
                 if (((Edge) it.next()).object.equals(node))
                     return true;
@@ -99,7 +98,7 @@ public class InfoCache {
         }
     }
 
-    public class Predicate {
+    class Predicate {
         final String namespace;
         final String property;
 
@@ -113,32 +112,33 @@ public class InfoCache {
         }
     }
 
-    public class Edge {
+    class Edge {
         final Predicate predicate;
+        final Node subject;
         final Node object;
 
-        Edge(final Predicate predicate, final Node node) {
+        Edge(final Node subject, final Predicate predicate,  final Node object) {
             this.predicate = predicate;
-            this.object = node;
+            this.subject = subject;
+            this.object = object;
         }
     }
     
-    public class CachedLiteral {
+    public class Literal {
         final Predicate predicate;
         final String literal;
 
-        CachedLiteral(final Predicate predicate, final String literal) {
+        Literal(final Predicate predicate, final String literal) {
             this.predicate = predicate;
             this.literal = literal;
         }
     }
 
     public void addEntry(int hashSubject, int hashObject, String prNamespace, String prURI) {
-//        String key = hashSubject+","+hashSubject;
-        if(hashSubject==hashObject) return;
+        if (hashSubject == hashObject) return;
         Point key = new Point(hashSubject, hashObject);
         Object value = hash.get(key);
-        if(value!=null) { 
+        if (value != null) { 
             Object[] values = (Object[]) value;
             Predicate newValues[] = new Predicate[values.length+1];
             System.arraycopy(values, 0, newValues, 0, values.length);
@@ -183,12 +183,12 @@ public class InfoCache {
             return null;
     }
 
-    public Edge getEdge(String namespace, String predicate, Node node) {
-        return new Edge(new Predicate(namespace, predicate), node);
+    public Edge getEdge(Node subject, String namespace, String predicate, Node object) {
+        return new Edge(subject, new Predicate(namespace, predicate), object);
     }
 
-    public CachedLiteral getLiteral(String namespace, String predicate, String literal) {
-        return new CachedLiteral(new Predicate(namespace, predicate), literal);
+    public Literal getLiteral(String namespace, String predicate, String literal) {
+        return new Literal(new Predicate(namespace, predicate), literal);
     }
     
     public void setLabel(String unique, String label) {

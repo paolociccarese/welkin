@@ -1,6 +1,3 @@
-/*
- * Created on 14-ott-2004
- */
 package edu.mit.simile.welkin;
 
 import java.awt.BorderLayout;
@@ -19,9 +16,6 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.tree.TreeCellRenderer;
 
-/**
- * @author Paolo Ciccarese
- */
 public class CheckTreeRenderer extends JPanel implements TreeCellRenderer {
     private JCheckBox box;
     private TreeLabel label;

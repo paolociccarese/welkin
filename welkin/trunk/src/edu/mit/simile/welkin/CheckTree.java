@@ -1,6 +1,3 @@
-/*
- * Created on 14-ott-2004
- */
 package edu.mit.simile.welkin;
 
 import java.awt.Rectangle;
@@ -31,9 +28,6 @@ import edu.mit.simile.welkin.tree.NamespaceTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToLiteralTreeNode;
 import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
 
-/**
- * @author Paolo Ciccarese
- */
 public class CheckTree extends JTree {
     Welkin welkin;
     CheckTreeRenderer renderer;

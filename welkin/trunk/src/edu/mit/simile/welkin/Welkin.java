@@ -30,10 +30,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
-/**
- * @author Stefano Mazzocchi <stefanom at mit.edu>
- * @author Paolo Ciccarese <paolo at hcklab.org>
- */
 public class Welkin extends JApplet implements ActionListener, ItemListener {
 
     public static final String NAME = "Welkin";
@@ -350,18 +346,19 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         } else if (source == shakeButton) {
             visualizer.shake();
 		} else if (source == dataLoadButton) {
-//		  TOREMOVE - Exception
-			try
-            {
-			    boolean res=wrapper.importModel();
-                if(res) tree.buildTree();
-            } catch (FileNotFoundException e1)
-            {
-                e1.printStackTrace();
+            try {
+                boolean res = wrapper.importModel();
+                if (res) {
+                    tree.buildTree();
+                    charter.analyze();
+                }
+            } catch (FileNotFoundException ex) {
+                ex.printStackTrace();
             }
 		} else if (source == dataClearButton) {
-		    wrapper.clear();
-		    tree.clear();
+            wrapper.clear();
+            tree.clear();
+            charter.clear();
         } else if (source == delayField) {
             visualizer.delay = Integer.parseInt(delayField.getText());
         } else if (source == massField) {

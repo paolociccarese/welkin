@@ -1,13 +1,7 @@
-/*
- * Created on 22-ott-2004
- */
 package edu.mit.simile.welkin.tree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-/**
- * @author Paolo Ciccarese
- */
 public class TreeNode extends DefaultMutableTreeNode {
     private int hash=0;
     

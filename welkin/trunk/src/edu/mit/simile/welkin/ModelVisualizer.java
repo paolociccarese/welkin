@@ -18,14 +18,11 @@ import java.util.Iterator;
 
 import javax.swing.JComponent;
 
-import edu.mit.simile.welkin.InfoCache.CachedLiteral;
+import edu.mit.simile.welkin.InfoCache.Literal;
 import edu.mit.simile.welkin.InfoCache.Edge;
 import edu.mit.simile.welkin.InfoCache.Node;
 
-/**
- * @author Stefano Mazzocchi <stefano@apache.org>
- * @author Paolo Ciccarese <paolo@hcklab.org>
- */
+
 public class ModelVisualizer extends JComponent implements Runnable {
 
 	final static float xBORDER = 6.0f;
@@ -520,7 +517,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                         float line = a + d + yBORDERs;
                         
                         for (Iterator i = n.getLiterals(); i.hasNext();) {
-                            CachedLiteral lit = (CachedLiteral) i.next();
+                            Literal lit = (Literal) i.next();
                             float length = fm.stringWidth(lit.predicate.toString() + " -> " + lit.literal) + xBORDERs;
                             if (length > rectWidth) rectWidth = length;
                             rectHeight += line;
@@ -578,7 +575,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                         int i = 0;
                         for (Iterator itt = n.getLiterals(); itt.hasNext(); i++) {
                         	   // Draw the literals
-                            CachedLiteral lit = (CachedLiteral) itt.next();
+                            Literal lit = (Literal) itt.next();
                             g2.drawString(lit.predicate.toString() + " -> " + lit.literal, x + xBORDER, y + asc + lineHeight * i + yBORDER + height);
                         }
                     }
@@ -598,15 +595,19 @@ public class ModelVisualizer extends JComponent implements Runnable {
         }
 
         if (timing) {
+            g2.translate(5, ch - 5);
             drawingTime = System.currentTimeMillis() - startTime;
             g.setColor(timeColor);
             g.setFont(timeFont);
-            g.drawString("calculation: " + simulationTime + " ms", 5, 15);
-            g.drawString("drawing: " + drawingTime + " ms", 5, 25);
-            g.drawString("nodes: " + model.cache.nodes.size(), 5, 35);
-            // g.drawString("edges: " + graph.edges, 5, 45);
+            FontMetrics fm = g2.getFontMetrics(timeFont);
+            int height = (int) (fm.getAscent() + fm.getDescent());
+            g.drawString("nodes: " + model.cache.nodes.size(), 0, -3*height);
+            g.drawString("edges: " + model.cache.hash.size(), 0, -2*height);
+            g.drawString("drawing: " + drawingTime + " ms", 0, -1*height);
+            g.drawString("calculation: " + simulationTime + " ms", 0, 0);
+            g2.setTransform(t);
         }
-
+        
         if (zoom) {
             if (alpha < MAX_ALPHA) {
                 alpha += ALPHA_INC;
