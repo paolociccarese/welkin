@@ -225,6 +225,7 @@ public class ResourcesTree extends JPanel {
         
         FullNode(String labelT, PartialUri resource, boolean isLeaf) {
         	this.resource = resource;
+        	this.isLeaf = isLeaf;
             me=this;
             
             this.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
@@ -262,7 +263,6 @@ public class ResourcesTree extends JPanel {
             
             this.isVisible = true;
             this.isAllowed = true;
-            this.isLeaf = isLeaf;
             
             adjustValue(INIT_VALUE);
             
@@ -280,7 +280,7 @@ public class ResourcesTree extends JPanel {
         
         public void incCount(int count) {
         	this.count += count;
-        	weight.setText(" (" + this.count + ")");
+        	weight.setText(" [" + this.count + "]");
         }
         
 		public void adjustValue(float f) {

@@ -58,8 +58,10 @@ public class ModelCache {
         if(index == -1) {
             predicates.add(ns);
             return ns;
-        }        
-        return (PredicateUri) predicates.get(index);
+        }
+        ns = (PredicateUri) predicates.get(index);
+        ns.incCount();
+        return ns;
     }
     
     private PartialUri pu;

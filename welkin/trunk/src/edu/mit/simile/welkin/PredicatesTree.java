@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -12,15 +11,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.UIManager;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ColorUIResource;
 
 import edu.mit.simile.welkin.resource.PredicateUri;
 
@@ -79,16 +76,16 @@ public class PredicatesTree extends JPanel {
     }
     
     public void buildTree() {
-        FullNode rootNode = new FullNode(ROOT_LABEL,null);
-        elements.add(rootNode);
+        root = new FullNode(ROOT_LABEL, null, false);
+        //root.incCount(welkin.wrapper.cache.predicates.size());
+        elements.add(root);
         
         for(Iterator it = welkin.wrapper.cache.predicates.iterator(); it.hasNext();) {
         	PredicateUri predicate = ((PredicateUri)it.next());
         	String[] parts = Util.splitUri(predicate.getUri());
-        	createNode(rootNode, parts, predicate, 0);
+        	createNode(root, parts, predicate, 0);
         }
 
-        root = rootNode;
         calculateValues(root, root.value);
         this.displayTree();
     	this.repaint();
@@ -97,14 +94,16 @@ public class PredicatesTree extends JPanel {
     }
     
     private void createNode(FullNode root, String[] parts, PredicateUri all, int level) {
-    	if(level == 2) {
-        	for(int i = 0; i < root.children.size(); i++) {
-        		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
-        			return;
-        		} 
-        	}
-        	FullNode tmp = new FullNode(parts[2], all);
-        	tmp.isVisible = false;
+//    	if(level == 2) {
+    	if(level == parts.length-1) {
+//        	for(int i = 0; i < root.children.size(); i++) {
+//        		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
+//        			return;
+//        		} 
+//        	}
+        	FullNode tmp = new FullNode(parts[2], all, true);
+        	if(level == 0) tmp.isVisible = true;
+        	else tmp.isVisible = false;
         	root.children.add(tmp);
     		return;
     	}
@@ -113,12 +112,13 @@ public class PredicatesTree extends JPanel {
     		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
     			level++;
     			createNode(((FullNode)root.children.get(i)), parts, all, level);
+    			((FullNode)root.children.get(i)).incCount(all.getCount());
     			flag = true;
     		}
     	}
     	
     	if(!flag) {
-    		FullNode child = new FullNode(parts[level++], null);
+    		FullNode child = new FullNode(parts[level++], all, false);
     		if(level==2) child.isVisible = false;
     		root.children.add(child);
     		createNode(child, parts, all, level);
@@ -215,9 +215,9 @@ public class PredicatesTree extends JPanel {
     
     class FullNode extends JPanel implements ChangeListener {
         private JLabel iconLabel;
-//        private JLabel weight;
+        private JLabel weight;
         private JSlider slider;
-        private TreeLabel label;
+        private JLabel label;
         
         PredicateUri absolute;
         
@@ -232,15 +232,18 @@ public class PredicatesTree extends JPanel {
         
         boolean isVisible;
         boolean isAllowed;
-        boolean isSelected;
+        boolean isLeaf;
+        
+        int count = 0;
         
         FullNode me;
         FullNode father;
         Vector children = new Vector();
         PredicateUri predicate;
         
-        FullNode(String labelT, PredicateUri predicate) {
+        FullNode(String labelT, PredicateUri predicate, boolean isLeaf) {
         	this.predicate = predicate;
+        	this.isLeaf = isLeaf;
             me=this;
             
             this.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
@@ -249,12 +252,13 @@ public class PredicatesTree extends JPanel {
             iconLabel = new JLabel();
             iconLabel.setSize(20,18);
             
-//            weight = new JLabel();
-//            weight.setHorizontalAlignment(JTextField.RIGHT);
-//            weight.setBackground(BACKGROUND);
-//            weight.setFont(font);
-//            weight.setSize(30,16);
-//            weight.setBorder(null);
+            weight = new JLabel();
+            weight.setHorizontalAlignment(JTextField.RIGHT);
+            weight.setBackground(BACKGROUND);
+            weight.setFont(font);
+            weight.setSize(30,16);
+            weight.setBorder(null);
+            if(predicate != null) incCount(predicate.getCount());
             
             slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
             slider.addChangeListener(this);
@@ -265,7 +269,7 @@ public class PredicatesTree extends JPanel {
             slider.setSnapToTicks(true);
             slider.setPaintTicks(false);
             
-            this.label = new TreeLabel();
+            this.label = new JLabel();
             this.label.setFont(font);
             this.label.setText(labelT);
             this.label.setBackground(BACKGROUND);
@@ -273,8 +277,7 @@ public class PredicatesTree extends JPanel {
             this.add(iconLabel);
             this.add(slider);
             this.add(this.label);
-           
-//            this.add(weight);
+            this.add(weight);
             
             this.value = INIT_VALUE;
             
@@ -293,6 +296,11 @@ public class PredicatesTree extends JPanel {
                     }
                 }
             });
+        }
+        
+        public void incCount(int count) {
+        	this.count += count;
+        	weight.setText(" [" + this.count + "]");
         }
         
 		public void adjustValue(float f) {
@@ -335,79 +343,19 @@ public class PredicatesTree extends JPanel {
         
         private void setFace() {
             float sliderValue = slider.getValue();
-            //weight.setText("("+Float.toString(sliderValue/FACTOR)+")");
             if(predicate!=null)
-            //weight.setText("(sum="+this.sum+",value="+this.value+",pred="+this.predicate.getUri()+",value="+this.predicate.weight+")");
             if (sliderValue==0) {
                 label.setForeground(PASSIVE_FOREG);
-                //weight.setForeground(PASSIVE_FOREG);
             } else if (sliderValue==10) {
                 label.setFont(bold);
-                //weight.setFont(bold);
             } else {
                 label.setForeground(ACTIVE_FOREG);
-                //weight.setForeground(ACTIVE_FOREG);
                 label.setFont(font);
-                //weight.setFont(font);
             } 
         }
         
         public Dimension getDimension() {
             return new Dimension (140+label.getPreferredSize().width,16);
-        }
-    }
-    
-    public class TreeLabel extends JLabel {
-        boolean isSelected;
-        boolean hasFocus;
-
-        public TreeLabel() {
-        }
-
-        public void setBackground(Color color) {
-            if (color instanceof ColorUIResource)
-                color = null;
-            super.setBackground(color);
-        }
-
-        public void paintComponent(Graphics g) {
-            String str;
-            if ((str = getText()) != null) {
-                if (0 < str.length()) {
-                    if (isSelected) {
-                        g.setColor(Color.YELLOW);
-                    } else {
-                        g.setColor(UIManager.getColor("Tree.textBackground"));
-                    }
-                    Dimension d = getPreferredSize();
-                    int imageOffset = 0;
-                    Icon currentI = getIcon();
-                    if (currentI != null) {
-                        imageOffset = currentI.getIconWidth()
-                                + Math.max(0, getIconTextGap() - 1);
-                    }
-                    g.fillRect(0, 0, d.width + 1, d.height + 10);
-                }
-            }
-            super.paintComponent(g);
-        }
-
-        public Dimension getPreferredSize() {
-            Dimension retDimension = super.getPreferredSize();
-            if (retDimension != null) {
-                retDimension = new Dimension(retDimension.width + 3,
-                        retDimension.height);
-            }
-            return retDimension;
-        }
-
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-            this.repaint();
-        }
-
-        public void setFocus(boolean hasFocus) {
-            this.hasFocus = hasFocus;
         }
     }
 }
