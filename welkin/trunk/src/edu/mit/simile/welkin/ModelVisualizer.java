@@ -159,12 +159,11 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 pick.x = x;
                 pick.y = y;
                 keepInsideCanvas(pick);
-                repaint();
             } else if (zoom) {
                 zoomX = (float) e.getX() - cx;
                 zoomY = (float) e.getY() - cy;
-                repaint();
             }
+            repaint();
         }
     }
 
@@ -428,7 +427,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                     g2.setColor(edgeColor);
                     g2.draw(new Line2D.Float(x1, y1, x2, y2));
                     
-                    if(drawarrows) {
+                    if (drawarrows) {
 						double dx = x2 - x1;
 						double dy = y2 - y1;
 						double alfa;

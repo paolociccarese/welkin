@@ -11,8 +11,8 @@ import org.openrdf.model.Value;
 import org.openrdf.rio.Parser;
 import org.openrdf.rio.StatementHandler;
 import org.openrdf.rio.StatementHandlerException;
-import org.openrdf.rio.ntriples.NTriplesParser;
 import org.openrdf.rio.rdfxml.RdfXmlParser;
+import org.openrdf.rio.turtle.TurtleParser;
 
 import edu.mit.simile.welkin.ModelCache.WResource;
 import edu.mit.simile.welkin.resource.PredicateUri;
@@ -20,7 +20,7 @@ import edu.mit.simile.welkin.resource.PredicateUri;
 public class ModelManager implements StatementHandler {
 
     public static final int RDFXML = 1;
-    public static final int NTRIPLES = 2;
+    public static final int TURTLE = 2;
     
     private final String RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
     
@@ -42,7 +42,7 @@ public class ModelManager implements StatementHandler {
         if (value instanceof URI) {
             WResource obj = cache.addResource(value.toString(), true);
         	
-        	PredicateUri puri = cache.addPredicatesUri(uri);
+            PredicateUri puri = cache.addPredicatesUri(uri);
         	
             sub.addObjectStatement(cache.getStatement(sub, puri, obj));
             cache.addResourcesUri((URI)value);
@@ -125,7 +125,7 @@ public class ModelManager implements StatementHandler {
      */
     private void initParser(int type) {
         if(type == RDFXML) setXmlRdfParserInstance();
-        else if(type == NTRIPLES) setNTriplesParserInstance();
+        else if(type == TURTLE) setTurtleParserInstance();
         else throw new IllegalArgumentException("Wrong rdf parser type!");
         
         parser.setStatementHandler(this);
@@ -155,9 +155,9 @@ public class ModelManager implements StatementHandler {
      * otherwise it will create one.
      * @return The parse instance.
      */
-    private void setNTriplesParserInstance() {
-       if (parser==null || !(parser instanceof NTriplesParser)) {
-           parser = new NTriplesParser();
+    private void setTurtleParserInstance() {
+       if (parser==null || !(parser instanceof TurtleParser)) {
+           parser = new TurtleParser();
        }
     }
 }

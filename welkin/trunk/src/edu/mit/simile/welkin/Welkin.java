@@ -74,7 +74,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     
     ModelVisualizer visualizer;
     ModelManager wrapper;
-    ModelCharter charter;
+    ModelChart inDegreeChart;
+    ModelChart outDegreeChart;
+    ModelChart clustCoeffChart;
     
     boolean running = false;
     
@@ -201,12 +203,13 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
         wrapper = new ModelManager();
         visualizer = new ModelVisualizer(wrapper);
-        charter = new ModelCharter(wrapper);
+        inDegreeChart = new InDegreeChart(wrapper);
+        outDegreeChart = new OutDegreeChart(wrapper);
+        clustCoeffChart = new ClusteringCoefficientChart(wrapper);
 
         predTree = new PredicatesTree(this);
         scrollingPredTree = new JScrollPane(predTree);
         
-        charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
         resTree = new ResourcesTree(this);
@@ -370,10 +373,17 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 		toolsPane.addTab("Highlight",highlight);
 		toolsPane.addTab("Parameters",parameters);
 
-        JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charter, visualizer);
+        JPanel charts = new JPanel();
+        charts.setLayout(new BoxLayout(charts, BoxLayout.Y_AXIS));
+        charts.add(inDegreeChart);
+        charts.add(outDegreeChart);
+        charts.add(clustCoeffChart);
+        charts.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        
+        JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charts, visualizer);
         chartPane.setOneTouchExpandable(true);
         chartPane.setResizeWeight(0.01);
-        chartPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        chartPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         
         JSplitPane visualizerPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,chartPane,toolsPane);
         visualizerPane.setOneTouchExpandable(true);
@@ -414,6 +424,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     public void notifyTreeChange() {
         wrapper.cache.uriBasedVisualization(predTree);
         visualizer.repaint();
+        inDegreeChart.reanalyze();
+        outDegreeChart.reanalyze();
+        clustCoeffChart.reanalyze();
     }
     
     public void notifyBaseUriColorChange() {
@@ -484,19 +497,25 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                     
                     boolean res = false;
                     int extIndex = fileName.getAbsolutePath().lastIndexOf(".");
-                    if(extIndex>0) {
-                    	String ext = fileName.getAbsolutePath().substring(extIndex+1);
-                    	if(ext.equals("n3")) 
-                    		res = wrapper.addModel(in, ModelManager.NTRIPLES);
-                    	else if(ext.equals("rdf") || ext.equals("rdfs"))
-                    		res = wrapper.addModel(in, ModelManager.RDFXML);
-                    	else 
+                    if (extIndex > 0) {
+                        String ext = fileName.getAbsolutePath().substring(extIndex+1);
+                        if(ext.equals("n3") || ext.equals("turtle")) 
+                            // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
+                            // this might return an error in valid N3 files, but until RIO supports
+                            // N3 this is the easiest way.
+                            res = wrapper.addModel(in, ModelManager.TURTLE);
+                        else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
+                            res = wrapper.addModel(in, ModelManager.RDFXML);
+                        else {
                             throw new IllegalArgumentException("Extension not recognized!");
+                        }
                     }
 
                     if (res) {
                         predTree.buildTree();
-                        charter.analyze();
+                        inDegreeChart.analyze(true);
+                        outDegreeChart.analyze(true);
+                        clustCoeffChart.analyze(true);
                         resTree.buildTree();
                         this.notifyBaseUriColorChange();
                         scrollingResTree.revalidate();
@@ -512,7 +531,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             }
             wrapper.clear();
             predTree.clear();
-            charter.clear();
+            inDegreeChart.clear();
+            outDegreeChart.clear();
+            clustCoeffChart.clear();
             resTree.clear();
             scrollingResTree.revalidate();
             scrollingPredTree.revalidate();
@@ -590,18 +611,22 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             }
             
             String extension = getExtension(f);
-    		if (extension != null) {
-                if (extension.equals("rdf") || extension.equals("rdfs") || extension.equals("n3")) { 
+            if (extension != null) {
+                if (extension.equals("rdf") || 
+                    extension.equals("rdfs") ||
+                    extension.equals("owl") ||
+                    extension.equals("n3") ||
+                    extension.equals("turtle")) { 
                         return true;
                 } 
-        	}
+        	    }
 
             return false;
         }
         
         // The description of this filter
         public String getDescription() {
-            return "Rdf, Rdfs, n3 data file";
+            return "RDF, RDFS, OWL, n3 or turtle data file";
         }
         
         /*
