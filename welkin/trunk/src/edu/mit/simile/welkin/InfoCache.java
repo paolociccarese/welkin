@@ -6,13 +6,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.commons.collections.map.HashedMap;
+import java.util.Hashtable;
 
 public class InfoCache {
 
     Set nodes = new HashSet();
-    HashedMap hash = new HashedMap();
+    Hashtable hash = new Hashtable();
     
     class Node {
         float x, y;
