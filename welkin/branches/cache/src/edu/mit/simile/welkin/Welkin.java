@@ -325,7 +325,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 //		  TOREMOVE - Exception
 			try
             {
-                wrapper.load();
+                wrapper.importModel();
             } catch (FileNotFoundException e1)
             {
                 e1.printStackTrace();

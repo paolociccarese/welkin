@@ -22,164 +22,120 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 
+import edu.mit.simile.welkin.InfoCache.Node;
+
 /**
- * @author Stefano Mazzocchi <stefanom@mit.edu>
+ * @author Stefano Mazzocchi <stefano@apache.org>
  * @author Paolo Ciccarese <paolo@hcklab.org>
  */
-public class ModelVisualizer extends JComponent implements Runnable
-{
+public class ModelVisualizer extends JComponent implements Runnable {
+    private final static int X = 0;
+    private final static int Y = 1;
+
     final static float BORDER = 3.0f;
-
     final static float BORDERs = BORDER * 2.0f;
-
+    
     final float MIN_ALPHA = 1.0f;
-
     final float MAX_ALPHA = MIN_ALPHA + 80.0f;
-
     final float ALPHA_INC = 20.0f;
-
     final float ZOOM_FACTOR = 2.0f;
 
     final Color fixedColor = Color.green;
-
     final Color selectColor = Color.red;
-
     final Color edgeColor = new Color(150, 150, 150, 100);
-
     final Color edgeValueColor = new Color(50, 50, 50, 100);
-
     final Color nodeColor = Color.red;
-
     final Color timeColor = Color.black;
-
     final Color tooltipBorderColor = Color.black;
-
     final Color pickedBGColor = new Color(255, 255, 0, 100);
-
     final Color pickedFontColor = Color.black;
-
     final Color highlightBGColor = new Color(255, 255, 0, 150);
-
     final Color highlightFontColor = Color.black;
-
     final Color groupColor = new Color(0, 0, 0, 200);
-
     final Color groupFontColor = groupColor;
-
     final Color groupBGColor = new Color(255, 255, 255, 100);
-
     final Color groupBorderColor = Color.black;
 
     final Font bigFont = new Font("Verdana", Font.BOLD, 10);
-
     final Font smallFont = new Font("Verdana", Font.PLAIN, 8);
-
     final Font tinyFont = new Font("Verdana", Font.PLAIN, 9);
 
     public int delay = 50; // time (milliseconds)
-
     public float mass = 10.0f; // mass (kg)
-
     public float drag = 2.0f; // drag coefficient (kg / second)
-
     public float attraction = 1.0f; // force (kg * pixel / second^2) [/100]
-
     public float repulsion = 1.0f; // force (kg * pixel / second^2) [*100]
 
     float REPULSION_END = 40.0f; // distance (pixel)
-
     float REPULSION_ENDs = 2.0f * REPULSION_END;
 
     public boolean random = false;
-
     public boolean antialias = true;
-
     public boolean drawedges = true;
-
     public boolean drawnodes = true;
-
     public boolean timing = true;
-
     public boolean drawgroups = true;
-
     public boolean drawedgevalues = false;
-
     public boolean background = false;
 
-    //    Node pick;
-    Resource pick;
+    Node pick;
+    //Resource pick;
 
     boolean pickfixed;
-
     boolean zoom = false;
 
     float zoomX = 0.0f;
-
     float zoomY = 0.0f;
 
     float alpha = MIN_ALPHA;
 
-    class MyMouseListener extends MouseAdapter
-    {
-        public void mousePressed(MouseEvent e)
-        {
-            if (e.getButton() == MouseEvent.BUTTON3 || e.isPopupTrigger() )
-            {
+    class MyMouseListener extends MouseAdapter {
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON3 || e.isPopupTrigger()) {
                 zoom = true;
                 zoomX = (float) e.getX() - cx;
                 zoomY = (float) e.getY() - cy;
-            } else
-            {
+            } else {
                 float x = (float) e.getX() - cx;
                 float y = (float) e.getY() - cy;
                 double bestdist = Double.MAX_VALUE;
-                Iterator i = model.getNodes().iterator();
-                while (i.hasNext())
-                {
-                    Resource n = (Resource) i.next();
-                    if (n != null)
-                    {
-                        float dx = model.getX(n) - x;
-                        float dy = model.getY(n) - y;
+
+                for (Iterator i = model.cache.nodes.iterator(); i.hasNext();) {
+                    Node n = (Node) i.next();
+                    if (n != null) {
+                        float[] xy = model.getCoordinateXY(n);
+                        float dx = xy[ModelVisualizer.X] - x;
+                        float dy = xy[ModelVisualizer.Y] - y;
                         float dist = dx * dx + dy * dy;
-                        if (dist < bestdist)
-                        {
+                        if (dist < bestdist) {
                             pick = n;
                             bestdist = dist;
                         }
                     }
                 }
-                if (pick != null)
-                {
-                    pickfixed = model.getFixedNode(pick);
-                    model.setFixedNode(pick, true);
-                    model.setX(pick, x);
-                    model.setY(pick, y);
+
+                if (pick != null) {
+                    pickfixed = pick.fixed;
+                    pick.fixed = true;
+                    model.setCoordinateXY(pick, x, y);
                 }
             }
             repaint();
         }
 
-        public void mouseReleased(MouseEvent e)
-        {
-            if (zoom)
-            {
+        public void mouseReleased(MouseEvent e) {
+            if (zoom) {
                 zoom = false;
-            } else
-            {
-                if (pick != null)
-                {
+            } else {
+                if (pick != null) {
                     int x = e.getX() - (int) cx;
                     int y = e.getY() - (int) cy;
-                    model.setX(pick, x);
-                    model.setY(pick, y);
+                    model.setCoordinateXY(pick, x, y);
                     keepInsideCanvas(pick);
-                    if (e.getClickCount() == 2)
-                    {
-                        model.setFixedNode(pick, !pickfixed);
-                    } else
-                    {
-                        model.setFixedNode(pick, pickfixed);
+                    if (e.getClickCount() == 2) {
+                        pick.fixed = !pickfixed;
+                    } else {
+                        pick.fixed = pickfixed;
                     }
                     pick = null;
                 }
@@ -188,20 +144,15 @@ public class ModelVisualizer extends JComponent implements Runnable
         }
     }
 
-    class MyMouseMotionListener extends MouseMotionAdapter
-    {
-        public void mouseDragged(MouseEvent e)
-        {
-            if (pick != null)
-            {
+    class MyMouseMotionListener extends MouseMotionAdapter {
+        public void mouseDragged(MouseEvent e) {
+            if (pick != null) {
                 int x = e.getX() - (int) cx;
                 int y = e.getY() - (int) cy;
-                model.setX(pick, x);
-                model.setY(pick, y);
+                model.setCoordinateXY(pick, x, y);
                 keepInsideCanvas(pick);
                 repaint();
-            } else if (zoom)
-            {
+            } else if (zoom) {
                 zoomX = (float) e.getX() - cx;
                 zoomY = (float) e.getY() - cy;
                 repaint();
@@ -214,201 +165,171 @@ public class ModelVisualizer extends JComponent implements Runnable
     Thread relaxer;
 
     float cx;
-
     float cy;
 
-    public ModelVisualizer(ModelWrapper model)
-    {
+    public ModelVisualizer(ModelWrapper model) {
         this.addMouseMotionListener(new MyMouseMotionListener());
         this.addMouseListener(new MyMouseListener());
         this.model = model;
     }
 
-    public void setGraph(ModelWrapper model)
-    {
+    public void setGraph(ModelWrapper model) {
         this.model = model;
     }
 
-    public ModelWrapper getGraph()
-    {
+    public ModelWrapper getGraph() {
         return this.model;
     }
 
-    public boolean isRunning()
-    {
+    public boolean isRunning() {
         return relaxer != null;
     }
 
-    public void start()
-    {
+    public void start() {
         relaxer = new Thread(this);
         relaxer.start();
     }
 
-    public void stop()
-    {
+    public void stop() {
         relaxer = null;
     }
 
-    public void reshape(int x, int y, int w, int h)
-    {
+    public void reshape(int x, int y, int w, int h) {
         super.reshape(x, y, w, h);
         this.cx = w / 2.0f;
         this.cy = h / 2.0f;
     }
 
-    public void run()
-    {
+    public void run() {
         Thread thisThread = Thread.currentThread();
-        while (relaxer == thisThread)
-        {
-            if (random && (Math.random() < 0.03))
-            {
+        while (relaxer == thisThread) {
+            if (random && (Math.random() < 0.03)) {
                 Resource n = (Resource) model.getNodes().get(
                         (int) (Math.random() * model.getNodes().size()));
-                if (!model.getFixedNode(n))
-                {
-                    model
-                            .setX(n, (float) (model.getX(n) + (100 * Math
-                                    .random() - 50)));
-                    model
-                            .setY(n, (float) (model.getY(n) + (100 * Math
-                                    .random() - 50)));
+                if (!model.getFixedNode(n)) {
+                    float[] xy = model.getCoordinateXY(n);
+                    model.setCoordinateXY(pick, (float) (xy[0] + (100 * Math
+                            .random() - 50)), (float) (xy[1] + (100 * Math
+                            .random() - 50)));
                     keepInsideCanvas(n);
                 }
             }
             simulate();
-            try
-            {
+            try {
                 Thread.sleep(delay);
-            } catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 break;
             }
         }
     }
 
-    public void circle()
-    {
+    public void circle() {
         float r = Math.min(cx, cy) - 50.0f;
         float alpha = (float) (2.0d * Math.PI / model.getNodes().size());
 
         int j = 0;
-        Iterator i = model.getNodes().iterator();
-        while (i.hasNext())
-        {
-            Resource n = (Resource) i.next();
-            model.setX(n, (float) (r * Math.sin(alpha * j)));
-            model.setY(n, (float) (r * Math.cos(alpha * j++)));
+        for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
+            Node n = (Node) it.next();
+            model.setCoordinateXY(n, (float) (r * Math.sin(alpha * j)),
+                    (float) (r * Math.cos(alpha * j++)));
         }
         repaint();
     }
 
-    public void scramble()
-    {
-        Iterator i = model.getNodes().iterator();
-        while (i.hasNext())
-        {
-            Resource n = (Resource) i.next();
-            if (!model.getFixedNode(n))
-            {
-                model
-                        .setX(n, (float) ((double) (cx - 50.0f) * (Math
-                                .random() - 0.5d)));
-                model
-                        .setY(n, (float) ((double) (cy - 50.0f) * (Math
-                                .random() - 0.5d)));
+    public void scramble() {
+        for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
+            Node n = (Node) it.next();
+            if (!n.fixed) {
+                n.x = (float) ((double) (cx - 50.0f) * (Math.random() - 0.5d));
+                n.y = (float) ((double) (cy - 50.0f) * (Math.random() - 0.5d));
             }
         }
         repaint();
     }
 
-    public void shake()
-    {
+    public void shake() {
         int j = 0;
-        Iterator i = model.getNodes().iterator();
-        while (i.hasNext())
-        {
-            Resource n = (Resource) i.next();
-            if (!model.getFixedNode(n))
-            {
-                model.setX(n,
-                        (float) (model.getX(n) + (80 * Math.random() - 40)));
-                model.setY(n,
-                        (float) (model.getY(n) + (80 * Math.random() - 40)));
+        for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
+            Node n = (Node) it.next();
+            if (!n.fixed) {
+                n.x = (float) (n.x + (80 * Math.random() - 40));
+                n.y = (float) (n.y + (80 * Math.random() - 40));
                 keepInsideCanvas(n);
             }
         }
         repaint();
     }
 
-    void keepInsideCanvas(Resource n)
-    {
-        if (model.getX(n) < -cx)
-        {
-            model.setX(n, -cx);
-        } else if (model.getX(n) > cx)
-        {
-            model.setX(n, cx);
+    void keepInsideCanvas(Node n) {
+        float tmpX;
+        float tmpY;
+        if (n.x < -cx) {
+            tmpX = -cx;
+        } else if (n.x > cx) {
+            tmpX = cx;
         }
-        if (model.getY(n) < -cy)
-        {
-            model.setY(n, cy);
-        } else if (model.getY(n) > cy)
-        {
-            model.setY(n, cy);
+        if (n.y < -cy) {
+            tmpY = cy;
+        } else if (n.y > cy) {
+            tmpY = cy;
+        }
+    }
+
+    void keepInsideCanvas(Resource n) {
+        float[] xy = model.getCoordinateXY(n);
+        float tmpX;
+        float tmpY;
+        if (xy[0] < -cx) {
+            tmpX = -cx;
+        } else if (xy[0] > cx) {
+            tmpX = cx;
+        }
+        if (xy[1] < -cy) {
+            tmpY = cy;
+        } else if (xy[1] > cy) {
+            tmpY = cy;
         }
     }
 
     long simulationTime;
-
     long drawingTime;
 
-    float attractive(float d, float weight)
-    {
+    float attractive(float d, float weight) {
         return attraction * weight * d / 100.0f;
     }
 
-    float repulsive(float d)
-    {
-        if (d < REPULSION_END)
-        {
+    float repulsive(float d) {
+        if (d < REPULSION_END) {
             float r = 100.0f * repulsion * (d - REPULSION_END)
                     / (d * (d - REPULSION_ENDs));
             return Math.min(r, 500.0f);
-        } else
-        {
+        } else {
             return 0.0f;
         }
     }
 
-    void simulate()
-    {
+    void simulate() {
         long startTime = 0;
 
         if (timing)
             startTime = System.currentTimeMillis();
 
-        Iterator i = model.getNodes().iterator();
-        while (i.hasNext())
-        {
-            Resource n = (Resource) i.next();
+        for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
+            Node n = (Node) it.next();
 
-            float xi = model.getX(n);
-            float yi = model.getY(n);
-            float vxi = model.getVX(n);
-            float vyi = model.getVY(n);
+            float xi = n.x;
+            float yi = n.y;
+            float vxi = n.vx;
+            float vyi = n.vy;
 
             float fx = 0.0f;
             float fy = 0.0f;
 
-            Iterator j = model.getNodes().iterator();
-            while (j.hasNext())
-            {
-                Resource m = (Resource) j.next();
+            for (Iterator j = model.cache.nodes.iterator(); j.hasNext();) {
+                Node m = (Node) j.next();
 
-                float xj = model.getX(m);
-                float yj = model.getY(m);
+                float xj = m.x;
+                float yj = m.y;
 
                 // calculate euclidean distance
                 float deltax = xi - xj;
@@ -418,7 +339,9 @@ public class ModelVisualizer extends JComponent implements Runnable
                 if (d == 0)
                     d = 0.0001f; // avoid divide by zero
 
-                Property edge = (Property) model.getConnection(n, m);
+                Property edge = (Property) model.getConnection(model.getModel()
+                        .getResource(n.unique), model.getModel().getResource(
+                        m.unique));
 
                 float weight = (edge != null) ? 1.0f : 0.0f;
 
@@ -453,12 +376,11 @@ public class ModelVisualizer extends JComponent implements Runnable
             yi += vyi;
 
             // TODO Verify
-            if (!model.getFixedNode(n))
-            {
-                model.setX(n, xi);
-                model.setY(n, yi);
-                model.setVX(n, vxi);
-                model.setVY(n, vyi);
+            if (!n.fixed) {
+                n.x = xi;
+                n.y = yi;
+                n.vx = vxi;
+                n.vy = vyi;
                 keepInsideCanvas(n);
             }
         }
@@ -469,23 +391,19 @@ public class ModelVisualizer extends JComponent implements Runnable
         repaint();
     }
 
-    public float zoom(float x, float y)
-    {
-        if (alpha > MIN_ALPHA)
-        {
+    public float zoom(float x, float y) {
+        if (alpha > MIN_ALPHA) {
             x -= zoomX;
             y -= zoomY;
             return ZOOM_FACTOR
                     * (float) Math.exp(-((x * x) + (y * y)) / (alpha * alpha));
-        } else
-        {
+        } else {
             return 0.0f;
         }
     }
 
-    public void paintComponent(Graphics g)
-    {
-        if (model == null || model.getNodes() == null)
+    public void paintComponent(Graphics g) {
+        if (model.getNodes() == null)
             return;
 
         long startTime = 0;
@@ -495,51 +413,42 @@ public class ModelVisualizer extends JComponent implements Runnable
 
         Graphics2D g2 = (Graphics2D) g;
 
-        if (antialias)
-        {
+        if (antialias) {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
 
-        if (background)
-        {
+        if (background) {
             g2.setColor(Color.white);
             g2.fill(new Rectangle2D.Float(0.0f, 0.0f, 2.0f * cx, 2.0f * cy));
         }
 
-        if (drawedges)
-        {
+        if (drawedges) {
             g2.setFont(tinyFont);
             FontMetrics fm = g2.getFontMetrics(tinyFont);
             float ascent = fm.getAscent();
 
-            Iterator nodes = model.getNodes().iterator();
-            while (nodes.hasNext())
-            {
-                Resource n1 = (Resource) nodes.next();
-                Iterator edges = model.getConnectionTo(n1).iterator();
-                while (edges.hasNext())
-                {
+            for (Iterator nodes = model.cache.nodes.iterator(); nodes.hasNext();) {
+                Node n1 = (Node) nodes.next();
+                Iterator edges = model.getConnectionTo(
+                        model.getModel().getResource(n1.unique)).iterator();
+                while (edges.hasNext()) {
                     Resource n2 = (Resource) edges.next();
-                    if ((n1 != null) && (n2 != null))
-                    {
-                        float z1 = zoom(model.getX(n1), model.getY(n1));
-                        float z2 = zoom(model.getX(n2), model.getY(n2));
-                        float x1 = model.getX(n1) + (model.getX(n1) - zoomX)
-                                * z1 + cx;
-                        float x2 = model.getX(n2) + (model.getX(n2) - zoomX)
-                                * z2 + cx;
-                        float y1 = model.getY(n1) + (model.getY(n1) - zoomY)
-                                * z1 + cy;
-                        float y2 = model.getY(n2) + (model.getY(n2) - zoomY)
-                                * z2 + cy;
+                    if ((n2 != null)) {
+                        float[] xyn2 = model.cache
+                                .getCoordinatesXY(n2.getURI());
+                        float z1 = zoom(n1.x, n1.y);
+                        float z2 = zoom(xyn2[0], xyn2[1]);
+                        float x1 = n1.x + (n1.x - zoomX) * z1 + cx;
+                        float x2 = xyn2[0] + (xyn2[0] - zoomX) * z2 + cx;
+                        float y1 = n1.y + (n1.y - zoomY) * z1 + cy;
+                        float y2 = xyn2[1] + (xyn2[1] - zoomY) * z2 + cy;
 
                         g2.setColor(edgeColor);
                         g2.draw(new Line2D.Float(x1, y1, x2, y2));
-                        if (drawedgevalues)
-                        {
+                        if (drawedgevalues) {
                             float x = (x2 + x1) / 2.0f;
                             float y = (y2 + y1) / 2.0f + ascent;
                             String value = "1.0";
@@ -553,29 +462,20 @@ public class ModelVisualizer extends JComponent implements Runnable
             }
         }
 
-        if (drawnodes)
-        {
-            Iterator i = model.getNodes().iterator();
-            while (i.hasNext())
-            {
-                Resource n = (Resource) i.next();
-                if (n != null)
-                {
-                    float z = zoom(model.getX(n), model.getY(n));
-                    float x = model.getX(n) + (model.getX(n) - zoomX) * z + cx;
-                    float y = model.getY(n) + (model.getY(n) - zoomY) * z + cy;
-                    Shape nodeshape = new Rectangle2D.Float(x - 3.0f, y - 3.0f,
-                            6.0f, 6.0f);
-                    if (n == pick)
-                    {
-                        g2.setColor(selectColor);
-                        g2.fill(nodeshape);
-                    } else
-                    {
-                        g2.setColor(model.getFixedNode(n) ? fixedColor
-                                : nodeColor);
-                        g2.draw(nodeshape);
-                    }
+        if (drawnodes) {
+            for (Iterator i = model.cache.nodes.iterator(); i.hasNext();) {
+                Node n = (Node) i.next();
+                float z = zoom(n.x, n.y);
+                float x = n.x + (n.x - zoomX) * z + cx;
+                float y = n.y + (n.y - zoomY) * z + cy;
+                Shape nodeshape = new Rectangle2D.Float(x - 3.0f, y - 3.0f,
+                        6.0f, 6.0f);
+                if (n == pick) {
+                    g2.setColor(selectColor);
+                    g2.fill(nodeshape);
+                } else {
+                    g2.setColor(n.fixed ? fixedColor : nodeColor);
+                    g2.draw(nodeshape);
                 }
             }
         }
@@ -632,124 +532,109 @@ public class ModelVisualizer extends JComponent implements Runnable
 
         AffineTransform t = g2.getTransform();
 
-        Iterator i = model.getNodes().iterator();
-        while (i.hasNext())
-        {
-            Resource n = (Resource) i.next();
-            if ((n != null) && (n.getURI() != null))
-            {
-                Font font = ((n == pick) || zoom) ? bigFont : smallFont;
-                g2.setFont(font);
-                FontMetrics fm = g2.getFontMetrics(font);
-                float width = fm.stringWidth(n.getURI()) + BORDERs;
-                float ascent = fm.getAscent();
-                float descent = fm.getDescent();
-                float height = ascent + descent + BORDERs;
-                float halfHeight = height / 2.0f;
+        for (Iterator it = model.cache.nodes.iterator(); it.hasNext();) {
+            Node n = (Node) it.next();
+            Font font = ((n == pick) || zoom) ? bigFont : smallFont;
+            g2.setFont(font);
+            FontMetrics fm = g2.getFontMetrics(font);
+            float width = fm.stringWidth(n.unique) + BORDERs;
+            float ascent = fm.getAscent();
+            float descent = fm.getDescent();
+            float height = ascent + descent + BORDERs;
+            float halfHeight = height / 2.0f;
 
-                if (zoom)
-                {
-                    float z = zoom(model.getX(n), model.getY(n));
-                    if (z > ZOOM_FACTOR * 0.95f)
-                    {
-                        float x = model.getX(n) + (model.getX(n) - zoomX) * z;
-                        float y = model.getY(n) + (model.getY(n) - zoomY) * z;
-                        float dx = x - zoomX;
-                        float dy = y - zoomY;
-                        double theta;
-                        if (Math.abs(dx) < Math.abs(dy))
-                        {
-                            theta = Math.acos(dx / dy);
-                            if (dy < 0.0f)
-                                theta += Math.PI;
-                        } else
-                        {
-                            theta = Math.asin(dy / dx);
-                            if (dx < 0.0f)
-                                theta += Math.PI;
-                        }
-                        float d = (float) Math.sqrt((dx * dx) + (dy * dy));
-
+            if (zoom) {
+                float z = zoom(n.x, n.y);
+                if (z > ZOOM_FACTOR * 0.95f) {
+                    float x = n.x + (n.x - zoomX) * z;
+                    float y = n.y + (n.y - zoomY) * z;
+                    float dx = x - zoomX;
+                    float dy = y - zoomY;
+                    double theta;
+                    if (Math.abs(dx) < Math.abs(dy)) {
+                        theta = Math.acos(dx / dy);
+                        if (dy < 0.0f)
+                            theta += Math.PI;
+                    } else {
+                        theta = Math.asin(dy / dx);
                         if (dx < 0.0f)
-                        {
-                            theta -= Math.PI;
-                            d = -d - width;
+                            theta += Math.PI;
+                    }
+                    float d = (float) Math.sqrt((dx * dx) + (dy * dy));
+
+                    if (dx < 0.0f) {
+                        theta -= Math.PI;
+                        d = -d - width;
+                    }
+
+                    g2.translate(zoomX + cx, zoomY + cy);
+                    g2.rotate(theta);
+
+                    Shape rectangle = new RoundRectangle2D.Float(d,
+                            -halfHeight, width, height, height, height);
+                    g2.setColor(highlightBGColor);
+                    g2.fill(rectangle);
+                    g2.setColor(tooltipBorderColor);
+                    g2.draw(rectangle);
+                    g2.setColor(highlightFontColor);
+                    g2.drawString(n.unique, d + BORDER, +BORDER);
+                    g2.setTransform(t);
+                }
+            } else {
+                float x = n.x;
+                if ((x + width + 2 * BORDER) > cx) {
+                    x -= width;
+                }
+                x += cx;
+
+                float y = n.y;
+                if ((y - 2 * BORDER) < -cy) {
+                    y += height;
+                }
+                y += cy;
+
+                if ((n == pick) || n.fixed /*
+                                            * || (n.highlighted)
+                                            */) {
+                    Shape rectangle = new RoundRectangle2D.Float(x, y
+                            - halfHeight, width, height, height, height);
+                    Color bgColor = (n == pick) ? pickedBGColor
+                            : highlightBGColor;
+                    Color fontColor = (n == pick) ? pickedFontColor
+                            : highlightFontColor;
+                    g2.setColor(bgColor);
+                    g2.fill(rectangle);
+                    g2.setColor(tooltipBorderColor);
+                    g2.draw(rectangle);
+                    g2.setColor(fontColor);
+                    g2.drawString(n.unique, x + BORDER, y + BORDER);
+
+                    if ((n == pick)) {
+                        // count properties and max text length
+                        int count = 0;
+                        float max = width;
+                        for (Iterator i = model.getLiterals(model.getModel()
+                                .getResource(n.unique)); i.hasNext();) {
+                            Statement no = (Statement) i.next();
+                            fm = g2.getFontMetrics(smallFont);
+                            float length = fm.stringWidth(no.getPredicate()
+                                    .toString()
+                                    + " -> " + no.getObject())
+                                    + BORDERs;
+                            if (length > max)
+                                max = length;
+                            count++;
                         }
 
-                        g2.translate(zoomX + cx, zoomY + cy);
-                        g2.rotate(theta);
-
-                        Shape rectangle = new RoundRectangle2D.Float(d,
-                                -halfHeight, width, height, height, height);
-                        g2.setColor(highlightBGColor);
-                        g2.fill(rectangle);
-                        g2.setColor(tooltipBorderColor);
-                        g2.draw(rectangle);
-                        g2.setColor(highlightFontColor);
-                        g2.drawString(n.getURI(), d + BORDER, +BORDER);
-                        g2.setTransform(t);
-                    }
-                } else
-                {
-                    float x = model.getX(n);
-                    if ((x + width + 2 * BORDER) > cx)
-                    {
-                        x -= width;
-                    }
-                    x += cx;
-
-                    float y = model.getY(n);
-                    if ((y - 2 * BORDER) < -cy)
-                    {
-                        y += height;
-                    }
-                    y += cy;
-
-                    if ((n == pick) || model.getFixedNode(n) /*
-                                                              * ||
-                                                              * (n.highlighted)
-                                                              */)
-                    {
-                        Shape rectangle = new RoundRectangle2D.Float(x, y
-                                - halfHeight, width, height, height, height);
-                        Color bgColor = (n == pick) ? pickedBGColor
-                                : highlightBGColor;
-                        Color fontColor = (n == pick) ? pickedFontColor
-                                : highlightFontColor;
-                        g2.setColor(bgColor);
-                        g2.fill(rectangle);
-                        g2.setColor(tooltipBorderColor);
-                        g2.draw(rectangle);
-                        g2.setColor(fontColor);
-                        g2.drawString(n.getURI(), x + BORDER, y + BORDER);
-                        
-                        if ((n == pick))
-                        {
-                            // count properties and max text length
-                            int count = 0;
-                            float max = width;
-                            for (Iterator it = model.getLiterals(n); it
-                                    .hasNext();)
-                            {
-                                Statement no = (Statement) it.next();
-                                fm = g2.getFontMetrics(smallFont);
-                                float length = fm.stringWidth(no.getPredicate()
-                                        .toString()
-                                        + " -> " + no.getObject())
-                                        + BORDERs;
-                                if (length > max)
-                                    max = length;
-                                count++;
-                            }
-                            
-                            float startY=0;
-                            float rectHeigh=count * 12 + BORDER;
-                            if((y+rectHeigh)>cy)
-                                startY=-(rectHeigh+height+2);
+                        if (count > 0) {
+                            float startY = 0;
+                            float rectHeigh = count * 12 + BORDER;
+                            if ((y + rectHeigh) > cy)
+                                startY = -(rectHeigh + height + 2);
 
                             // Draw properties rect
-                            Shape rect = new Rectangle2D.Float(x, y + 21 +startY
-                                    - halfHeight, max, rectHeigh);
+                            Shape rect = new Rectangle2D.Float(x, y + 21
+                                    + startY - halfHeight, max, rectHeigh);
                             g2.setColor(Color.WHITE);
                             g2.fill(rect);
                             g2.setColor(Color.BLACK);
@@ -757,13 +642,13 @@ public class ModelVisualizer extends JComponent implements Runnable
                             g2.setFont(smallFont);
 
                             int ddy = 18;
-                            for (Iterator it = model.getLiterals(n); it
-                                    .hasNext();)
-                            {
-                                Statement no = (Statement) it.next();
+                            for (Iterator itt = model.getLiterals(model
+                                    .getModel().getResource(n.unique)); itt
+                                    .hasNext();) {
+                                Statement no = (Statement) itt.next();
                                 g2.drawString(no.getPredicate().toString()
                                         + " -> " + no.getObject().toString(), x
-                                        + BORDER, y + BORDER + ddy+ startY);
+                                        + BORDER, y + BORDER + ddy + startY);
                                 ddy += 12;
                             }
                         }
@@ -772,8 +657,7 @@ public class ModelVisualizer extends JComponent implements Runnable
             }
         }
 
-        if (timing)
-        {
+        if (timing) {
             drawingTime = System.currentTimeMillis() - startTime;
             g.setColor(timeColor);
             g.setFont(smallFont);
@@ -783,17 +667,13 @@ public class ModelVisualizer extends JComponent implements Runnable
             //            g.drawString("edges: " + graph.edges, 5, 45);
         }
 
-        if (zoom)
-        {
-            if (alpha < MAX_ALPHA)
-            {
+        if (zoom) {
+            if (alpha < MAX_ALPHA) {
                 alpha += ALPHA_INC;
                 repaint();
             }
-        } else
-        {
-            if (alpha > MIN_ALPHA)
-            {
+        } else {
+            if (alpha > MIN_ALPHA) {
                 alpha -= ALPHA_INC;
                 repaint();
             }
