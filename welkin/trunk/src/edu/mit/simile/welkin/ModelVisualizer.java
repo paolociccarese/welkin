@@ -1,6 +1,7 @@
 package edu.mit.simile.welkin;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -18,8 +19,8 @@ import java.util.Iterator;
 
 import javax.swing.JComponent;
 
-import edu.mit.simile.welkin.InfoCache.Literal;
 import edu.mit.simile.welkin.InfoCache.Edge;
+import edu.mit.simile.welkin.InfoCache.Literal;
 import edu.mit.simile.welkin.InfoCache.Node;
 
 
@@ -649,4 +650,9 @@ public class ModelVisualizer extends JComponent implements Runnable {
             }
         }
     }
+    
+    public Dimension getMinimumSize() {
+        return new Dimension(400, 400);
+    }
+    
 }
