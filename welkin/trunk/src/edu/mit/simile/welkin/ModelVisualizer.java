@@ -474,15 +474,14 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 Shape border, inside;
                 if(n.isNotSubject) {
                     border = new Ellipse2D.Float(x - 3.1f, y - 3.1f, 6.2f, 6.2f);
-                    inside = new Ellipse2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+                    inside = new Ellipse2D.Float(x - 1.5f, y - 1.5f, 3.0f, 3.0f);
                 } else {
                     border = new Rectangle2D.Float(x - 3.1f, y - 3.1f, 6.2f, 6.2f);
                     inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
                 }
                 
                 if (n == pick) {
-                    if(colors) g2.setColor(n.color);
-                    else g2.setColor(n.isNotSubject ?  externalNodeColor : nodeColor );
+                    g2.setColor(n.color);
                     g2.fill(inside);
                     g2.setColor(fixedColor);
                     g2.draw(border);
@@ -490,13 +489,12 @@ public class ModelVisualizer extends JComponent implements Runnable {
                     if (n.fixed) {
                         g2.setColor(fixedColor);                     
                         g2.fill(inside);
-                        if(colors) g2.setColor(n.color);
-                        else g2.setColor(n.isNotSubject ?  externalNodeColor : nodeColor);
+                        g2.setColor(n.color);
                         g2.draw(border);
                     } else {
-                        if(colors) g2.setColor(n.color);
-                        else g2.setColor(n.isNotSubject ?  externalNodeColor : nodeColor);
+                        g2.setColor(n.color);
                         g2.fill(inside);
+                        g2.draw(border);
                     }
                 }
             }

@@ -54,6 +54,9 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     public static final String VERSION = "@version@";
     public static final String YEAR = "@year@";
 	
+    static final int X_WIN_DIM = 860;
+    static final int Y_WIN_DIM = 700;
+    
     static final String ICON_PATH = "resources/icons/";
     static final String LOGO_SMALL_ICON = ICON_PATH + "logo-small.gif"; 
     static final String LOGO_ICON = ICON_PATH + "sombrero.png"; 
@@ -361,24 +364,11 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 		drawing.add(Box.createHorizontalGlue());
 		drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 		
-		JPanel namespacing = new JPanel();
-		namespacing.setLayout(new BoxLayout(namespacing, BoxLayout.X_AXIS));
-		namespacing.add(inOutColorsRadio);
-		namespacing.add(namespaceColorsRadio);
-		namespacing.add(Box.createHorizontalGlue());
-		namespacing.add(Box.createRigidArea(new Dimension(5,0)));
-		namespacing.add(colorsFilteringField);
-		namespacing.add(Box.createHorizontalGlue());
-		namespacing.add(pickColorButton);
-		namespacing.add(resetColorsButton);
-		namespacing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-		
 		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
 		//toolsPane.addTab("Controls",controls);
 		toolsPane.addTab("Drawing", drawing);
 		toolsPane.addTab("Highlight",highlight);
 		toolsPane.addTab("Parameters",parameters);
-		toolsPane.addTab("Resources Colors",namespacing);
 
         JSplitPane chartPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,charter, visualizer);
         chartPane.setOneTouchExpandable(true);
@@ -450,9 +440,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 			visualizer.background = selected;
 		} else if (source == highlightOnLabelCheckbox) {
 			visualizer.highlightOnLabel = selected;
-        } else if (source == inOutColorsRadio) {
-            visualizer.colors = !selected;
-        }
+        } 
         visualizer.repaint();
     }
 
@@ -470,19 +458,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             visualizer.scramble();
         } else if (source == shakeButton) {
             visualizer.shake();
-        } else if (source == resetColorsButton) {
-            wrapper.cache.clearUriColors();
-            resTree.repaint();
-            notifyBaseUriColorChange();
-        } else if (source == colorsFilteringField || source == pickColorButton) {
-            if(jc==null) jc = new JColorChooser();
-            chooser = JColorChooser.createDialog((Component)Welkin.frame,"Pick the namespace color", true, jc, this, this);
-            chooser.show();
-        } else if (e.getActionCommand().equals("OK")) {
-            // TODO make it stronger
-            wrapper.cache.setUriColor(colorsFilteringField.getText().trim() , jc.getColor());
-            resTree.repaint();
-            notifyBaseUriColorChange();
 		} else if (source == dataLoadButton) {
             try {
                 File fileName;
@@ -593,8 +568,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                 System.exit(0);
             }
         });
-        frame.setSize(800, 600);
-        frame.pack();
+        frame.setSize(X_WIN_DIM, Y_WIN_DIM);
+        //frame.pack();
         frame.setVisible(true);
         frame.show();
     }    

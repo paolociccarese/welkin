@@ -16,7 +16,6 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -42,6 +41,8 @@ public class ResourcesTree extends JPanel {
     public static final int MAX_VALUE = 255;
     public static final int INIT_VALUE = 10;
     public static final float FACTOR = 255;
+    
+    private int maxWidth=200;
     
     Welkin welkin;
     FullNode root;
@@ -85,6 +86,7 @@ public class ResourcesTree extends JPanel {
         }
         
         root = rootNode;
+        calculateValues(root, root.value);
         this.displayTree();
     	this.repaint();
     }
@@ -99,7 +101,9 @@ public class ResourcesTree extends JPanel {
         			return;
         		} 
         	}
-        	root.children.add(new FullNode(parts[1], all));
+        	FullNode tmp = new FullNode(parts[1], all);
+        	tmp.isVisible = false;
+        	root.children.add(tmp);
     		return;
     	}
     	boolean flag = false;
@@ -113,6 +117,7 @@ public class ResourcesTree extends JPanel {
     	
     	if(!flag) {
     		FullNode child = new FullNode(parts[level++], null);
+    		if(level == 2) child.isVisible = false;
     		root.children.add(child);
     		createNode(child, parts, all, level);
     	}
@@ -124,33 +129,35 @@ public class ResourcesTree extends JPanel {
         this.setBackground(BACKGROUND);
         
         root.value = root.slider.getValue()/FACTOR;
-        calculateValues(root, root.value);
         
         xPos=5;
         vPos=5;
         printNodes(root);
         
+        this.validate();
         this.repaint();
     }
     
     private void printNodes(FullNode node) {
-        if(node.isVisible && node.isAllowed) {
-	        node.setLocation(xPos,vPos);
-	        this.add(node);
-	        vPos+=22;
+        if(node.isAllowed) {
+	        if(node.isVisible) {
+		        node.setLocation(xPos,vPos);
+		        maxWidth = maxWidth > (node.getDimension().width+50) ? maxWidth : (node.getDimension().width+50);
+		        this.add(node);
+		        vPos+=22;
+		        
+		        if(node.children.size()>0) xPos+=15;
+		        for(int i=0; i<node.children.size();i++) {
+		            printNodes((FullNode) node.children.get(i));
+		        }
+		        if(node.children.size()>0) xPos-=15;
+	        }
 	        
 	        if(node.children.size()==0) {
 	            node.iconLabel.setIcon(UIManager.getIcon("Tree.leafIcon"));
 	        }
-        } else return;
-        
-        if(node.children.size()>0) xPos+=15;
-        for(int i=0; i<node.children.size();i++) {
-            printNodes((FullNode) node.children.get(i));
+	        this.setPreferredSize(new Dimension(xPos+maxWidth, vPos+5));
         }
-        if(node.children.size()>0) xPos-=15;
-        
-        this.setPreferredSize(new Dimension(xPos+200, vPos+5));
     }
     
     private void calculateValues(FullNode node, float ancestorValue) {
@@ -164,12 +171,6 @@ public class ResourcesTree extends JPanel {
         }
         
         welkin.notifyBaseUriColorChange();
-    }
-    
-    private void deselectAll() {
-        for(Iterator it=elements.iterator();it.hasNext();) {
-            ((FullNode)it.next()).label.setSelected(false);
-        }
     }
     
     private void visualizeAll() {
@@ -205,8 +206,7 @@ public class ResourcesTree extends JPanel {
     class FullNode extends JPanel implements ChangeListener {
         private JLabel iconLabel;
         private Icon icon;
-        private JLabel color;
-        private JLabel weight;
+        //private JLabel weight;
         private JSlider slider;
         private TreeLabel label;
         
@@ -221,7 +221,6 @@ public class ResourcesTree extends JPanel {
         
         boolean isVisible;
         boolean isAllowed;
-        boolean isSelected;
         
         FullNode me;
         FullNode father;
@@ -241,26 +240,21 @@ public class ResourcesTree extends JPanel {
             icon = UIManager.getIcon("Tree.openIcon");
             iconLabel.setIcon(icon);
             
-            weight = new JLabel();
-            weight.setHorizontalAlignment(JTextField.RIGHT);
-            weight.setBackground(BACKGROUND);
-            weight.setFont(font);
-            weight.setSize(30,16);
-            weight.setBorder(null);
+//            weight = new JLabel();
+//            weight.setHorizontalAlignment(JTextField.RIGHT);
+//            weight.setBackground(BACKGROUND);
+//            weight.setFont(font);
+//            weight.setSize(30,16);
+//            weight.setBorder(null);
             
             slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
             slider.addChangeListener(this);
             slider.setBackground(BACKGROUND);
-            slider.setSize(new Dimension(80,16));
+            slider.setSize(new Dimension(80,14));
             slider.setPreferredSize(new Dimension(80,14));
             slider.setMajorTickSpacing(1);
             slider.setSnapToTicks(false);
-            slider.setPaintTicks(true);
-            
-            color = new JLabel("U");
-            color.setSize(20,20);
-            color.setPreferredSize(new Dimension(20,20));
-            color.setForeground(Color.black);
+            slider.setPaintTicks(false);
             
             this.label = new TreeLabel();
             this.label.setFont(font);
@@ -269,10 +263,9 @@ public class ResourcesTree extends JPanel {
             
             this.add(iconLabel);
             this.add(slider);
-            this.add(color);
             this.add(this.label);
            
-            this.add(weight);
+            //this.add(weight);
             
             this.value = INIT_VALUE;
             
@@ -285,13 +278,10 @@ public class ResourcesTree extends JPanel {
             
             this.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
-                    deselectAll();
-                    label.isSelected = true;
                     if(e.getPoint().x<=20) {
                         openCloseNodeChildren(me);
                         displayTree();
                     }
-                    repaint();
                 }
             });
         }
@@ -302,7 +292,6 @@ public class ResourcesTree extends JPanel {
 			float col = 1677721.5f * f;
 			if(resource!=null) resource.color =  Color.getHSBColor(f/255,1,1);
 			slider.setBackground(Color.getHSBColor(f/255,1,1));
-			color.repaint();
 		}
 		
 		public void adjustValue() {
@@ -310,7 +299,6 @@ public class ResourcesTree extends JPanel {
 			float col = 65535f * value;
 			if(resource!=null) resource.color = Color.getHSBColor(((float)slider.getValue()/255),1,1);
 			slider.setBackground(Color.getHSBColor(((float)slider.getValue()/255),1,1)) ;
-			color.repaint();
 		}
 
 		private void openCloseNodeChildren (FullNode node) {
@@ -348,20 +336,20 @@ public class ResourcesTree extends JPanel {
             //weight.setText("(sum="+this.sum+",value="+this.value+",pred="+this.resource.getUri()+",value="+this.predicate.weight+")");
             if (sliderValue==0) {
                 label.setForeground(PASSIVE_FOREG);
-                weight.setForeground(PASSIVE_FOREG);
+                //weight.setForeground(PASSIVE_FOREG);
             } else if (sliderValue==10) {
                 label.setFont(bold);
-                weight.setFont(bold);
+                //weight.setFont(bold);
             } else {
                 label.setForeground(ACTIVE_FOREG);
-                weight.setForeground(ACTIVE_FOREG);
+                //weight.setForeground(ACTIVE_FOREG);
                 label.setFont(font);
-                weight.setFont(font);
+                //weight.setFont(font);
             } 
         }
         
         public Dimension getDimension() {
-            return new Dimension (200+420+20+30+80+label.getPreferredSize().width,16);
+            return new Dimension (140+label.getPreferredSize().width,16);
         }
     }
     
@@ -382,11 +370,9 @@ public class ResourcesTree extends JPanel {
             String str;
             if ((str = getText()) != null) {
                 if (0 < str.length()) {
-                    if (isSelected) {
-                        g.setColor(Color.YELLOW);
-                    } else {
-                        g.setColor(UIManager.getColor("Tree.textBackground"));
-                    }
+
+                    g.setColor(UIManager.getColor("Tree.textBackground"));
+                    
                     Dimension d = getPreferredSize();
                     int imageOffset = 0;
                     Icon currentI = getIcon();
@@ -407,11 +393,6 @@ public class ResourcesTree extends JPanel {
                         retDimension.height);
             }
             return retDimension;
-        }
-
-        public void setSelected(boolean isSelected) {
-            this.isSelected = isSelected;
-            this.repaint();
         }
 
         public void setFocus(boolean hasFocus) {
