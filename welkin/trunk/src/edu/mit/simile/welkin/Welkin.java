@@ -69,7 +69,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     JColorChooser jc;
     JDialog chooser;
     
-    PredicatesTree tree;
+    PredicatesTree predTree;
     ResourcesTree resTree;
     
     ModelVisualizer visualizer;
@@ -118,8 +118,8 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     JTextField repulsionField;
     JTextField highlightField;
     
-    JScrollPane scrollingUriBases;
-    JScrollPane scrollingTree;
+    JScrollPane scrollingResTree;
+    JScrollPane scrollingPredTree;
     
     ImageIcon startIcon;
     ImageIcon stopIcon;
@@ -201,15 +201,15 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         visualizer = new ModelVisualizer(wrapper);
         charter = new ModelCharter(wrapper);
 
-        tree = new PredicatesTree(this);
-        scrollingTree = new JScrollPane(tree);
+        predTree = new PredicatesTree(this);
+        scrollingPredTree = new JScrollPane(predTree);
         
         charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
         resTree = new ResourcesTree(this);
         resTree.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-        scrollingUriBases = new JScrollPane(resTree);
+        scrollingResTree = new JScrollPane(resTree);
         
         dataClearButton = new JButton("Clear");
         dataLoadButton = new JButton("Load");
@@ -364,7 +364,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 		drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 		
 		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
-		//toolsPane.addTab("Controls",controls);
 		toolsPane.addTab("Drawing", drawing);
 		toolsPane.addTab("Highlight",highlight);
 		toolsPane.addTab("Parameters",parameters);
@@ -379,7 +378,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         visualizerPane.setResizeWeight(1.0);
         visualizerPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
-        JSplitPane infoPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scrollingTree,scrollingUriBases);
+        JSplitPane infoPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scrollingPredTree,scrollingResTree);
         infoPane.setOneTouchExpandable(true);
         infoPane.setResizeWeight(0.25);
         infoPane.setDividerLocation(350);        
@@ -411,7 +410,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 	}
 
     public void notifyTreeChange() {
-        wrapper.cache.uriBasedVisualization(tree);
+        wrapper.cache.uriBasedVisualization(predTree);
         visualizer.repaint();
     }
     
@@ -489,12 +488,12 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                     }
 
                     if (res) {
-                        tree.buildTree();
+                        predTree.buildTree();
                         charter.analyze();
                         resTree.buildTree();
                         this.notifyBaseUriColorChange();
-                        scrollingUriBases.revalidate();
-                        scrollingTree.revalidate();
+                        scrollingResTree.revalidate();
+                        scrollingPredTree.revalidate();
                     }
                 }
             } catch (Exception ex) {
@@ -505,11 +504,11 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         	    internalStop();
             }
             wrapper.clear();
-            tree.clear();
+            predTree.clear();
             charter.clear();
             resTree.clear();
-            scrollingUriBases.revalidate();
-            scrollingTree.revalidate();
+            scrollingResTree.revalidate();
+            scrollingPredTree.revalidate();
         } else if (source == aboutButton) {
             about();
         } else if (source == delayField) {

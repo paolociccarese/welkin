@@ -95,6 +95,8 @@ public class ResourcesTree extends JPanel {
         calculateValues(root, root.value);
         this.displayTree();
     	this.repaint();
+    	
+    	welkin.scrollingResTree.validate();
     }
     
     private void createNode(FullNode root, String[] parts, PartialUri all, int level) {
@@ -142,10 +144,13 @@ public class ResourcesTree extends JPanel {
         
         this.validate();
         this.repaint();
+        
+        welkin.scrollingResTree.validate();
     }
     
     private void printNodes(FullNode node) {
         if(node.isAllowed) {
+        	boolean open = true;
 	        if(node.isVisible) {
 		        node.setLocation(xPos,vPos);
 		        maxWidth = maxWidth > (node.getDimension().width+50) ? maxWidth : (node.getDimension().width+50);
@@ -154,6 +159,7 @@ public class ResourcesTree extends JPanel {
 		        
 		        if(node.children.size()>0) xPos+=15;
 		        for(int i=0; i<node.children.size();i++) {
+		        	if(!((FullNode) node.children.get(i)).isVisible) open = false;
 		            printNodes((FullNode) node.children.get(i));
 		        }
 		        if(node.children.size()>0) xPos-=15;
@@ -161,7 +167,12 @@ public class ResourcesTree extends JPanel {
 	        
 	        if(node.children.size()==0) {
 	            node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(LEAF_ICON)));
+	        } else if(open) {
+	        	node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(OPEN_ICON)));
+	        } else {
+	        	node.iconLabel.setIcon(new ImageIcon(Welkin.class.getResource(CLOSED_ICON)));
 	        }
+	        	
 	        this.setPreferredSize(new Dimension(xPos+maxWidth, vPos+5));
         }
     }
@@ -211,7 +222,6 @@ public class ResourcesTree extends JPanel {
     
     class FullNode extends JPanel implements ChangeListener {
         private JLabel iconLabel;
-        private Icon icon;
         //private JLabel weight;
         private JSlider slider;
         private TreeLabel label;
@@ -242,9 +252,6 @@ public class ResourcesTree extends JPanel {
             
             iconLabel = new JLabel();
             iconLabel.setSize(20,18);
-            
-            icon = new ImageIcon(Welkin.class.getResource(CLOSED_ICON));
-            iconLabel.setIcon(icon);
             
 //            weight = new JLabel();
 //            weight.setHorizontalAlignment(JTextField.RIGHT);
