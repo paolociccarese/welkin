@@ -11,6 +11,7 @@ import java.util.Set;
 public class InfoCache {
 
     Set nodes = new HashSet();
+    List namespaces = new ArrayList();
     HashMap hash = new HashMap();
     
     class Node {
@@ -18,6 +19,7 @@ public class InfoCache {
         float vx, vy;
 
         int hash = 0;
+        int namespaceCode=-1;
 
         boolean fixed = false;
         boolean isVisible = true;
@@ -153,11 +155,14 @@ public class InfoCache {
             hash.put(key, values);
         }
     }
-
-    Point tmp = new Point();
     
+    public int addNamespace(String namespace) {
+        if(!namespaces.contains(namespace))
+            namespaces.add(namespace);
+        return namespaces.indexOf(namespace);
+    }
 
-    
+    Point tmp = new Point();  
     public Predicate[] getEntries(int hashSubject, int hashObject) {
         tmp.x = hashSubject;
         tmp.y = hashObject;

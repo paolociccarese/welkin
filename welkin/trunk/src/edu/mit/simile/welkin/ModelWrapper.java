@@ -315,7 +315,7 @@ public class ModelWrapper {
                     String on = ((Resource) obj).isAnon() ? ((Resource) obj).getId().toString() : ((Resource) obj).getURI();
                     Node objectNode = cache.getNode(on);
                     node.addObjectEdge(cache.getEdge(subjectNode, pr.getNameSpace(), pr.getURI(), objectNode));
-                    cache.addEntry(node.hash,objectNode.hash, pr.getNameSpace(), pr.getURI());
+                    cache.addEntry(node.hash,objectNode.hash, pr.getNameSpace(), pr.getURI());           
                 } else {
                     String literal = ((Literal) obj).toString();
                     node.addLiteral(cache.getLiteral(pr.getNameSpace(), pr.getURI(), literal));
@@ -338,7 +338,8 @@ public class ModelWrapper {
     
     private void addResource(Resource res, boolean isSubject) {
         String unique = res.isAnon()?res.getId().toString():res.getURI();
-        cache.addNode(unique, getCoordinates(res), isNodeFixed(res), isSubject);
+        Node result = cache.addNode(unique, getCoordinates(res), isNodeFixed(res), isSubject);
+        if (result!=null) result.namespaceCode = cache.addNamespace(res.getNameSpace());
     }
     
     private float[] getCoordinates (Resource res) {

@@ -12,6 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -41,7 +42,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     final Color edgeColor = new Color(150, 150, 150, 100);
     final Color edgeValueColor = new Color(50, 50, 50, 100);
     final Color nodeColor = Color.red;
-    final Color externalNodeColor = Color.blue;
+    final Color externalNodeColor = Color.orange;
     final Color timeColor = Color.black;
     final Color tooltipBorderColor = Color.black;
     final Color pickedBGColor = new Color(255, 255, 0, 100);
@@ -78,7 +79,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean timing = true;
     public boolean drawgroups = true;
     public boolean drawedgevalues = false;
-    public boolean background = false;
+    public boolean background = true;
     public boolean highlightOnLabel = true;
 
     ModelWrapper model;
@@ -455,17 +456,31 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 float z = zoom(n.x, n.y);
                 float x = n.x + (n.x - zoomX) * z + cx;
                 float y = n.y + (n.y - zoomY) * z + cy;
-                Shape nodeshape = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+                
+                Shape border, inside;
+                if(n.isObjectOnly) {
+                    border = new Ellipse2D.Float(x - 3.1f, y - 3.1f, 6.2f, 6.2f);
+                    inside = new Ellipse2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+                } else {
+                    border = new Rectangle2D.Float(x - 3.1f, y - 3.1f, 6.2f, 6.2f);
+                    inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+                }
+                
                 if (n == pick) {
-                    g2.setColor(selectColor);
-                    g2.fill(nodeshape);
+                    g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                    g2.fill(inside);
+                    g2.setColor(fixedColor);
+                    g2.draw(border);
                 } else {
                     if (n.fixed) {
-                        g2.setColor(fixedColor);
+                        g2.setColor(fixedColor);                     
+                        g2.fill(inside);
+                        g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                        g2.draw(border);
                     } else {
                         g2.setColor(n.isObjectOnly ?  externalNodeColor : nodeColor);
+                        g2.fill(inside);
                     }
-                    g2.draw(nodeshape);
                 }
             }
         }
