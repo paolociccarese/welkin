@@ -6,6 +6,10 @@
 		<vendor>The SIMILE Project</vendor>
 		<description>A graphical RDF visualizer</description>
 		<homepage href="http://simile.mit.edu/"/>
+                <offline-allowed/>   
+                <shortcut online="false">
+                    <menu submenu="SIMILE Project"/>   
+                </shortcut>
 	</information>
 	<security>
 		<all-permissions />
