@@ -45,6 +45,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
+import javax.swing.filechooser.FileFilter;
+
 
 public class Welkin extends JPanel implements ActionListener, ItemListener {
 
@@ -114,6 +116,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
     JTextField highlightField;
     
     JScrollPane scrollingUriBases;
+    JScrollPane scrollingTree;
     
     ImageIcon startIcon;
     ImageIcon stopIcon;
@@ -196,7 +199,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         charter = new ModelCharter(wrapper);
 
         tree = new PredicatesTree(this);
-        JScrollPane scrollingTree = new JScrollPane(tree);
+        scrollingTree = new JScrollPane(tree);
         
         charter.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         visualizer.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
@@ -470,7 +473,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             uriBases.repaint();
             notifyBaseUriColorChange();
         } else if (source == colorsFilteringField || source == pickColorButton) {
-            jc = new JColorChooser();
+            if(jc==null) jc = new JColorChooser();
             chooser = JColorChooser.createDialog((Component)Welkin.frame,"Pick the namespace color", true, jc, this, this);
             chooser.show();
         } else if (e.getActionCommand().equals("OK")) {
@@ -484,7 +487,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
                 // Save File Manager
                 JFileChooser openWin = new JFileChooser();
-                //saveWin.setFileFilter(new GeneDataFilter());
+                openWin.setFileFilter(new WFileFilter());
 
                 int returnVal = openWin.showOpenDialog(null);
                 
@@ -504,6 +507,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                         uriBases.init();
                         this.notifyBaseUriColorChange();
                         scrollingUriBases.revalidate();
+                        scrollingTree.revalidate();
                     }
                 }
             } catch (Exception ex) {
@@ -515,6 +519,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
             charter.clear();
             uriBases.clear();
             scrollingUriBases.revalidate();
+            scrollingTree.revalidate();
         } else if (source == aboutButton) {
             about();
         } else if (source == delayField) {
@@ -580,4 +585,41 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         frame.setVisible(true);
         frame.show();
     }    
+    
+    class WFileFilter extends FileFilter {
+        // Accept all directories and all gif, jpg, or tiff files.
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            
+            String extension = getExtension(f);
+    		if (extension != null) {
+                if (extension.equals("rdf") || extension.equals("rdfs") || extension.equals("n3")) { 
+                        return true;
+                } 
+        	}
+
+            return false;
+        }
+        
+        // The description of this filter
+        public String getDescription() {
+            return "Rdf, Rdfs, n3 data file";
+        }
+        
+        /*
+         * Get the extension of a file.
+         */
+        public String getExtension(File f) {
+            String ext = null;
+            String s = f.getName();
+            int i = s.lastIndexOf('.');
+
+            if (i > 0 &&  i < s.length() - 1) {
+                ext = s.substring(i+1).toLowerCase();
+            }
+            return ext;
+        }
+    }
 }

@@ -23,7 +23,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 
-import edu.mit.simile.welkin.ModelCache.WUriBase;
+import edu.mit.simile.welkin.resource.ResourceUri;
 
 public class ResourceUriBasePanel extends JComponent {
 
@@ -43,9 +43,9 @@ public class ResourceUriBasePanel extends JComponent {
     class ResourcesBaseRow {
         int x,y;
         boolean on=false;
-        WUriBase ns;
+        ResourceUri ns;
         
-        ResourcesBaseRow(WUriBase ns, int x, int y) {
+        ResourcesBaseRow(ResourceUri ns, int x, int y) {
             this.ns = ns;
             this.x = x;
             this.y = y;
@@ -55,7 +55,7 @@ public class ResourceUriBasePanel extends JComponent {
     class MyMouseListener extends MouseAdapter implements ActionListener{
         
         JColorChooser jcc;
-        WUriBase namespace;
+        ResourceUri namespace;
         
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -114,9 +114,9 @@ public class ResourceUriBasePanel extends JComponent {
         int maxWidth=0;
         int shift=0;
         for(Iterator i=welkin.wrapper.cache.resourcesBases.iterator();i.hasNext();) {
-            WUriBase urib = (WUriBase)i.next();
+        	ResourceUri urib = (ResourceUri)i.next();
             resourcesBases.add(new ResourcesBaseRow(urib,XTOP,HTOP+(HROW*shift++)));
-            maxWidth=fm.stringWidth(urib.base)>maxWidth? fm.stringWidth(urib.base):maxWidth;
+            maxWidth=fm.stringWidth(urib.getUri())>maxWidth? fm.stringWidth(urib.getUri()):maxWidth;
         }
         
         if(fm!=null) this.setPreferredSize(new Dimension(maxWidth+20,HROW*resourcesBases.size()+4));
@@ -142,7 +142,7 @@ public class ResourceUriBasePanel extends JComponent {
             ResourcesBaseRow baseUriRow = (ResourcesBaseRow)(i.next());
             if (baseUriRow.on) g2.setColor(ResourceUriBasePanel.DEFAULT_URI_COLOR);
             else g2.setColor(Color.black);
-            g2.drawString(baseUriRow.ns.base ,baseUriRow.x+11,baseUriRow.y);
+            g2.drawString(baseUriRow.ns.getUri() ,baseUriRow.x+11,baseUriRow.y);
             g2.setColor(baseUriRow.ns.color);
             Shape shape = new Rectangle(baseUriRow.x,baseUriRow.y-8,8,8);
             g2.fill(shape);

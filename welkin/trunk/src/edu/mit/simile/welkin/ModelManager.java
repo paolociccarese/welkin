@@ -15,6 +15,7 @@ import org.openrdf.rio.ntriples.NTriplesParser;
 import org.openrdf.rio.rdfxml.RdfXmlParser;
 
 import edu.mit.simile.welkin.ModelCache.WResource;
+import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class ModelManager implements StatementHandler {
 
@@ -39,10 +40,13 @@ public class ModelManager implements StatementHandler {
          
         if (value instanceof URI) {
             WResource obj = cache.addResource(value.toString(), true);
-            sub.addObjectStatement(cache.getStatement(sub, uri, obj));
+        	
+        	PredicateUri puri = cache.addPredicatesUri(uri);
+        	
+            sub.addObjectStatement(cache.getStatement(sub, puri, obj));
             cache.addResourcesUri((URI)value);
-            cache.addStatement(sub.hash, obj.hash, uri);
-            cache.addPredicatesUri(uri);
+            cache.addStatement(sub.hash, obj.hash, puri);
+            
         } else if (value instanceof Literal) {
             sub.addLiteral(cache.getLiteral(uri , value.toString()));
             
@@ -53,8 +57,9 @@ public class ModelManager implements StatementHandler {
             }
         } else if (value instanceof BNode) {
             WResource obj = cache.addBlankResource(value.toString());
-            sub.addObjectStatement(cache.getStatement(sub, uri, obj));
-            cache.addStatement(sub.hash, obj.hash, uri);
+            PredicateUri puri = cache.addPredicatesUri(uri);
+            sub.addObjectStatement(cache.getStatement(sub, puri, obj));
+            cache.addStatement(sub.hash, obj.hash, puri);
             cache.addPredicatesUri(uri);
         }
 	}
@@ -118,7 +123,7 @@ public class ModelManager implements StatementHandler {
      */
     private void initParser(int type) {
         if(type == RDFXML) setXmlRdfParserInstance();
-        else if(type == NTRIPLES) setXmlN3ParserInstance();
+        else if(type == NTRIPLES) setNTriplesParserInstance();
         else throw new IllegalArgumentException("Wrong rdf parser type!");
         
         parser.setStatementHandler(this);
@@ -148,7 +153,7 @@ public class ModelManager implements StatementHandler {
      * otherwise it will create one.
      * @return The parse instance.
      */
-    private void setXmlN3ParserInstance() {
+    private void setNTriplesParserInstance() {
        if (parser==null || !(parser instanceof NTriplesParser)) {
            parser = new NTriplesParser();
        }

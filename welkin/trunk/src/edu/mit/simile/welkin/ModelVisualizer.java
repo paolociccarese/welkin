@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import edu.mit.simile.welkin.ModelCache.WLiteral;
 import edu.mit.simile.welkin.ModelCache.WResource;
 import edu.mit.simile.welkin.ModelCache.WStatement;
+import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class ModelVisualizer extends JComponent implements Runnable {
 
@@ -293,6 +294,9 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
         if (timing) startTime = System.currentTimeMillis();
 
+        PredicateUri[] pu;
+        float somma = 0;
+        
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
             
@@ -321,8 +325,17 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 float d = (float) Math.sqrt(d2);
                 if (d == 0) d = 0.0001f; // avoid dividing by zero
 
+                pu = model.cache.getEntries(n.hash,m.hash);
+                
+                somma = 0;
+                if(pu!=null && pu.length>0)
+                for (int i=0; i<pu.length;i++) {
+                	somma+=pu[i].weight;
+                }
+                	
+                
                 // get the weight of the link between n and m
-                float weight = (model.cache.getEntries(n.hash,m.hash) != null) ? 1.0f : 0.0f;
+                float weight = somma>1 ? 1.0f : somma;
                 
                 // attractive force
                 float af = attractive(d, weight);
@@ -652,7 +665,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
             FontMetrics fm = g2.getFontMetrics(timeFont);
             int height = (int) (fm.getAscent() + fm.getDescent());
             g.drawString("nodes: " + model.cache.resources.size(), 0, -3*height);
-            g.drawString("edges: " + model.cache.hash.size(), 0, -2*height);
+            g.drawString("edges: " + model.cache.statements.size(), 0, -2*height);
             g.drawString("drawing: " + drawingTime + " ms", 0, -1*height);
             g.drawString("calculation: " + simulationTime + " ms", 0, 0);
             g2.setTransform(t);

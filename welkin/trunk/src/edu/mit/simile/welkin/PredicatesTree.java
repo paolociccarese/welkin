@@ -1,310 +1,406 @@
 package edu.mit.simile.welkin;
 
-import java.awt.Rectangle;
-import java.awt.event.MouseListener;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
-import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.plaf.ColorUIResource;
 
-import edu.mit.simile.welkin.ModelCache.WUriBase;
-import edu.mit.simile.welkin.tree.NamespaceTreeNode;
-import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
-import edu.mit.simile.welkin.tree.TreeNode;
+import edu.mit.simile.welkin.resource.PredicateUri;
 
-public class PredicatesTree extends JTree {
-    Mouse mouseListener;
+/**
+ * @author Paolo Ciccarese
+ */
+public class PredicatesTree extends JPanel {
+    
+    final Font font = new Font("Verdana", Font.PLAIN, 11);
+    final Font bold = new Font("Verdana", Font.BOLD, 10);
+    
+    public static final String EMPTY_LABEL = "Any predicates in the model!";
+    public static final String ROOT_LABEL = "Predicates";
+    
+    public static final Color BACKGROUND = Color.WHITE;
+    public static final Color ACTIVE_FOREG = Color.BLACK;
+    public static final Color PASSIVE_FOREG = Color.GRAY;
+    
+    public static final int MIN_VALUE = 0;
+    public static final int MAX_VALUE = 10;
+    public static final int INIT_VALUE = 10;
+    public static final float FACTOR = 10;
+    
     Welkin welkin;
-    PredicatesTreeRenderer renderer;
-    Hashtable map;
-    Hashtable checked;
-    boolean pathcheck = false;
+    FullNode root;
+    List elements;
+    
+    int vPos;
+    int xPos;
     
     public PredicatesTree(Welkin welkin) {
-        super();
         this.welkin = welkin;
-        init();
-        defineEmptyRoot();
+        clear();
     }
     
     public void clear() {
-        init();
-        defineEmptyRoot();
+        root = null;
+        elements = new ArrayList();
+        setEmptyTree();
     }
     
-    public void init() {
-        if(mouseListener!=null) this.removeMouseListener(mouseListener);
-        mouseListener = new Mouse();
-        map = new Hashtable();
-        checked = new Hashtable();
-        super.setCellRenderer(renderer = new PredicatesTreeRenderer(map, checked));
-        this.addMouseListener(mouseListener);
+    public void setEmptyTree() {
+        JLabel emptyLabel = new JLabel(EMPTY_LABEL);
+        emptyLabel.setBounds(2,2,200,16);
+        emptyLabel.setFont(font);
+        
+        this.removeAll();
+        this.setLayout(null);
+        this.setBackground(BACKGROUND);
+        this.add(emptyLabel);
+        this.setPreferredSize(new Dimension(300,20));
+        this.repaint();
     }
- 
+    
     public void buildTree() {
-        init();
-        fillTree();
-    }
-    
-    private void defineEmptyRoot() {
-        DefaultMutableTreeNode root=new DefaultMutableTreeNode("Any ontology");
-        DefaultTreeModel model=new DefaultTreeModel(root);
-        this.setModel(model);
-        this.revalidate();
-        this.validate();
-        this.repaint();
-    }
-    
-    public void fillTree() {
-        DefaultMutableTreeNode root=new DefaultMutableTreeNode("Predicates uri");
-        DefaultTreeModel model=new DefaultTreeModel(root);
-        for(Iterator it=welkin.wrapper.cache.predicatesBases.iterator();it.hasNext();) {
-            WUriBase ns=((WUriBase)it.next());
-            TreeNode nsTreeNode=new NamespaceTreeNode(ns.base);
-            model.insertNodeInto(nsTreeNode,root,root.getChildCount());
-            for(Iterator i=ns.locals.iterator();i.hasNext();) {
-                model.insertNodeInto(new PropertyToResourceTreeNode(ns.base,(String)i.next()),nsTreeNode,nsTreeNode.getChildCount());
-            }
+        FullNode rootNode = new FullNode("Predicates",null);
+        elements.add(rootNode);
+        
+        for(Iterator it = welkin.wrapper.cache.predicates.iterator(); it.hasNext();) {
+        	PredicateUri predicate = ((PredicateUri)it.next());
+        	String[] parts = Util.getParts(predicate.getUri());
+        	createNode(rootNode, parts, predicate, 0);
         }
         
-        this.setTreeCheck(new TreePath(root.getPath()));
-        forwardPropagation(root, true);
-        this.setModel(model);
-        this.revalidate();
-        this.validate();
+        root = rootNode;
+        this.displayTree();
+    	this.repaint();
+    }
+    
+    private void createNode(FullNode root, String[] parts, PredicateUri all, int level) {
+    	if(level == 2) {
+        	for(int i = 0; i < root.children.size(); i++) {
+        		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
+        			return;
+        		} 
+        	}
+        	root.children.add(new FullNode(parts[2], all));
+    		return;
+    	}
+    	boolean flag = false;
+    	for(int i = 0; i < root.children.size(); i++) {
+    		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
+    			level++;
+    			createNode(((FullNode)root.children.get(i)), parts, all, level);
+    			flag = true;
+    		}
+    	}
+    	
+    	if(!flag) {
+    		FullNode child = new FullNode(parts[level++], null);
+    		root.children.add(child);
+    		createNode(child, parts, all, level);
+    	}
+    }
+    
+    private void displayTree() {
+        this.removeAll();
+        this.setLayout(null);
+        this.setBackground(BACKGROUND);
+        
+        root.value = root.slider.getValue()/FACTOR;
+        calculateValues(root, root.value);
+        
+        xPos=5;
+        vPos=5;
+        printNodes(root);
+        
         this.repaint();
     }
-
-    public class TreeSelect implements TreeSelectionListener {
-        public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
-            Object value = treeSelectionEvent.getPath().getLastPathComponent();
+    
+    private void printNodes(FullNode node) {
+        if(node.isVisible && node.isAllowed) {
+	        node.setLocation(xPos,vPos);
+	        this.add(node);
+	        vPos+=22;
+	        
+	        if(node.children.size()==0) {
+	            node.iconLabel.setIcon(UIManager.getIcon("Tree.leafIcon"));
+	        }
+        } else return;
+        
+        if(node.children.size()>0) xPos+=15;
+        for(int i=0; i<node.children.size();i++) {
+            printNodes((FullNode) node.children.get(i));
+        }
+        if(node.children.size()>0) xPos-=15;
+        
+        this.setPreferredSize(new Dimension(xPos+200, vPos+5));
+    }
+    
+    private void calculateValues(FullNode node, float ancestorValue) {
+    	if(node.predicate!=null)
+    			node.adjustValue();
+        for(int i=0; i<node.children.size();i++) {
+            ((FullNode) node.children.get(i)).sum = ancestorValue;
+            ((FullNode) node.children.get(i)).adjustValue(Math.min(ancestorValue,1));
+            calculateValues((FullNode) node.children.get(i),((FullNode) node.children.get(i)).value);
+            ((FullNode) node.children.get(i)).setFace();
+        }
+        PredicatesTree.this.welkin.notifyTreeChange();
+    }
+    
+    private void deselectAll() {
+        for(Iterator it=elements.iterator();it.hasNext();) {
+            ((FullNode)it.next()).label.setSelected(false);
         }
     }
-
-    public void setPathCheck(boolean pathcheck) {
-        this.pathcheck = pathcheck;
-        if (this.pathcheck == false)
-            checked.clear();
+    
+    private void visualizeAll() {
+        for(Iterator it=elements.iterator();it.hasNext();) {
+            ((FullNode)it.next()).isAllowed = true;
+        }
+    }
+    
+    private void devisualizeAll() {
+        for(Iterator it=elements.iterator();it.hasNext();) {
+            ((FullNode)it.next()).isAllowed = false;
+        }
+    }
+    
+    public void crawlingTree(String prefix) {
+        devisualizeAll();
+        for(Iterator it=elements.iterator();it.hasNext();) {
+            FullNode node = ((FullNode)it.next());
+            if(node.absolute != null && node.absolute.getUri().startsWith(prefix))
+                setAllowedBranch(node);
+        }
+        displayTree();
+    }
+    
+    private void setAllowedBranch(FullNode node) {
+        if(node == null) return;
         else {
-            checked.clear();
-            includePathCheck();
-        }
-        repaint();
-    }
-
-    private void includePathCheck() {
-        int[] rows = new int[getRowCount()];
-        int[] selected = getSelectionRows();
-        int rowcount = super.getRowCount();
-        for (int i = 0; i < rowcount; i++) {
-            if (isExpanded(i) == true)
-                rows[i] = i;
-            else
-                rows[i] = -1;
-        }
-
-        for (int i = rowcount - 1; i >= 0; i--) {
-            if (rows[i] != -1)
-                collapseRow(rows[i]);
-        }
-
-        int rc = getRowCount();
-        int be, ae;
-        be = rc; // before expansion = current row count
-        TreePath path;
-        for (int i = 0; i < rc; i++) {
-            path = getPathForRow(i);
-            if (isChecked(path))
-                addCheck(path.getParentPath(), false);
-
-            expandRow(i);
-            ae = getRowCount(); //after expansion = current row count..
-            checkNodes(ae - be, i);
-            collapseRow(i);
-        }
-        // End Traversal...
-
-        //return them to normal status...
-        for (int i = 0; i < rowcount; i++) {
-            if (rows[i] != -1)
-                expandRow(rows[i]);
-        }
-        if (selected != null)
-            setSelectionRows(selected);
-    }
-
-    private void checkNodes(int amount, int row) {
-        if (amount == 0)
-            return;
-
-        int be, ae;
-        be = getRowCount();
-        TreePath path;
-        for (int i = 1; i <= amount; i++) {
-            path = getPathForRow(i + row);
-            if (isChecked(path))
-                addCheck(path.getParentPath(), false);
-            expandRow(i + row);
-            ae = getRowCount();
-            checkNodes(ae - be, i + row);
-            collapseRow(i + row);
-        }
-    }
-
-    public boolean isChecked(Object value) {
-        Integer key = new Integer(value.hashCode());
-        if (map.containsKey(key))
-            return true;
-        else
-            return false;
-    }
-
-    public boolean isChecked(TreePath path) {
-        return isChecked(path.getLastPathComponent());
-    }
-
-    public Object[] getCheckedObjects() {
-        return map.values().toArray();
-    }
-
-    private void addCheck(TreePath path, boolean now) {
-        if (path == null)
-            return;
-        Object value = path.getLastPathComponent();
-        Integer v = new Integer(value.hashCode());
-        if (checked.containsKey(v) == false || now)
-            checked.put(v, new Integer(1));
-        else
-            checked.put(v, new Integer(1 + ((Integer) checked.get(v))
-                    .intValue()));
-        addCheck(path.getParentPath(), false);
-    }
-
-    private void removeCheck(TreePath path, boolean now) {
-        if (path == null)
-            return;
-        Object value = path.getLastPathComponent();
-        Integer v = new Integer(value.hashCode());
-        if (checked.containsKey(v)) {
-            int t = ((Integer) checked.get(v)).intValue();
-            if (t <= 1 || now)
-                checked.remove(v);
-            else
-                checked.put(v, new Integer(t - 1));
-        }
-        removeCheck(path.getParentPath(), false);
-    }
-
-    public void setTreeCheck(TreePath path) {
-        Object value = path.getLastPathComponent();
-        Integer key = new Integer(value.hashCode());
-        if (map.containsKey(key) == true)
-            return;
-        map.put(key, value);
-        if (PredicatesTree.this.pathcheck)
-            addCheck(path.getParentPath(), false);
-    }
-
-    public void removeTreeCheck(TreePath path) {
-        Integer key = new Integer(path.getLastPathComponent().hashCode());
-        if (map.containsKey(key) == false)
-            return;
-        map.remove(key);
-        if (PredicatesTree.this.pathcheck)
-            removeCheck(path.getParentPath(), false);
-    }
-    
-    private void forwardPropagation(DefaultMutableTreeNode node, boolean bool) {
-        checkManagement(new TreePath(node.getPath()),bool);
-        for (int i = 0; i < PredicatesTree.this.getModel().getChildCount(node); i++) {
-            forwardPropagation((DefaultMutableTreeNode) PredicatesTree.this.getModel().getChild(node,i),bool);
+            node.isAllowed = true;
+            setAllowedBranch(node.father);
         }
     }
     
-    private void backwardPropagation(DefaultMutableTreeNode node, boolean bool) {
-        boolean allSelectedFlag = true;
-        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-        if(parent==null) return;
-        for(Enumeration e = parent.children(); e.hasMoreElements(); ) {
-            if(!PredicatesTree.this.isChecked(e.nextElement()))
-                allSelectedFlag = false;
+    class FullNode extends JPanel implements ChangeListener {
+        private JLabel iconLabel;
+        private Icon icon;
+        private JLabel weight;
+        private JSlider slider;
+        private TreeLabel label;
+        
+        PredicateUri absolute;
+        
+        /**
+         * Actual value of the node
+         */
+        private float value;
+        /**
+         * Sum of values of the ancestors
+         */
+        private float sum;
+        
+        boolean isVisible;
+        boolean isAllowed;
+        boolean isSelected;
+        
+        FullNode me;
+        FullNode father;
+        Vector children = new Vector();
+        PredicateUri predicate;
+        
+        FullNode(String labelT, PredicateUri predicate) {
+        	this.predicate = predicate;
+            me=this;
+            
+            this.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+            this.setBackground(BACKGROUND);
+            
+            iconLabel = new JLabel();
+            iconLabel.setSize(20,18);
+            
+            icon = UIManager.getIcon("Tree.openIcon");
+            iconLabel.setIcon(icon);
+            
+            weight = new JLabel();
+            weight.setHorizontalAlignment(JTextField.RIGHT);
+            weight.setBackground(BACKGROUND);
+            weight.setFont(font);
+            weight.setSize(30,16);
+            weight.setBorder(null);
+            
+            slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
+            slider.addChangeListener(this);
+            slider.setBackground(BACKGROUND);
+            slider.setSize(new Dimension(80,16));
+            slider.setPreferredSize(new Dimension(80,14));
+            slider.setMajorTickSpacing(1);
+            slider.setSnapToTicks(true);
+            slider.setPaintTicks(true);
+            
+            this.label = new TreeLabel();
+            this.label.setFont(font);
+            this.label.setText(labelT);
+            this.label.setBackground(BACKGROUND);
+            
+            this.add(iconLabel);
+            this.add(slider);
+            this.add(this.label);
+           
+            this.add(weight);
+            
+            this.value = INIT_VALUE;
+            
+            this.isVisible = true;
+            this.isAllowed = true;
+            
+            setFace();
+            
+            this.setSize(getDimension().width,18);
+            
+            this.addMouseListener(new MouseAdapter() {
+                public void mousePressed(MouseEvent e) {
+                    deselectAll();
+                    label.isSelected = true;
+                    if(e.getPoint().x<=20) {
+                        openCloseNodeChildren(me);
+                        displayTree();
+                    }
+                    repaint();
+                }
+            });
         }
         
-        boolean allNotSelectedFlag = true;
-        for(Enumeration e = parent.children(); e.hasMoreElements(); ) {
-            if(PredicatesTree.this.isChecked(e.nextElement()))
-                allNotSelectedFlag = false;
-        }
-        
-        if(allSelectedFlag||allNotSelectedFlag) {
-            if (bool)
-                PredicatesTree.this.setTreeCheck(new TreePath(parent.getUserObjectPath()));
-            else
-                PredicatesTree.this.removeTreeCheck(new TreePath(parent.getUserObjectPath()));
-        }
-        backwardPropagation(parent,bool);
-    }
-    
-    private void checkManagement(TreePath path, boolean bool) {
-        if (bool)
-            PredicatesTree.this.setTreeCheck(path);
-        else
-            PredicatesTree.this.removeTreeCheck(path);
-    }
-    
-    public class Mouse implements MouseListener {
+		public void adjustValue(float f) {
+			value = f;
+			slider.setValue((int)(f*10));
+			if(predicate!=null) predicate.weight = f ;
+		}
+		
+		public void adjustValue() {
+			value = (float)slider.getValue()/10;
+			if(predicate!=null) predicate.weight = value ;
+		}
 
-        public void mousePressed(java.awt.event.MouseEvent mouseEvent) {
-
-            TreePath path = PredicatesTree.this.getPathForLocation(
-                    mouseEvent.getX(), mouseEvent.getY());
-
-            if (path == null) return;            
-            
-            Object value=path.getLastPathComponent();
-
-            Integer key = new Integer(value.hashCode());
-            Rectangle rect = PredicatesTree.this.getPathBounds(path);
-            boolean isCheckBox = PredicatesTree.this.renderer.isCheckBox(mouseEvent
-                    .getX()
-                    - (int) rect.getX(), mouseEvent.getY() - (int) rect.getY());
-
-            if (!isCheckBox) return;
-            
-            if (map.containsKey(key) == true) {
-                map.remove(key);
-                if (PredicatesTree.this.pathcheck)
-                    removeCheck(path.getParentPath(), false);
-            } else {
-                map.put(key, value);
-                if (PredicatesTree.this.pathcheck)
-                    addCheck(path.getParentPath(), false);
+		private void openCloseNodeChildren (FullNode node) {
+            if(node.children.size()>0) {
+                if(((FullNode)node.children.get(0)).isVisible) {
+                    closeChildren(node);
+                } else {
+                    openChildren(node);
+                }
             }
-            
-            boolean bool=PredicatesTree.this.isChecked(value);
-            forwardPropagation((DefaultMutableTreeNode) value, bool);
-            backwardPropagation((DefaultMutableTreeNode) value, bool);
-            PredicatesTree.this.welkin.notifyTreeChange();
-            PredicatesTree.this.repaint();
+        }
+        
+        private void openChildren(FullNode node) {
+            for(int i=0;i<node.children.size();i++) 
+                ((FullNode)node.children.get(i)).isVisible = true;
+        }
+        
+        private void closeChildren(FullNode node) {
+            for(int i=0;i<node.children.size();i++) 
+                ((FullNode)node.children.get(i)).isVisible = false;
+        }
+        
+        public void stateChanged(ChangeEvent e) { 
+            this.setFace();      
+            this.value=Math.min(slider.getValue()/FACTOR,1);
+            calculateValues(this,value);
+            this.repaint();
+        }
+        
+        private void setFace() {
+            float sliderValue = slider.getValue();
+            //weight.setText("("+Float.toString(sliderValue/FACTOR)+")");
+            if(predicate!=null)
+            weight.setText("(sum="+this.sum+",value="+this.value+",pred="+this.predicate.getUri()+",value="+this.predicate.weight+")");
+            if (sliderValue==0) {
+                label.setForeground(PASSIVE_FOREG);
+                weight.setForeground(PASSIVE_FOREG);
+            } else if (sliderValue==10) {
+                label.setFont(bold);
+                weight.setFont(bold);
+            } else {
+                label.setForeground(ACTIVE_FOREG);
+                weight.setForeground(ACTIVE_FOREG);
+                label.setFont(font);
+                weight.setFont(font);
+            } 
+        }
+        
+        public Dimension getDimension() {
+            return new Dimension (200+420+20+30+80+label.getPreferredSize().width,16);
+        }
+    }
+    
+    public class TreeLabel extends JLabel {
+        boolean isSelected;
+        boolean hasFocus;
+
+        public TreeLabel() {
         }
 
-        public void mouseEntered(java.awt.event.MouseEvent mouseEvent) {
+        public void setBackground(Color color) {
+            if (color instanceof ColorUIResource)
+                color = null;
+            super.setBackground(color);
         }
 
-        public void mouseExited(java.awt.event.MouseEvent mouseEvent) {
+        public void paintComponent(Graphics g) {
+            String str;
+            if ((str = getText()) != null) {
+                if (0 < str.length()) {
+                    if (isSelected) {
+                        g.setColor(Color.YELLOW);
+                    } else {
+                        g.setColor(UIManager.getColor("Tree.textBackground"));
+                    }
+                    Dimension d = getPreferredSize();
+                    int imageOffset = 0;
+                    Icon currentI = getIcon();
+                    if (currentI != null) {
+                        imageOffset = currentI.getIconWidth()
+                                + Math.max(0, getIconTextGap() - 1);
+                    }
+                    g.fillRect(0, 0, d.width + 1, d.height + 10);
+                }
+            }
+            super.paintComponent(g);
         }
 
-        public void mouseClicked(java.awt.event.MouseEvent mouseEvent) {
+        public Dimension getPreferredSize() {
+            Dimension retDimension = super.getPreferredSize();
+            if (retDimension != null) {
+                retDimension = new Dimension(retDimension.width + 3,
+                        retDimension.height);
+            }
+            return retDimension;
         }
 
-        public void mouseReleased(java.awt.event.MouseEvent mouseEvent) {
+        public void setSelected(boolean isSelected) {
+            this.isSelected = isSelected;
+            this.repaint();
         }
 
-    };
+        public void setFocus(boolean hasFocus) {
+            this.hasFocus = hasFocus;
+        }
+    }
 }

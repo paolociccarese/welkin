@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+
+import edu.mit.simile.welkin.resource.PredicateUri;
+import edu.mit.simile.welkin.resource.ResourceUri;
 
 public class ModelCache {
 
@@ -16,49 +21,48 @@ public class ModelCache {
     
     boolean blankNodes = false;    
     Set resources = new HashSet();
-    List predicatesBases = new ArrayList();
+    List predicates = new ArrayList();
     List resourcesBases = new ArrayList();
-    HashMap hash = new HashMap();
+    HashMap statements = new HashMap();
+    ValueFactory factory = new ValueFactoryImpl();
     
     public void clear() {
         blankNodes = false;
         resources.clear();
-        predicatesBases.clear();
+        predicates.clear();
         resourcesBases.clear();
-        hash.clear();
+        statements.clear();
     }
     
-    public void addStatement(int hashSubject, int hashObject, URI predicate) {
+    public void addStatement(int hashSubject, int hashObject, PredicateUri predicate) {
         if (hashSubject == hashObject) return;
         WDoubleHashKey key = new WDoubleHashKey(hashSubject, hashObject);
-        Object value = hash.get(key);
+        Object value = statements.get(key);
         if (value != null) { 
             Object[] values = (Object[]) value;
-            URI newValues[] = new URI[values.length+1];
+            PredicateUri newValues[] = new PredicateUri[values.length+1];
             System.arraycopy(values, 0, newValues, 0, values.length);
             newValues[values.length] = predicate;
         } else {
-            URI[] values = new URI[1];
+        	PredicateUri[] values = new PredicateUri[1];
             values[0] = predicate;
-            hash.put(key, values);
+            statements.put(key, values);
         }
     }
     
-    public int addPredicatesUri(URI uri) {
-        WUriBase ns = new WUriBase(uri.getNamespace(), ResourceUriBasePanel.DEFAULT_URI_COLOR);
-        if(!predicatesBases.contains(ns)) {
-            ns.addProperty(uri.getLocalName());
-            predicatesBases.add(ns);
-            return predicatesBases.indexOf(ns);
-        }
+    public PredicateUri addPredicatesUri(URI uri) {
+    	PredicateUri ns = new PredicateUri(uri, 1);
+    	int index = predicates.indexOf(ns);
+        if(index == -1) {
+            predicates.add(ns);
+            return ns;
+        }        
         
-        int index = predicatesBases.indexOf(ns);
-        ((WUriBase)predicatesBases.get(index)).addProperty(uri.getLocalName());
-        return predicatesBases.indexOf(ns);
+        return (PredicateUri) predicates.get(index);
     }
     
     public int addResourcesUri(URI uri) {
-        WUriBase ns = new WUriBase(uri.getNamespace(), ResourceUriBasePanel.DEFAULT_URI_COLOR);
+        ResourceUri ns = new ResourceUri(uri, ResourceUriBasePanel.DEFAULT_URI_COLOR);
         if(!resourcesBases.contains(ns)) {
             resourcesBases.add(ns);
             return resourcesBases.indexOf(ns);
@@ -68,10 +72,10 @@ public class ModelCache {
     }
 
     WDoubleHashKey tmp = new WDoubleHashKey();  
-    public URI[] getEntries(int hashSubject, int hashObject) {
+    public PredicateUri[] getEntries(int hashSubject, int hashObject) {
         tmp.x = hashSubject;
         tmp.y = hashObject;
-        return (URI[]) hash.get(tmp);
+        return (PredicateUri[]) statements.get(tmp);
     }
     
     public WResource addResource(String unique, float[] coordinates, boolean isNodeFixed, boolean isNotSubject) {
@@ -103,7 +107,9 @@ public class ModelCache {
     public WResource addBlankResource(String unique) {
         if(!blankNodes) {
             blankNodes = true;
-            WUriBase ns = new WUriBase(ModelCache.ANONYMOUS_RES, ResourceUriBasePanel.DEFAULT_URI_COLOR);
+            ResourceUri ns = new ResourceUri(
+            		factory.createURI(ModelCache.ANONYMOUS_RES), 
+					ResourceUriBasePanel.DEFAULT_URI_COLOR);
             if(!resourcesBases.contains(ns)) {
                 resourcesBases.add(ns);
             }
@@ -122,15 +128,15 @@ public class ModelCache {
     
     public void clearUriColors() {
         for(Iterator it = resourcesBases.iterator(); it.hasNext();) {
-            WUriBase uri = (WUriBase) it.next();
+        	ResourceUri uri = (ResourceUri) it.next();
             uri.color = ResourceUriBasePanel.DEFAULT_URI_COLOR;
         }
     }
     
     public void setUriColor(String prefix, Color color) {
         for(Iterator it = resourcesBases.iterator(); it.hasNext();) {
-            WUriBase uri = (WUriBase) it.next();
-            if(uri.base.startsWith(prefix))
+        	ResourceUri uri = (ResourceUri) it.next();
+            if(uri.getUri().startsWith(prefix))
                 uri.color = color;
         }
     }
@@ -144,7 +150,7 @@ public class ModelCache {
         return null;
     }
       
-    public WStatement getStatement(WResource subject, URI predicate, WResource object) {
+    public WStatement getStatement(WResource subject, PredicateUri predicate, WResource object) {
         return new WStatement(subject, predicate, object);
     }
 
@@ -165,8 +171,8 @@ public class ModelCache {
             boolean flag = false;
             for (Iterator i = node.linkedObjectNodes.iterator(); i.hasNext();) {
                 WStatement edge = (WStatement) i.next();
-                String tmp = edge.predicate.toString();
-                if (tree.isChecked(edge.predicate.toString())) {
+//                String tmp = edge.predicate.toString();
+                if (edge.predicate.weight>0) {
                     flag = true;
                     validatedNodes.add(edge.object);
                 }
@@ -183,12 +189,12 @@ public class ModelCache {
     
     public void adjustResourcesUriBaseColor() {
         for(Iterator i=resourcesBases.iterator();i.hasNext();) {
-            WUriBase ns = (WUriBase) i.next();
+        	ResourceUri ns = (ResourceUri) i.next();
 	        for(Iterator it=resources.iterator();it.hasNext();) {
 	            WResource tmp = (WResource) it.next();
-	            if(blankNodes && ns.base.equals(ModelCache.ANONYMOUS_RES) && tmp.isBlankNode ) {
+	            if(blankNodes && ns.getUri().equals(ModelCache.ANONYMOUS_RES) && tmp.isBlankNode ) {
 	                tmp.color = ns.color;
-	            } else if(Util.getNameSpace(tmp.unique).equals(ns.base)) {
+	            } else if(Util.getNameSpace(tmp.unique).equals(ns.getUri())) {
 	                tmp.color = ns.color;
 	            }
 	        }
@@ -323,10 +329,10 @@ public class ModelCache {
     }
     
     public class WStatement {
-        final URI predicate;
+        final PredicateUri predicate;
         final WResource subject, object;
 
-        WStatement(final WResource subject, final URI predicate,  final WResource object) {
+        WStatement(final WResource subject, final PredicateUri predicate,  final WResource object) {
             this.predicate = predicate;
             this.subject = subject;
             this.object = object;
@@ -344,46 +350,6 @@ public class ModelCache {
         
         public int hashCode() {
             return subject.hashCode()+predicate.hashCode()*5+object.hashCode()*10;
-        }
-    }
-    
-    class WUriBase {
-        int hash=0;
-        String base;
-        Color color;
-        Set locals = new HashSet();
-        WUriBase(final String base, final Color color) {
-            this.base = base;
-            this.color=color;
-            calculateHashCode();
-        }
-        
-        public void addProperty(String property) {
-            locals.add(property);
-        }
-        
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || !(o instanceof WUriBase)) return false;
-
-            if (this.base.equals(((WUriBase) o).base)) return true;
-            else return false;
-        }
-        
-        public int hashCode() { return hash; }
-
-        private void calculateHashCode() {
-            int h = hash;
-            if (h == 0) {
-                int off = 0;
-                char val[] = base.toString().toCharArray();
-                int len = base.toString().length();
-
-                for (int i = 0; i < len; i++) {
-                    h = 31 * h + val[off++];
-                }
-                hash = h;
-            }
         }
     }
     

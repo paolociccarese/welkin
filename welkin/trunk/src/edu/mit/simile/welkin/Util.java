@@ -19,4 +19,30 @@ public class Util {
         
         return uri.substring(0 , i+1);       
     }
+    
+    public static String[] getParts(String uri) {
+    	String[] us= new String[3];
+    	
+    	int canceIndex = uri.lastIndexOf("#");
+    	if(canceIndex>=0) us[2] = uri.substring(canceIndex);
+    	else 
+    	{
+    		canceIndex = uri.lastIndexOf("/");
+    		if(canceIndex>3) {
+    			us[2] = uri.substring(canceIndex);
+    		} else {
+	    		String[] uris = new String[1];
+				uris[0] = uri;
+				return uris;
+    		}
+    	}
+    	
+    	int slashIndex = uri.indexOf('/',7);
+    	if(slashIndex>=7) {
+    		us[1] = uri.substring(slashIndex, canceIndex);
+    		us[0] = uri.substring(0, slashIndex);
+    	}
+    	
+    	return us;
+    }
 }
