@@ -474,7 +474,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     fileName = openWin.getSelectedFile();
                     
-                    dirBase = fileName.getAbsolutePath().substring(0,fileName.toString().lastIndexOf("\\"));
+                    dirBase = fileName.getParent();
 
                     FileInputStream in = new FileInputStream(fileName);
                     if (in == null) {
