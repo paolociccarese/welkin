@@ -3,59 +3,69 @@ package edu.mit.simile.welkin;
 
 public class Util {
     
-    public static String[] getParts(String uri) {
-    	String[] us= new String[3];
-    	
-    	int canceIndex = uri.lastIndexOf("#");
-    	if(canceIndex>=0) us[2] = uri.substring(canceIndex);
-    	else 
-    	{
-    		canceIndex = uri.lastIndexOf("/");
-    		if(canceIndex>3) {
-    			us[2] = uri.substring(canceIndex);
-    		} else {
-	    		String[] uris = new String[1];
-				uris[0] = uri;
-				return uris;
-    		}
+    public static String[] splitUri(String uri) {
+    	String[] parts = null;
+
+    	if(uri.startsWith("urn:")) { // urn:*:*
+    		parts = new String[2];
+    		int lastIndex = uri.lastIndexOf(":");
+    		parts[1] = uri.substring(lastIndex);
+    		parts[0] = uri.substring(0, lastIndex);
+    	} else if(uri.startsWith("http:")) { // http://*/*#* 
+    		parts = new String[3];
+    		int lastIndex = uri.indexOf("#");
+    		if(lastIndex==-1) lastIndex = uri.lastIndexOf("/");
+        	parts[2] = uri.substring(lastIndex);
+        	int slashIndex = uri.indexOf('/',7);
+    		parts[1] = uri.substring(slashIndex, lastIndex);
+    		parts[0] = uri.substring(0, slashIndex);
+    	} else if(uri.startsWith("file:")) { // urn:*:*
+    		parts = new String[2];
+    		int lastIndex = uri.lastIndexOf("/");
+    		parts[1] = uri.substring(lastIndex);
+    		parts[0] = uri.substring(0, lastIndex);
     	}
     	
-    	int slashIndex = uri.indexOf('/',7);
-    	if(slashIndex>=7) {
-    		us[1] = uri.substring(slashIndex, canceIndex);
-    		us[0] = uri.substring(0, slashIndex);
-    	}
-    	
-    	return us;
+    	return parts;
     }
     
-    public static String getBase(String uri) {
-    	String[] us= new String[3];
+    public static String[] splitUriBases(String uri) {
+    	String[] parts = null;
     	
-    	try {
-	    	int canceIndex = uri.lastIndexOf("#");
-	    	if(canceIndex<0) {
-	    		canceIndex = uri.lastIndexOf("/");
-	    	}
-	    	
-	    	return uri.substring(0, canceIndex);
-    	} catch(Exception exc) {
-    		int canceIndex = uri.lastIndexOf(":");
-    		
-    		if(canceIndex>=0) return uri.substring(0, canceIndex);
-    		return "";
+    	if(uri.startsWith("urn:")) { // urn:*:*
+    		parts = new String[1];
+    		int lastIndex = uri.lastIndexOf(":");
+    		parts[0] = uri.substring(0, lastIndex);
+    	} else if(uri.startsWith("http:")) { // http://*/*#* 
+    		parts = new String[2];
+    		int lastIndex = uri.indexOf("#");
+    		if(lastIndex==-1) lastIndex = uri.lastIndexOf("/");
+        	int slashIndex = uri.indexOf('/',7);
+    		parts[1] = uri.substring(slashIndex, lastIndex);
+    		parts[0] = uri.substring(0, slashIndex);
+    	} else if(uri.startsWith("file:")) { // urn:*:*
+    		parts = new String[1];
+    		int lastIndex = uri.lastIndexOf("/");
+    		parts[0] = uri.substring(0, lastIndex);
     	}
+    	
+    	return parts;
     }
     
-    public static String[] getBasisParts(String base) {
-    	String[] us= new String[2];
-    	
-    	int slashIndex = base.indexOf('/',7);
-    	if(slashIndex>=7) {
-    		us[1] = base.substring(slashIndex);
-    		us[0] = base.substring(0, slashIndex);
-    	}
-    	
-    	return us;
-    }
+//    public static String getUriBase(String uri) {
+//
+//    	if(uri.startsWith("urn:")) { // urn:*:*
+//    		int lastIndex = uri.lastIndexOf(":");
+//    		return uri.substring(0, lastIndex);
+//    	} else if(uri.startsWith("http:")) { // http://*/*#* 
+//    		int lastIndex = uri.indexOf("#");
+//    		if(lastIndex==-1) lastIndex = uri.lastIndexOf("/");
+//    		return uri.substring(0, lastIndex);
+//    	} else if(uri.startsWith("file:")) { // urn:*:*
+//    		int lastIndex = uri.lastIndexOf("/");
+//    		return uri.substring(0, lastIndex);
+//    	}
+//    	
+//    	return null;
+//    }
 }

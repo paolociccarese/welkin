@@ -64,7 +64,8 @@ public class ModelCache {
     
     public PartialUri addResourcesUri(URI uri) {
 
-    	PartialUri pu = new PartialUri(Util.getBase(uri.toString()), Color.RED);
+    	//PartialUri pu = new PartialUri(Util.getUriBase(uri.toString()), Color.RED);
+    	PartialUri pu = new PartialUri(uri.getNamespace(), Color.RED);
         int index = resourcesBases.indexOf(pu);
         if(index == -1) {
             resourcesBases.add(pu);

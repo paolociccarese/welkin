@@ -84,7 +84,7 @@ public class ResourcesTree extends JPanel {
         
         for(Iterator it = welkin.wrapper.cache.resourcesBases.iterator(); it.hasNext();) {
         	PartialUri predicate = ((PartialUri)it.next());
-        	String[] parts = Util.getBasisParts(predicate.getBase());
+        	String[] parts = Util.splitUriBases(predicate.getBase());
         	createNode(root, parts, predicate, 0);
         }
         
@@ -99,14 +99,15 @@ public class ResourcesTree extends JPanel {
     	
     	if(parts[0]==null) return; // TODO Blank Nodes
     	
-    	if(level == 1) {
+    	if(level == parts.length || (parts.length == 1 && level == 0)) {
         	for(int i = 0; i < root.children.size(); i++) {
         		if(((FullNode)root.children.get(i)).label.getText().equals(parts[level])) {
         			return;
         		} 
         	}
-        	FullNode tmp = new FullNode(parts[1], all);
-        	tmp.isVisible = false;
+        	FullNode tmp = new FullNode(parts[parts.length-1], all);
+        	if(level == 0) tmp.isVisible = true;
+        	else tmp.isVisible = false;
         	root.children.add(tmp);
     		return;
     	}
@@ -301,7 +302,7 @@ public class ResourcesTree extends JPanel {
         }
         
         public void stateChanged(ChangeEvent e) { 
-            label.setForeground(Color.getHSBColor(slider.getValue()/(float)MAX_VALUE,1,1));
+        	adjustValue();
             calculateValues(this,slider.getValue());
             this.repaint();
         }

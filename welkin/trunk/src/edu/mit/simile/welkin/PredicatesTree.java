@@ -84,7 +84,7 @@ public class PredicatesTree extends JPanel {
         
         for(Iterator it = welkin.wrapper.cache.predicates.iterator(); it.hasNext();) {
         	PredicateUri predicate = ((PredicateUri)it.next());
-        	String[] parts = Util.getParts(predicate.getUri());
+        	String[] parts = Util.splitUri(predicate.getUri());
         	createNode(rootNode, parts, predicate, 0);
         }
 
