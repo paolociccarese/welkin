@@ -31,7 +31,7 @@ public class NamespacesPanel extends JComponent {
     private static final int XTOP = 2;
     private static final int HROW = 18;
     
-    final Font font = new Font("Verdana", Font.BOLD, 11);
+    final Font font = new Font("Verdana", Font.PLAIN, 11);
     
     Welkin welkin;
     Set namespaces = new HashSet();

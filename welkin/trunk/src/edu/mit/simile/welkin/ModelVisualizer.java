@@ -82,7 +82,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean background = true;
     public boolean highlightOnLabel = true;
 
-    public boolean colors = true;
+    public boolean colors = false;
     
     ModelWrapper model;
     Node pick;

@@ -16,6 +16,9 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.tree.TreeCellRenderer;
 
+import edu.mit.simile.welkin.tree.PropertyToLiteralTreeNode;
+import edu.mit.simile.welkin.tree.PropertyToResourceTreeNode;
+
 public class CheckTreeRenderer extends JPanel implements TreeCellRenderer {
     private JCheckBox box;
     private TreeLabel label;
@@ -70,12 +73,17 @@ public class CheckTreeRenderer extends JPanel implements TreeCellRenderer {
         label.setSelected(isSelected);
         label.setFocus(hasFocus);
 
+        if(value instanceof PropertyToLiteralTreeNode) this.remove(box);
+        else this.add(box, BorderLayout.WEST);
+        
         if (bool2 && !bool)
             box.setIcon(cicon);
         else
             box.setIcon(icon);
 
-        if (leaf)
+        if(value instanceof PropertyToResourceTreeNode)
+            label.setIcon(null);
+        else if (leaf)
             label.setIcon(UIManager.getIcon("Tree.leafIcon"));
         else if (expanded)
             label.setIcon(UIManager.getIcon("Tree.openIcon"));
