@@ -37,7 +37,7 @@ public class ResTree extends GeneralTree {
     private ResourceNode childNode;
     private void createNode(ResourceNode root, String[] parts, PartialUri all, int level) {
     	
-    	if(parts[0]==null) return; // TODO Blank Nodes
+    	if(parts == null || parts[0]==null) return; // TODO Blank Nodes
     	
     	if(level == parts.length-1) {
     		childNode = new ResourceNode(this, parts[parts.length-1], all, root, true);

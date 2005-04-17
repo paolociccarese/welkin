@@ -180,11 +180,6 @@ public abstract class ModelChart extends JComponent {
 
     public abstract int process(WResource node);
 
-    public float scale(float value,float max,float scale) {
-    	if(value == 0.0f) value = 0.000000000001f;
-        return (float) (Math.log(value) / Math.log(max)) * scale;
-    }
-
     public float unscale(float value,float max,float scale) {
         return (float) (Math.exp(value/scale * Math.log(max)));
     }
@@ -201,6 +196,12 @@ public abstract class ModelChart extends JComponent {
         processValueVisibility(lv,hv);
         processCountVisibility(lc,hc);
     }
+
+	public float scale(float value,float max,float scale) {
+		if(value == 0.0f || value == 1.0f) value += 0.0000000001f;
+		if(max == 0.0f || max == 1.0f) max += 0.0000000001f;
+	    return (float) (Math.log(value) / Math.log(max)) * scale;
+	}
 
     private void processCountVisibility(float low, float high) {
         for (Iterator i = this.distributionByCount.keySet().iterator(); i.hasNext();) {
