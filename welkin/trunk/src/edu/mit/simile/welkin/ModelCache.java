@@ -14,7 +14,6 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 import edu.mit.simile.welkin.resource.PartialUri;
 import edu.mit.simile.welkin.resource.PredicateUri;
-import edu.mit.simile.welkin.resource.ResourceUri;
 
 public class ModelCache {
 
@@ -128,9 +127,6 @@ public class ModelCache {
     public WResource addBlankResource(String unique) {
         if(!blankNodes) {
             blankNodes = true;
-            ResourceUri ns = new ResourceUri(
-            		factory.createURI("_:"+unique),
-            		ResourcesTree.DEFAULT_URI_COLOR);
         }
 
         WResource res = new WResource(unique, true, true);

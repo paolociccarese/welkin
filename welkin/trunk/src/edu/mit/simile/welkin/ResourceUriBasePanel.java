@@ -1,7 +1,6 @@
 package edu.mit.simile.welkin;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -30,33 +29,33 @@ public class ResourceUriBasePanel extends JComponent {
     private static final int HTOP = 13;
     private static final int XTOP = 2;
     private static final int HROW = 18;
-    
+
     public static final Color DEFAULT_URI_COLOR = Color.red;
-    
+
     final Font font = new Font("Verdana", Font.PLAIN, 11);
     FontMetrics fm;
-    
+
     Welkin welkin;
-    
+
     Set resourcesBases = new HashSet();
-    
+
     class ResourcesBaseRow {
         int x,y;
         boolean on=false;
         ResourceUri ns;
-        
+
         ResourcesBaseRow(ResourceUri ns, int x, int y) {
             this.ns = ns;
             this.x = x;
             this.y = y;
         }
     }
-    
+
     class MyMouseListener extends MouseAdapter implements ActionListener{
-        
+
         JColorChooser jcc;
         ResourceUri namespace;
-        
+
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 for(Iterator i=resourcesBases.iterator();i.hasNext();) {
@@ -65,14 +64,14 @@ public class ResourceUriBasePanel extends JComponent {
                       && e.getPoint().y>=nsr.y-12 && e.getPoint().y<=nsr.y+4) {
                         namespace = nsr.ns;
                         jcc = new JColorChooser();
-                        JDialog chooser = JColorChooser.createDialog((Component)Welkin.frame,"Pick the namespace color", true, jcc, this, this);
+                        JDialog chooser = JColorChooser.createDialog(Welkin.frame,"Pick the namespace color", true, jcc, this, this);
                         chooser.show();
                     }
                 }
-            } 
+            }
             repaint();
         }
-        
+
         public void actionPerformed(ActionEvent evt) {
             if(evt.getActionCommand().equals("OK")) {
                 namespace.color = jcc.getColor();
@@ -84,7 +83,7 @@ public class ResourceUriBasePanel extends JComponent {
             repaint();
         }
     }
-    
+
     class MyMouseMotionListener extends MouseMotionAdapter {
         public void mouseMoved(MouseEvent e) {
             for(Iterator i=resourcesBases.iterator();i.hasNext();) {
@@ -96,21 +95,21 @@ public class ResourceUriBasePanel extends JComponent {
                     nsr.on=false;
                 }
             }
-            repaint(); 
+            repaint();
         }
     }
-    
+
     ResourceUriBasePanel (Welkin welkin) {
         this.welkin = welkin;
         this.setLayout(null);
-        
+
         this.addMouseListener(new MyMouseListener());
         this.addMouseMotionListener(new MyMouseMotionListener());
     }
-    
+
     public void init() {
         resourcesBases = new HashSet();
-        
+
         int maxWidth=0;
         int shift=0;
         for(Iterator i=welkin.wrapper.cache.resourcesBases.iterator();i.hasNext();) {
@@ -118,26 +117,26 @@ public class ResourceUriBasePanel extends JComponent {
             resourcesBases.add(new ResourcesBaseRow(urib,XTOP,HTOP+(HROW*shift++)));
             maxWidth=fm.stringWidth(urib.getUri())>maxWidth? fm.stringWidth(urib.getUri()):maxWidth;
         }
-        
+
         if(fm!=null) this.setPreferredSize(new Dimension(maxWidth+20,HROW*resourcesBases.size()+4));
         this.repaint();
     }
-    
+
     public void clear() {
         resourcesBases = new HashSet();
         this.setPreferredSize(new Dimension(10,10));
-        this.repaint();       
+        this.repaint();
     }
-    
+
     public void paintComponent(Graphics g) {
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.white);
         g2.setFont(font);
         fm = g2.getFontMetrics(font);
-        
+
         g2.fill(new Rectangle2D.Float(0.0f, 0.0f, this.getWidth(), this.getHeight()));
-        
+
         for(Iterator i=resourcesBases.iterator();i.hasNext();) {
             ResourcesBaseRow baseUriRow = (ResourcesBaseRow)(i.next());
             if (baseUriRow.on) g2.setColor(ResourceUriBasePanel.DEFAULT_URI_COLOR);

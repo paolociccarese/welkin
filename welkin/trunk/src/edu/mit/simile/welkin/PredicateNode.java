@@ -16,15 +16,15 @@ import javax.swing.event.ChangeEvent;
 import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class PredicateNode extends WNode {
-    
+
     public static final int MIN_VALUE = 0;
     public static final int MAX_VALUE = 10;
     public static final int INIT_VALUE = 10;
     public static final float FACTOR = 10;
-    
+
     final PredTree tree;
-    final PredicateUri predicate; 
-    
+    final PredicateUri predicate;
+
     public PredicateNode(final PredTree tree, String labelT, PredicateUri predicate,
     		WNode father, boolean isLeaf) {
     	this.predicate = predicate;
@@ -32,18 +32,18 @@ public class PredicateNode extends WNode {
     	this.isLeaf = isLeaf;
     	this.tree = tree;
     	this.me=this;
-        
+
         this.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
         this.setBackground(GeneralTree.BACKGROUND);
-        
+
         iconLabel = new JLabel();
         iconLabel.setSize(20,18);
-        
+
         check = new JCheckBox();
         check.setSelected(true);
         check.setBackground(Color.WHITE);
         check.addActionListener(this);
-        
+
         weight = new JLabel();
         weight.setHorizontalAlignment(JTextField.RIGHT);
         weight.setBackground(PredTree.BACKGROUND);
@@ -51,7 +51,7 @@ public class PredicateNode extends WNode {
         weight.setSize(30,16);
         weight.setBorder(null);
         if(predicate != null) incCount(predicate.getCount());
-        
+
         slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
         slider.addChangeListener(this);
         slider.setBackground(PredTree.BACKGROUND);
@@ -60,25 +60,25 @@ public class PredicateNode extends WNode {
         slider.setMajorTickSpacing(1);
         slider.setSnapToTicks(true);
         slider.setPaintTicks(false);
-        
+
         this.label = new JLabel();
         this.label.setFont(PredTree.font);
         this.label.setText(labelT);
         this.label.setBackground(PredTree.BACKGROUND);
-        
+
         this.add(iconLabel);
         this.add(check);
         this.add(slider);
         this.add(this.label);
         this.add(weight);
-        
+
         adjustValue(INIT_VALUE);
-        
+
         this.isVisible = true;
         this.isAllowed = true;
-        
+
         this.setSize(getDimension().width,18);
-        
+
         this.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 if(e.getPoint().x<=20) {
@@ -95,30 +95,30 @@ public class PredicateNode extends WNode {
     	if(predicate!=null) predicate.included = this.check.isSelected();
     	tree.notification();
 	}
-	
+
     public void incCount(int count) {
     	this.count += count;
     	weight.setText(" [" + this.count + "]");
     }
-    
+
 	public void adjustValue(int value) {
 		slider.removeChangeListener(this);
 		slider.setValue(value);
 		slider.addChangeListener(this);
 		adjustNode(value);
 	}
-	
+
 	public void adjustNode(float value) {
 		if(predicate!=null) predicate.weight = value;
-		setLook();		
+		setLook();
 	}
-    
+
     public void stateChanged(ChangeEvent e) {
-    	adjustNode((float)slider.getValue()/FACTOR) ;
-        tree.calculateValues(this, slider.getValue());
-        tree.notification();
+		adjustNode(slider.getValue()/FACTOR) ;
+		tree.calculateValues(this, slider.getValue());
+		tree.notification();
     }
-    
+
     float sliderValue;
     public void setLook() {
         sliderValue = slider.getValue();
@@ -130,6 +130,6 @@ public class PredicateNode extends WNode {
         } else {
             label.setForeground(PredTree.ACTIVE_FOREG);
             label.setFont(PredTree.font);
-        } 
+        }
     }
 }

@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -183,16 +182,16 @@ public abstract class ModelChart extends JComponent {
 
     public float scale(float value,float max,float scale) {
     	if(value == 0.0f) value = 0.000000000001f;
-        return (float) (Math.log((double) value) / Math.log((double) max)) * scale;
+        return (float) (Math.log(value) / Math.log(max)) * scale;
     }
 
     public float unscale(float value,float max,float scale) {
-        return (float) (Math.exp((double) (value/scale) * Math.log((double) max)));
+        return (float) (Math.exp(value/scale * Math.log(max)));
     }
 
     void filter() {
-        float w = (float) getWidth() - 1.0f;
-        float h = (float) getHeight() - 1.0f;
+        float w = getWidth() - 1.0f;
+        float h = getHeight() - 1.0f;
 
         float hv = unscale(highValue,maxValue,w);
         float lv = unscale(lowValue,maxValue,w);
@@ -206,7 +205,7 @@ public abstract class ModelChart extends JComponent {
     private void processCountVisibility(float low, float high) {
         for (Iterator i = this.distributionByCount.keySet().iterator(); i.hasNext();) {
             Count c = (Count) this.distributionByCount.get(i.next());
-            float size = (float) c.size();
+            float size = c.size();
             if (size < low || size > high) {
                 c.hide();
             } else {
@@ -249,7 +248,6 @@ public abstract class ModelChart extends JComponent {
                 this.distributionByValue.put(_value,count);
             } else {
                 count.add(n);
-                Integer v = new Integer(count.size());
                 if (count.size() > maxCount) maxCount = count.size();
             }
             if (rescale && value > maxValue) maxValue = value;
@@ -291,8 +289,6 @@ public abstract class ModelChart extends JComponent {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        AffineTransform t = g2.getTransform();
-
         float h = getHeight() - 1.0f;
         float w = getWidth() - 1.0f;
 
@@ -306,18 +302,18 @@ public abstract class ModelChart extends JComponent {
 
         // paint grid
         g2.setColor(gridColor);
-        int xdecades = (int) Math.round(Math.log((double) maxValue) / Math.log(10.0d));
+        int xdecades = (int) Math.round(Math.log(maxValue) / Math.log(10.0d));
         for (int i = 0; i < xdecades; i++) {
             for (int j = 0; j < 10; j++) {
-                float ox = (float) ((double) j * Math.pow(10.0d,(double) i));
+                float ox = (float) (j * Math.pow(10.0d,i));
                 float x = scale(ox,maxValue,w);
                 if (x < w) g2.draw(new Line2D.Float(x,0.0f,x,-h));
             }
         }
-        int ydecades = (int) Math.round(Math.log((double) maxCount) / Math.log(10.0d));
+        int ydecades = (int) Math.round(Math.log(maxCount) / Math.log(10.0d));
         for (int i = 0; i < ydecades; i++) {
             for (int j = 0; j < 10; j++) {
-                float oy = (float) ((double) j * Math.pow(10.0d,(double) i));
+                float oy = (float) (j * Math.pow(10.0d,i));
                 float y = scale(oy,maxCount,h);
                 if (y < h) g2.draw(new Line2D.Float(0.0f,-y,w,-y));
             }

@@ -98,11 +98,11 @@ public class ModelVisualizer extends JComponent implements Runnable {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON3 || e.isPopupTrigger()) {
                 zoom = true;
-                zoomX = (float) e.getX() - cx;
-                zoomY = (float) e.getY() - cy;
+                zoomX = e.getX() - cx;
+                zoomY = e.getY() - cy;
             } else {
-                float x = (float) e.getX() - cx;
-                float y = (float) e.getY() - cy;
+                float x = e.getX() - cx;
+                float y = e.getY() - cy;
                 double bestdist = Double.MAX_VALUE;
 
                 for (Iterator i = model.cache.resources.iterator(); i.hasNext();) {
@@ -160,8 +160,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 pick.y = y;
                 keepInsideCanvas(pick);
             } else if (zoom) {
-                zoomX = (float) e.getX() - cx;
-                zoomY = (float) e.getY() - cy;
+                zoomX = e.getX() - cx;
+                zoomY = e.getY() - cy;
             }
             repaint();
         }
@@ -204,8 +204,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
     public void reshape(int x, int y, int w, int h) {
         super.reshape(x, y, w, h);
-        this.cw = (float) w;
-        this.ch = (float) h;
+        this.cw = w;
+        this.ch = h;
         this.cx = cw / 2.0f;
         this.cy = ch / 2.0f;
     }
@@ -247,7 +247,6 @@ public class ModelVisualizer extends JComponent implements Runnable {
     }
 
     public void shake() {
-        int j = 0;
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
             if (!n.fixed) {
@@ -445,8 +444,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
 						g2.fillArc(
 							(int) ((x2 - 15)), (int) ((y2 - 15)),
-							(int) ((30)), (int) ((30)),
-							(int) alfa, 20);
+							30, 30, (int) alfa, 20);
                     }
 
                     if (drawedgevalues) {
@@ -659,10 +657,10 @@ public class ModelVisualizer extends JComponent implements Runnable {
             g.setColor(timeColor);
             g.setFont(timeFont);
             FontMetrics fm = g2.getFontMetrics(timeFont);
-            int height = (int) (fm.getAscent() + fm.getDescent());
-            g.drawString("nodes: " + model.cache.resources.size(), 0, -3*height);
-            g.drawString("edges: " + model.cache.statements.size(), 0, -2*height);
-            g.drawString("drawing: " + drawingTime + " ms", 0, -1*height);
+            int height = fm.getAscent() + fm.getDescent();
+            g.drawString("nodes: " + model.cache.resources.size(), 0, -3 * height);
+            g.drawString("edges: " + model.cache.statements.size(), 0, -2 * height);
+            g.drawString("drawing: " + drawingTime + " ms", 0, -1 * height);
             g.drawString("calculation: " + simulationTime + " ms", 0, 0);
             g2.setTransform(t);
         }
