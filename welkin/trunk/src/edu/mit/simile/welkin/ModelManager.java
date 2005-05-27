@@ -1,6 +1,7 @@
 package edu.mit.simile.welkin;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Iterator;
 
 import org.openrdf.model.BNode;
@@ -77,12 +78,32 @@ public class ModelManager implements StatementHandler {
         }
     }
     
+    public boolean addModel(InputStream in, int type, String baseUri) {
+        try {
+            initParser(type);
+            parser.parse(in, baseUri);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
     /**
      * Adds a model without a base uri.
      * @param in	The inputstream
      * @param type	Type of the parser
      */
     public boolean addModel(FileInputStream in, int type) {
+        return addModel(in, type, "");
+    }
+    
+    /**
+     * Adds a model without a base uri.
+     * @param in	The inputstream
+     * @param type	Type of the parser
+     */
+    public boolean addModel(InputStream in, int type) {
         return addModel(in, type, "");
     }
     

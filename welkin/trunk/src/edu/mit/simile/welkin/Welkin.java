@@ -21,6 +21,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.AbstractButton;
@@ -29,6 +31,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -49,7 +52,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 
-public class Welkin extends JPanel implements ActionListener, ItemListener {
+public class Welkin extends JApplet implements ActionListener, ItemListener {
 
     public static final String NAME = "Welkin";
     public static final String VERSION = "@version@";
@@ -202,10 +205,61 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
 
     // called by the applet sandbox
     public void init() {
-    	    initPanel();
+        
+    	try {
+    		URL dataURL = null;
+    		if(getParameter("url")!=null) {
+				try {
+					dataURL = new URL(getParameter("url"));
+				} catch (MalformedURLException e) {
+	    			dataURL = new File(getParameter("url")).toURL();
+				}
+				initPanel(true);
+				
+                InputStream in = dataURL.openStream();
+                if (in == null) {
+                    throw new IllegalArgumentException("File: " + dataURL.getPath()
+                            + " not found");
+                }
+				
+                boolean res = false;
+                int extIndex = dataURL.getPath().lastIndexOf(".");
+                if (extIndex > 0) {
+                    String ext = dataURL.getPath().substring(extIndex+1);
+                    if(ext.equals("n3") || ext.equals("turtle"))
+                        // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
+                        // this might return an error in valid N3 files, but until RIO supports
+                        // N3 this is the easiest way.
+                        res = wrapper.addModel(in, ModelManager.TURTLE);
+                    else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
+                        res = wrapper.addModel(in, ModelManager.RDFXML);
+                    else {
+                        throw new IllegalArgumentException("Extension not recognized!");
+                    }
+                }
+
+                if (res) {
+                    visualizer.setGraph(wrapper);
+                    predTree.createTree();
+                    inDegreeChart.analyze(true);
+                    outDegreeChart.analyze(true);
+                    clustCoeffChart.analyze(true);
+                    resTree.createTree();
+                    this.notifyBaseUriColorChange();
+                    scrollingResTree.revalidate();
+                    scrollingPredTree.revalidate();
+                }
+		
+                
+    		} else {
+    		    initPanel(false);
+    		}
+		} catch (Exception e) {
+			System.out.println(e + " " + e.getMessage());
+		}
     }
 
-    public void initPanel(){
+    public void initPanel(boolean applet){
 
         wrapper = new ModelManager();
         visualizer = new ModelVisualizer(wrapper);
@@ -224,22 +278,36 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         resTree = new ResTree(this);
         scrollingResTree = new JScrollPane(resTree);
 
-        dataClearButton = new JButton("Clear");
-        dataLoadButton = new JButton("Load");
-
-        dataClearButton.addActionListener(this);
-        dataLoadButton.addActionListener(this);
-
-        JPanel dataButtons = new JPanel();
-        dataButtons.setLayout(new BoxLayout(dataButtons, BoxLayout.X_AXIS));
-        dataButtons.add(Box.createHorizontalGlue());
-        dataButtons.add(dataLoadButton);
-        dataButtons.add(dataClearButton);
-        dataButtons.add(Box.createHorizontalGlue());
-
         JPanel dataControls = new JPanel();
         dataControls.setLayout(new BorderLayout());
-        dataControls.add(dataButtons, BorderLayout.SOUTH);
+        
+        JPanel dataPane = new JPanel();
+        dataPane.setLayout(new BorderLayout());
+        
+        if(!applet) {
+            dataClearButton = new JButton("Clear");
+            dataLoadButton = new JButton("Load");
+
+            dataClearButton.addActionListener(this);
+        	dataLoadButton.addActionListener(this);
+        	
+            aboutButton = new JButton("About");
+            aboutButton.addActionListener(this);
+            
+            JPanel dataButtons = new JPanel();
+            dataButtons.setLayout(new BoxLayout(dataButtons, BoxLayout.X_AXIS));
+            dataButtons.add(Box.createHorizontalGlue());
+            
+            dataButtons.add(dataLoadButton);
+            dataButtons.add(dataClearButton);
+            
+            dataButtons.add(Box.createHorizontalGlue());
+            
+            dataControls.add(dataButtons, BorderLayout.SOUTH);
+            
+            dataPane.add(dataButtons, BorderLayout.WEST);
+            dataPane.add(aboutButton, BorderLayout.EAST);
+        } 
 
         startIcon = createImageIcon(START_ICON);
         stopIcon = createImageIcon(STOP_ICON);
@@ -251,14 +319,6 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         } else {
             controlButton = new JButton("Start");
         }
-
-        aboutButton = new JButton("About");
-        aboutButton.addActionListener(this);
-
-        JPanel dataPane = new JPanel();
-        dataPane.setLayout(new BorderLayout());
-        dataPane.add(dataButtons, BorderLayout.WEST);
-        dataPane.add(aboutButton, BorderLayout.EAST);
 
         circleButton = new JButton("Circle");
         scrambleButton = new JButton("Scramble");
@@ -419,10 +479,24 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         bodyPane.setDividerLocation(200);
         bodyPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
-        this.setLayout(new BorderLayout());
-        this.add(dataPane, BorderLayout.NORTH);
-        this.add(bodyPane, BorderLayout.CENTER);
-        this.add(toolsPane, BorderLayout.SOUTH);
+        this.getContentPane().setLayout(new BorderLayout());
+        if (!applet) this.getContentPane().add(dataPane, BorderLayout.NORTH);
+        this.getContentPane().add(bodyPane, BorderLayout.CENTER);
+        this.getContentPane().add(toolsPane, BorderLayout.SOUTH);
+    }
+    
+    public String getAppletInfo() {
+        return NAME;
+    }  
+    
+    public void start() {
+		super.start();
+    	if (running) internalStart();
+    }
+    
+    public void stop() {
+		super.stop();
+        if (running) internalStop();
     }
 
 	public void internalStart() {
@@ -598,7 +672,7 @@ public class Welkin extends JPanel implements ActionListener, ItemListener {
         } catch (Exception e) { }
 
 		Welkin welkin = new Welkin();
-		welkin.init();
+		welkin.initPanel(false);
 
         frame = new JFrame(NAME);
         URL logo = Welkin.class.getResource(LOGO_SMALL_ICON);
