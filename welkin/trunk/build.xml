@@ -10,7 +10,7 @@
 <project name="welkin" default="package" basedir=".">
 
     <!-- === Initialization Targets ============================================= -->
-    
+
       <target name="init">
 
         <!-- Set the timestamps -->
@@ -27,7 +27,7 @@
         <filter token="year" value="${year}"/>
         <filter token="version" value="${version}"/>
         <filter token="date" value="${TODAY}"/>
-        
+
         <!-- Set classpath -->
         <path id="classpath">
           <fileset dir="${lib}">
@@ -38,7 +38,7 @@
       </target>
 
     <!--+
-        | Compiles the source code 
+        | Compiles the source code
         +-->
     <target name="compile" depends="init" description="Compiles the source code">
 
@@ -50,13 +50,14 @@
             <include name="**/*.java"/>
           </fileset>
         </copy>
-        
+
         <javac srcdir="${build}/src"
             destdir="${build}/classes"
             debug="${compile.debug}"
             optimize="${compile.optimize}"
             deprecation="${compile.deprecation}"
-            target="1.2">
+            target="1.2"
+        	    source="1.2">
             <classpath refid="classpath"/>
             <include name="**/*.java"/>
         </javac>
@@ -68,7 +69,7 @@
             </fileset>
         </copy>
     </target>
-    
+
     <!--+
         | Creates the jar archive
         +-->
@@ -83,7 +84,7 @@
                 </fileset>
             </path>
         </pathconvert>
-                
+
         <jar jarfile="${lib}/${jar.name}" basedir="${build}/classes" compress="${jar.compress}">
             <manifest>
                 <attribute name="Main-Class" value="edu.mit.simile.welkin.Welkin"/>
@@ -116,7 +117,7 @@
         <copy todir="${dist}/legal">
           <fileset dir="${legal}"/>
         </copy>
-        
+
         <copy todir="${dist}/${src}" filtering="on">
             <fileset dir="${src}">
                 <exclude name="**/*.jpg"/>
@@ -124,7 +125,7 @@
                 <exclude name="**/*.png"/>
             </fileset>
         </copy>
-    
+
         <copy todir="${dist}/${src}" filtering="off">
             <fileset dir="${src}">
                 <include name="**/*.jpg"/>
@@ -132,7 +133,7 @@
                 <include name="**/*.png"/>
             </fileset>
         </copy>
-        
+
         <copy todir="${dist}/${docs}" filtering="on">
             <fileset dir="${docs}">
                 <exclude name="**/*.jpg"/>
@@ -151,9 +152,9 @@
         </copy>
 
         <chmod file="${dist}/welkin.sh" perm="+x"/>
-        
+
         <fixcrlf srcdir="${dist}" includes="*.sh" eol="lf"/>
-        
+
     </target>
 
     <!--+
@@ -173,7 +174,7 @@
         <gzip zipfile="${dist.target}/${dist.name}.tar.gz" src="${dist.target}/${dist.name}.tar"/>
         <delete file="${dist.target}/${dist.name}.tar"/>
     </target>
-    
+
     <!--+
         | Cleans up
         +-->
@@ -186,7 +187,7 @@
                 <include name="*.zip"/>
                 <include name="*.tar.gz"/>
              </fileset>
-       </delete> 
+       </delete>
     </target>
 
 </project>
