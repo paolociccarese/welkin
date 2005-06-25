@@ -73,6 +73,7 @@ public class ModelManager implements StatementHandler {
             parser.parse(in, baseUri);
             return true;
         } catch (Exception e) {
+            cache.clear();
             e.printStackTrace();
             return false;
         }
@@ -84,6 +85,7 @@ public class ModelManager implements StatementHandler {
             parser.parse(in, baseUri);
             return true;
         } catch (Exception e) {
+            cache.clear();
             e.printStackTrace();
             return false;
         }

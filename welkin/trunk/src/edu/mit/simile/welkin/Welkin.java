@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -76,9 +77,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     JColorChooser jc;
     JDialog chooser;
 
-    //PredicatesTree predTree;
     PredTree predTree;
-    //ResourcesTree resTree;
     ResTree resTree;
 
     ModelVisualizer visualizer;
@@ -222,35 +221,25 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
                             + " not found");
                 }
 				
-                boolean res = false;
-                int extIndex = dataURL.getPath().lastIndexOf(".");
-                if (extIndex > 0) {
-                    String ext = dataURL.getPath().substring(extIndex+1);
-                    if(ext.equals("n3") || ext.equals("turtle"))
-                        // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
-                        // this might return an error in valid N3 files, but until RIO supports
-                        // N3 this is the easiest way.
-                        res = wrapper.addModel(in, ModelManager.TURTLE);
-                    else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
-                        res = wrapper.addModel(in, ModelManager.RDFXML);
-                    else {
-                        throw new IllegalArgumentException("Extension not recognized!");
-                    }
+                initAll(in, dataURL.getPath());
+    		} else if (getParameter("data")!=null) {
+    		    String base = getDocumentBase().toString();
+				try {
+	    			dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) + getParameter("data"));
+				} catch (MalformedURLException e) {
+                    throw new IllegalArgumentException("Url: " 
+                            + base.substring(0,base.lastIndexOf('/') + 1) + getParameter("data")
+                            + " malformed");
+				}
+				initPanel(true);
+				
+                InputStream in = dataURL.openStream();
+                if (in == null) {
+                    throw new IllegalArgumentException("File: " + dataURL.getPath()
+                            + " not found");
                 }
-
-                if (res) {
-                    visualizer.setGraph(wrapper);
-                    predTree.createTree();
-                    inDegreeChart.analyze(true);
-                    outDegreeChart.analyze(true);
-                    clustCoeffChart.analyze(true);
-                    resTree.createTree();
-                    this.notifyBaseUriColorChange();
-                    scrollingResTree.revalidate();
-                    scrollingPredTree.revalidate();
-                }
-		
-                
+				
+                initAll(in, dataURL.getPath());
     		} else {
     		    initPanel(false);
     		}
@@ -565,8 +554,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.shake();
 		} else if (source == dataLoadButton) {
             try {
-                File fileName;
-
                 // Save File Manager
                 JFileChooser openWin;
                 if(dirBase != null) openWin = new JFileChooser(dirBase);
@@ -577,43 +564,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
                 int returnVal = openWin.showOpenDialog(null);
 
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    fileName = openWin.getSelectedFile();
-
-                    dirBase = fileName.getParent();
-
-                    FileInputStream in = new FileInputStream(fileName);
-                    if (in == null) {
-                        throw new IllegalArgumentException("File: " + fileName
-                                + " not found");
-                    }
-
-                    boolean res = false;
-                    int extIndex = fileName.getAbsolutePath().lastIndexOf(".");
-                    if (extIndex > 0) {
-                        String ext = fileName.getAbsolutePath().substring(extIndex+1);
-                        if(ext.equals("n3") || ext.equals("turtle"))
-                            // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
-                            // this might return an error in valid N3 files, but until RIO supports
-                            // N3 this is the easiest way.
-                            res = wrapper.addModel(in, ModelManager.TURTLE);
-                        else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
-                            res = wrapper.addModel(in, ModelManager.RDFXML);
-                        else {
-                            throw new IllegalArgumentException("Extension not recognized!");
-                        }
-                    }
-
-                    if (res) {
-                        visualizer.setGraph(wrapper);
-                        predTree.createTree();
-                        inDegreeChart.analyze(true);
-                        outDegreeChart.analyze(true);
-                        clustCoeffChart.analyze(true);
-                        resTree.createTree();
-                        this.notifyBaseUriColorChange();
-                        scrollingResTree.revalidate();
-                        scrollingPredTree.revalidate();
-                    }
+                    loadFile(openWin.getSelectedFile());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -654,6 +605,80 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             clustCoeffChart.filter();
         }
         visualizer.repaint();
+    }
+    
+    private void loadFile(File fileName) throws FileNotFoundException {
+        dirBase = fileName.getParent();
+
+        FileInputStream in = new FileInputStream(fileName);
+        if (in == null) {
+            throw new IllegalArgumentException("File: " + fileName
+                    + " not found");
+        }
+
+        initAll(in, fileName.getAbsolutePath());
+        
+//        boolean res = false;
+//        int extIndex = fileName.getAbsolutePath().lastIndexOf(".");
+//        if (extIndex > 0) {
+//            String ext = fileName.getAbsolutePath().substring(extIndex+1);
+//            if(ext.equals("n3") || ext.equals("turtle"))
+//                // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
+//                // this might return an error in valid N3 files, but until RIO supports
+//                // N3 this is the easiest way.
+//                res = wrapper.addModel(in, ModelManager.TURTLE);
+//            else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
+//                res = wrapper.addModel(in, ModelManager.RDFXML);
+//            else {
+//                throw new IllegalArgumentException("Extension not recognized!");
+//            }
+//        }
+//
+//        if (res) {
+//            visualizer.setGraph(wrapper);
+//            predTree.createTree();
+//            inDegreeChart.analyze(true);
+//            outDegreeChart.analyze(true);
+//            clustCoeffChart.analyze(true);
+//            resTree.createTree();
+//            this.notifyBaseUriColorChange();
+//            scrollingResTree.revalidate();
+//            scrollingPredTree.revalidate();
+//        } else {
+//            throw new IllegalArgumentException("File not correct!");
+//        }
+    }
+    
+    private void initAll(InputStream stream, String fileName) {
+        boolean res = false;
+        int extIndex = fileName.lastIndexOf(".");
+        if (extIndex > 0) {
+            String ext = fileName.substring(extIndex+1);
+            if(ext.equals("n3") || ext.equals("turtle"))
+                // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
+                // this might return an error in valid N3 files, but until RIO supports
+                // N3 this is the easiest way.
+                res = wrapper.addModel(stream, ModelManager.TURTLE);
+            else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
+                res = wrapper.addModel(stream, ModelManager.RDFXML);
+            else {
+                throw new IllegalArgumentException("Extension not recognized!");
+            }
+        }
+
+        if (res) { 
+            visualizer.setGraph(wrapper);
+            predTree.createTree();
+            inDegreeChart.analyze(true);
+            outDegreeChart.analyze(true);
+            clustCoeffChart.analyze(true);
+            resTree.createTree();
+            this.notifyBaseUriColorChange();
+            scrollingResTree.revalidate();
+            scrollingPredTree.revalidate(); 
+        } else {
+            throw new IllegalArgumentException("File not correct!");
+        }       
     }
 
 	protected static ImageIcon createImageIcon(String path) {
