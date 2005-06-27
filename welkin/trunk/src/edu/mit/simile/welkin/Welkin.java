@@ -1,4 +1,3 @@
-
 package edu.mit.simile.welkin;
 
 import java.awt.BorderLayout;
@@ -23,7 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.AbstractButton;
@@ -203,34 +201,18 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     }
 
     // called by the applet sandbox
-    public void init() {
-        
+    public void init() {  
     	try {
     		URL dataURL = null;
-    		if(getParameter("url")!=null) {
-				try {
+    		if(getParameter("url")!=null || getParameter("data")!=null) {
+	    		if(getParameter("url")!=null) {
 					dataURL = new URL(getParameter("url"));
-				} catch (MalformedURLException e) {
-	    			dataURL = new File(getParameter("url")).toURL();
-				}
-				initPanel(true);
-				
-                InputStream in = dataURL.openStream();
-                if (in == null) {
-                    throw new IllegalArgumentException("File: " + dataURL.getPath()
-                            + " not found");
-                }
-				
-                initAll(in, dataURL.getPath());
-    		} else if (getParameter("data")!=null) {
-    		    String base = getDocumentBase().toString();
-				try {
-	    			dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) + getParameter("data"));
-				} catch (MalformedURLException e) {
-                    throw new IllegalArgumentException("Url: " 
-                            + base.substring(0,base.lastIndexOf('/') + 1) + getParameter("data")
-                            + " malformed");
-				}
+	    		} else if (getParameter("data")!=null) {
+	    		    String base = getDocumentBase().toString();
+	    		    dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) 
+	    		            + getParameter("data"));
+	    		}
+
 				initPanel(true);
 				
                 InputStream in = dataURL.openStream();
