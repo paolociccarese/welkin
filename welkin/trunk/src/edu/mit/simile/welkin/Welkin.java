@@ -145,13 +145,18 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             g2.drawImage(createImageIcon(LOGO_ICON).getImage(),0,0,null);
             g2.setFont(new Font("Verdana", Font.BOLD, 30));
             g2.setColor(new Color(206,50,8));
-            g2.drawString(NAME,18,291);
+            g2.drawString(NAME,13,261);
             g2.setFont(new Font("Verdana", Font.PLAIN, 12));
             g2.setColor(new Color(128,128,128));
-            g2.drawString("A Graphical RDF Browser",18,325);
+            g2.drawString("A Graphical RDF Browser",18,285);
             g2.setFont(new Font("Verdana", Font.PLAIN, 12));
             g2.setColor(new Color(192,192,192));
-            g2.drawString("Version " + VERSION,18,341);
+            g2.drawString("Version " + VERSION,18,301);
+            g2.setFont(new Font("Verdana", Font.PLAIN, 10));
+            g2.setColor(new Color(128,128,128));
+            g2.drawString("http://simile.mit.edu/welkin/",18,317);
+            g2.setColor(new Color(128,128,128));
+            g2.drawString("Copyright (c) Massachusetts Institute of Technology",18,365);
         }
 
         public Dimension getPreferredSize() {
