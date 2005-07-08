@@ -23,10 +23,16 @@
         <!-- Get the build properties from an external file -->
         <property file="build.properties"/>
 
+        <!-- Set the filters used when making the distribution -->
         <filter token="name" value="${name}"/>
         <filter token="year" value="${year}"/>
         <filter token="version" value="${version}"/>
         <filter token="date" value="${TODAY}"/>
+
+        <!-- Set the jar-bundling task used to create the MacOSX executable bundle -->
+        <taskdef name="jarbundler" 
+           classpath="tools/jarbundler-1.4.jar"
+           classname="com.loomcom.ant.tasks.jarbundler.JarBundler" />
 
         <!-- Set classpath -->
         <path id="classpath">
@@ -158,7 +164,7 @@
     </target>
 
     <!--+
-        | Creates the distribution archive
+        | Creates the distribution archives
         +-->
     <target name="dist" depends="prepare-dist" description="Creates the distribution">
         <zip zipfile="${dist.target}/${dist.name}.zip" basedir="${dist}"/>
@@ -173,6 +179,33 @@
         </tar>
         <gzip zipfile="${dist.target}/${dist.name}.tar.gz" src="${dist.target}/${dist.name}.tar"/>
         <delete file="${dist.target}/${dist.name}.tar"/>
+    </target>
+    
+    <!--+
+        | Creates the MacOSX distributions
+        +-->
+    <target name="mac-dist" depends="prepare-dist" description="Creates the distribution for MacOSX">
+      <jarbundler dir="${dist.target}"
+                  name="Welkin"
+                  mainclass="edu.mit.simile.welkin.Welkin" 
+                  icon="${misc}/welkin.icns"
+                  version="${version}"
+                  infostring="${Name} ${version}"
+                  aboutmenuname="Welkin"
+                  jvmversion="1.4+"
+                  bundleid="edu.mit.simile.welkin.Welkin"
+                  vmoptions="-Xmx128m"
+                  smalltabs="true"
+                  antialiasedgraphics="true"
+                  antialiasedtext="true"
+                  liveresize="true"
+                  growboxintrudes="true"
+                  screenmenu="true">
+        <jarfileset dir="${lib}">
+          <exclude name="**/CVS" />
+          <include name="**/*.jar" />
+        </jarfileset>
+      </jarbundler>
     </target>
 
     <!--+
