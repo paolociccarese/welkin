@@ -43,8 +43,8 @@ public abstract class ModelChart extends JComponent {
 
     private int westDelta;
     private int eastDelta;
-    private int northDelta;
-    private int southDelta;
+    //private int northDelta;
+    //private int southDelta;
 
     private Map distributionByValue = new HashMap();
     private Map distributionByCount = new HashMap();
@@ -61,11 +61,11 @@ public abstract class ModelChart extends JComponent {
     class MyMouseListener extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             int x = e.getX();
-            int y = e.getY();
+            //int y = e.getY();
             westDelta = highValue - x;
             eastDelta = x - lowValue;
-            northDelta = highCount - y;
-            southDelta = y - lowCount;
+            //northDelta = highCount - y;
+            //southDelta = y - lowCount;
         }
 
         public void mouseReleased(MouseEvent e) {
@@ -83,16 +83,16 @@ public abstract class ModelChart extends JComponent {
 
         public void mouseMoved(MouseEvent e) {
             int x = e.getX();
-            int y = e.getY();
+            //int y = e.getY();
 
             if (Math.abs(x - highValue) < TOLERANCE) {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
             } else if (Math.abs(x - lowValue) < TOLERANCE) {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
-            } else if (Math.abs(y - highCount) < TOLERANCE) {
-                this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
-            } else if (Math.abs(y - lowCount) < TOLERANCE) {
-                this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+            //} else if (Math.abs(y - highCount) < TOLERANCE) {
+            //    this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+            //} else if (Math.abs(y - lowCount) < TOLERANCE) {
+            //    this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
             } else {
                 this.parent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
@@ -100,17 +100,17 @@ public abstract class ModelChart extends JComponent {
 
         public void mouseDragged(MouseEvent e) {
             int x = e.getX();
-            int y = e.getY();
+            //int y = e.getY();
 
             if (draggingState == NONE) {
                 if (Math.abs(x - highValue) < TOLERANCE) {
                     draggingState = EAST;
                 } else if (Math.abs(x - lowValue) < TOLERANCE) {
                     draggingState = WEST;
-                } else if (Math.abs(y - highCount) < TOLERANCE) {
-                    draggingState = NORTH;
-                } else if (Math.abs(y - lowCount) < TOLERANCE) {
-                    draggingState = SOUTH;
+                //} else if (Math.abs(y - highCount) < TOLERANCE) {
+                //    draggingState = NORTH;
+                //} else if (Math.abs(y - lowCount) < TOLERANCE) {
+                //    draggingState = SOUTH;
                 } else {
                     draggingState = WINDOW;
                 }
@@ -122,17 +122,17 @@ public abstract class ModelChart extends JComponent {
                     case(WEST):
                         lowValue = x;
                         break;
-                    case(NORTH):
-                        highCount = y;
-                        break;
-                    case(SOUTH):
-                        lowCount = y;
-                        break;
+                    //case(NORTH):
+                    //    highCount = y;
+                    //    break;
+                    //case(SOUTH):
+                    //    lowCount = y;
+                    //    break;
                     case(WINDOW):
                         highValue = Math.min(x + westDelta,parent.getWidth() - 1);
                         lowValue = Math.max(x - eastDelta,0);
-                        highCount = Math.min(y + northDelta,parent.getHeight() - 1);
-                        lowCount = Math.max(y - southDelta,0);
+                        //highCount = Math.min(y + northDelta,parent.getHeight() - 1);
+                        //lowCount = Math.max(y - southDelta,0);
                 }
             }
 
@@ -230,7 +230,7 @@ public abstract class ModelChart extends JComponent {
 
     void analyze(boolean rescale) {
         this.distributionByValue.clear();
-        this.distributionByCount.clear();
+        //this.distributionByCount.clear();
 
         if (rescale) {
             this.maxCount = 0;
@@ -255,6 +255,7 @@ public abstract class ModelChart extends JComponent {
         }
 
         reset();
+		repaint();
     }
 
     void update() {
@@ -280,10 +281,10 @@ public abstract class ModelChart extends JComponent {
     final static Color backgroundColor = Color.WHITE;
     final static Color gridColor = new Color(150, 150, 150, 100);
     final static Color drawColor = Color.RED;
-    final static Color xFilterColor = new Color(0, 128, 0, 50);
-    final static Color xFilterBorderColor = new Color(0, 192, 0, 100);
-    final static Color yFilterColor = new Color(0, 0, 128, 50);
-    final static Color yFilterBorderColor = new Color(0, 0, 192, 100);
+    final static Color xFilterColor = new Color(128, 128, 128, 50);
+    final static Color xFilterBorderColor = new Color(192, 192, 192, 100);
+    //final static Color yFilterColor = new Color(0, 0, 128, 50);
+    //final static Color yFilterBorderColor = new Color(0, 0, 192, 100);
 
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
@@ -337,22 +338,22 @@ public abstract class ModelChart extends JComponent {
         Shape westRect = new Rectangle2D.Float(hv,-h,w - hv,h);
         float lv = lowValue;
         Shape eastRect = new Rectangle2D.Float(0,-h,lv,h);
-        float hc = highCount;
-        Shape northRect = new Rectangle2D.Float(0,hc - h,w,h - hc);
-        float lc = lowCount;
-        Shape southRect = new Rectangle2D.Float(0,-h,w,lc);
+        //float hc = highCount;
+        //Shape northRect = new Rectangle2D.Float(0,hc - h,w,h - hc);
+        //float lc = lowCount;
+        //Shape southRect = new Rectangle2D.Float(0,-h,w,lc);
         g2.setColor(xFilterColor);
         g2.fill(westRect);
         g2.fill(eastRect);
         g2.setColor(xFilterBorderColor);
         g2.draw(westRect);
         g2.draw(eastRect);
-        g2.setColor(yFilterColor);
-        g2.fill(northRect);
-        g2.fill(southRect);
-        g2.setColor(yFilterBorderColor);
-        g2.draw(northRect);
-        g2.draw(southRect);
+        //g2.setColor(yFilterColor);
+        //g2.fill(northRect);
+        //g2.fill(southRect);
+        //g2.setColor(yFilterBorderColor);
+        //g2.draw(northRect);
+        //g2.draw(southRect);
     }
 
     private void signalAction() {

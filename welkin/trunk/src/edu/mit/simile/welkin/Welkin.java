@@ -260,7 +260,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             dataLoadButton = new JButton("Load");
 
             dataClearButton.addActionListener(this);
-        	dataLoadButton.addActionListener(this);
+            dataLoadButton.addActionListener(this);
         	
             aboutButton = new JButton("About");
             aboutButton.addActionListener(this);
@@ -581,9 +581,15 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.getGraph().clearHighlights();
         } else if (source == inDegreeChart) {
             inDegreeChart.filter();
+            outDegreeChart.update();
+            clustCoeffChart.update();
         } else if (source == outDegreeChart) {
+            inDegreeChart.update();
             outDegreeChart.filter();
+            clustCoeffChart.update();
         } else if (source == clustCoeffChart) {
+            inDegreeChart.update();
+            outDegreeChart.update();
             clustCoeffChart.filter();
         }
         visualizer.repaint();

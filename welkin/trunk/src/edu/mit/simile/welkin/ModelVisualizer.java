@@ -39,7 +39,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 
     final Color fixedColor = Color.green;
     final Color selectColor = Color.red;
-    final Color edgeColor = new Color(150, 150, 150, 100);
+    final Color edgeColor = new Color(150, 150, 150, 75);
     final Color edgeValueColor = new Color(50, 50, 50, 100);
     final Color nodeColor = Color.red;
     final Color externalNodeColor = Color.orange;
