@@ -1,15 +1,16 @@
 
 
 
-                                W E L K I N 
+                                    W E L K I N 
 
+                                    version @version@
 
 
 
   What is this?
   -------------
 
-  Welkin is an RDF graph visualizer.
+  Welkin is an graphical RDF visualizer.
   
 
 
@@ -21,11 +22,21 @@
    o  A Java 1.4 or later compatible virtual machine for your operating system.
 
 
+
+  Documentation
+  -------------
+  
+  For more information on welkin, please look into the 'docs' folder or visit:
+  
+      http://simile.mit.edu/welkin/
+
+
+
   
   Licensing and legal issues
   --------------------------
 
-  Gadget is open source software and is licensed under the BSD license
+  Welkin is open source software and is licensed under the BSD license
   located in the LICENSE.txt file located in the same directory as this very 
   file you are reading.
 
