@@ -39,10 +39,13 @@ public class Util {
     	} else if(uri.startsWith("http:")) { // http://*/*#* 
     		parts = new String[2];
     		int lastIndex = uri.indexOf("#");
-    		if(lastIndex==-1) lastIndex = uri.lastIndexOf("/");
+    		if(lastIndex==-1) lastIndex = uri.lastIndexOf('/');
+    		if(lastIndex==-1) lastIndex = uri.length()-1;
         	int slashIndex = uri.indexOf('/',7);
-    		parts[1] = uri.substring(slashIndex, lastIndex);
-    		parts[0] = uri.substring(0, slashIndex);
+        	if(lastIndex>6) {
+	    		if(slashIndex<lastIndex) parts[1] = uri.substring(slashIndex, lastIndex);
+	    		parts[0] = uri.substring(0, slashIndex);
+        	}
     	} else if(uri.startsWith("file:")) { // urn:*:*
     		parts = new String[1];
     		int lastIndex = uri.lastIndexOf("/");

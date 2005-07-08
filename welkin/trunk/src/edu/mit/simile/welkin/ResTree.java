@@ -40,6 +40,7 @@ public class ResTree extends GeneralTree {
     	if(parts == null || parts[0]==null) return; // TODO Blank Nodes
     	
     	if(level == parts.length-1) {
+    	    if(parts[parts.length-1]==null) return;
     		childNode = new ResourceNode(this, parts[parts.length-1], all, root, true);
         	if(level == 0) childNode.isVisible = true;
         	else childNode.isVisible = false;
@@ -57,6 +58,7 @@ public class ResTree extends GeneralTree {
     	}
     	
     	if(!flag) {
+    	    if(parts[level]==null) return;
     		childNode = new ResourceNode(this, parts[level++], all, root, false);
     		if(level == 2) childNode.isVisible = false;
     		root.children.add(childNode); 

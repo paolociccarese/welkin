@@ -21,6 +21,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -610,36 +611,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         }
 
         initAll(in, fileName.getAbsolutePath());
-        
-//        boolean res = false;
-//        int extIndex = fileName.getAbsolutePath().lastIndexOf(".");
-//        if (extIndex > 0) {
-//            String ext = fileName.getAbsolutePath().substring(extIndex+1);
-//            if(ext.equals("n3") || ext.equals("turtle"))
-//                // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
-//                // this might return an error in valid N3 files, but until RIO supports
-//                // N3 this is the easiest way.
-//                res = wrapper.addModel(in, ModelManager.TURTLE);
-//            else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
-//                res = wrapper.addModel(in, ModelManager.RDFXML);
-//            else {
-//                throw new IllegalArgumentException("Extension not recognized!");
-//            }
-//        }
-//
-//        if (res) {
-//            visualizer.setGraph(wrapper);
-//            predTree.createTree();
-//            inDegreeChart.analyze(true);
-//            outDegreeChart.analyze(true);
-//            clustCoeffChart.analyze(true);
-//            resTree.createTree();
-//            this.notifyBaseUriColorChange();
-//            scrollingResTree.revalidate();
-//            scrollingPredTree.revalidate();
-//        } else {
-//            throw new IllegalArgumentException("File not correct!");
-//        }
     }
     
     private void initAll(InputStream stream, String fileName) {
@@ -657,6 +628,12 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             else {
                 throw new IllegalArgumentException("Extension not recognized!");
             }
+        }
+        
+        try {
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         if (res) { 
