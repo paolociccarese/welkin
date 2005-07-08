@@ -77,7 +77,7 @@ public class PredicateNode extends WNode {
         this.isVisible = true;
         this.isAllowed = true;
 
-        this.setSize(getDimension().width,18);
+        this.setSize(getDimension().width,20);
 
         this.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
