@@ -46,8 +46,8 @@ public class ResourceNode extends WNode {
         slider = new JSlider(JSlider.HORIZONTAL,MIN_VALUE,MAX_VALUE,INIT_VALUE);
         slider.addChangeListener(this);
         slider.setBackground(GeneralTree.BACKGROUND);
-        slider.setSize(new Dimension(60,14));
-        slider.setPreferredSize(new Dimension(60,14));
+        slider.setSize(new Dimension(60,18));
+        slider.setPreferredSize(new Dimension(60,18));
         slider.setMajorTickSpacing(1);
         slider.setSnapToTicks(false);
         slider.setPaintTicks(false);
