@@ -31,9 +31,14 @@
 
         <!-- Set the jar-bundling task used to create the MacOSX executable bundle -->
         <taskdef name="jarbundler" 
-           classpath="tools/jarbundler-1.4.jar"
+           classpath="${tools}/jarbundler-1.4.jar"
            classname="com.loomcom.ant.tasks.jarbundler.JarBundler" />
 
+        <!-- Set the task used to create the Java Web Start integrations -->
+        <taskdef 
+            classpath="${tools}/roxes-ant-tasks-1.2.jar" 
+            resource="com/roxes/tools/ant/taskdefs.properties"/>
+            
         <!-- Set classpath -->
         <path id="classpath">
           <fileset dir="${lib}">
@@ -208,6 +213,40 @@
       </jarbundler>
     </target>
 
+    <!--+
+        | Creates the Java WebStart distributions
+        +-->
+    <target name="webstart" depends="prepare-dist" description="Creates the Java Web Start files">
+        <!-- Create the Java WebStart JNPL file -->
+        <jnlp spec="1.0+" toFile="docs/welkin.jnlp" href="docs/welkin.jnlp" codebase="http://simile.mit.edu/repository/welkin/latest/" >
+            <information>
+                <title>Welkin ${version}</title>
+                <vendor>The SIMILE Project</vendor>
+                <description>A graphical RDF visualizer</description>
+                <description kind="tooltip">Welkin - A Graphical RDF Visualizer</description>
+                <homepage href="http://simile.mit.edu/welkin/"/>
+                <offline_allowed/>
+            </information>
+            <security>
+                <all_permissions/>
+            </security>
+            <resources>
+                <j2se version="1.4+" href="http://java.sun.com/products/autodl/j2se"/>
+                <fileset dir="." includes="${lib}/*.jar"/>
+            </resources>
+            <application_desc main_class="edu.mit.simile.welkin.Welkin" />
+        </jnlp>
+        
+        <!-- Ask for the keystore password -->
+        <input message="Please enter the keystore password:" addproperty="keystore.password"/>
+        
+        <!-- Sign the main welkin jar -->
+        <signjar jar="${lib}/welkin.jar" 
+           alias="welkin" 
+           storepass="${keystore.password}"
+           keystore="${keystore}"/>
+    </target>
+    
     <!--+
         | Cleans up
         +-->
