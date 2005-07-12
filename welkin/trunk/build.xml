@@ -265,11 +265,6 @@
     <target name="clean" depends="init" description="Cleans up the project">
         <delete dir="${dist.root}"/>
         <delete dir="${build}"/>
-        <delete>
-             <fileset dir=".">
-                <include name="${lib}/${jar.name}"/>
-             </fileset>
-       </delete>
     </target>
 
 </project>
