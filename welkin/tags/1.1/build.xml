@@ -1,0 +1,275 @@
+
+<!--+
+    |
+    |               +=======================+
+    |               |  Welkin Build System  |
+    |               +=======================+
+    |
+    +-->
+
+<project name="welkin" default="package" basedir=".">
+
+    <!-- === Initialization Targets ============================================= -->
+
+      <target name="init">
+
+        <!-- Set the timestamps -->
+        <tstamp/>
+
+        <!-- Allow users a chance to override without editing the main file -->
+        <property file="${user.home}/welkin.build.properties"/>
+        <property file="local.build.properties"/>
+
+        <!-- Get the build properties from an external file -->
+        <property file="build.properties"/>
+
+        <!-- Set the filters used when making the distribution -->
+        <filter token="name" value="${name}"/>
+        <filter token="year" value="${year}"/>
+        <filter token="version" value="${version}"/>
+        <filter token="date" value="${TODAY}"/>
+
+        <!-- Set the jar-bundling task used to create the MacOSX executable bundle -->
+        <taskdef name="jarbundler" 
+           classpath="${tools}/jarbundler-1.4.jar"
+           classname="com.loomcom.ant.tasks.jarbundler.JarBundler" />
+
+        <!-- Set the task used to create the Java Web Start integrations -->
+        <taskdef 
+            classpath="${tools}/roxes-ant-tasks-1.2.jar" 
+            resource="com/roxes/tools/ant/taskdefs.properties"/>
+            
+        <!-- Set classpath -->
+        <path id="classpath">
+          <fileset dir="${lib}">
+            <include name="*.jar"/>
+          </fileset>
+        </path>
+
+      </target>
+
+    <!--+
+        | Compiles the source code
+        +-->
+    <target name="compile" depends="init" description="Compiles the source code">
+
+        <mkdir dir="${build}/classes"/>
+        <mkdir dir="${build}/src"/>
+
+        <copy todir="${build}/src" filtering="on">
+          <fileset dir="${src}">
+            <include name="**/*.java"/>
+          </fileset>
+        </copy>
+
+        <javac srcdir="${build}/src"
+            destdir="${build}/classes"
+            debug="${compile.debug}"
+            optimize="${compile.optimize}"
+            deprecation="${compile.deprecation}"
+            target="1.2"
+        	    source="1.2">
+            <classpath refid="classpath"/>
+            <include name="**/*.java"/>
+        </javac>
+
+        <copy todir="${build}/classes" filtering="off">
+            <fileset dir="${src}">
+                <exclude name="**/*.java"/>
+                <exclude name="**/package.html"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <!--+
+        | Creates the jar archive
+        +-->
+    <target name="package" depends="compile" description="Generates the jar">
+        <!-- Generate relative classpath for jar file -->
+        <pathconvert dirsep="/" pathsep=" " property="Class-Path">
+            <map from="${basedir}/${lib}/" to=""/>
+            <map from="${basedir}\${lib}\" to=""/>
+            <path>
+                <fileset dir="${lib}">
+                    <include name="*.jar" />
+                </fileset>
+            </path>
+        </pathconvert>
+
+        <jar jarfile="${lib}/${jar.name}" basedir="${build}/classes" compress="${jar.compress}">
+            <manifest>
+                <attribute name="Main-Class" value="edu.mit.simile.welkin.Welkin"/>
+                <attribute name="Class-Path" value="${Class-Path}" />
+            </manifest>
+        </jar>
+    </target>
+
+    <!--+
+        | Prepares the distribution files
+        +-->
+    <target name="prepare-dist" depends="package" description="Prepares the distribution">
+
+        <copy todir="${dist}" filtering="on">
+            <fileset dir=".">
+                <include name="*.txt"/>
+                <include name="*.xml"/>
+                <include name="*.properties"/>
+                   <include name="*.sh"/>
+               <include name="*.bat"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${dist}/${lib}" filtering="off">
+            <fileset dir="${lib}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${dist}/legal">
+          <fileset dir="${legal}"/>
+        </copy>
+
+        <copy todir="${dist}/${src}" filtering="on">
+            <fileset dir="${src}">
+                <exclude name="**/*.jpg"/>
+                <exclude name="**/*.gif"/>
+                <exclude name="**/*.png"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${dist}/${src}" filtering="off">
+            <fileset dir="${src}">
+                <include name="**/*.jpg"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.png"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${dist}/${docs}" filtering="on">
+            <fileset dir="${docs}">
+                <exclude name="**/*.jpg"/>
+                <exclude name="**/*.gif"/>
+                <exclude name="**/*.png"/>
+                <exclude name="index.html"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${dist}/${docs}" filtering="off">
+            <fileset dir="${docs}">
+                <include name="**/*.jpg"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.png"/>
+            </fileset>
+        </copy>
+
+        <chmod file="${dist}/welkin.sh" perm="+x"/>
+
+        <fixcrlf srcdir="${dist}" includes="*.sh" eol="lf"/>
+
+    </target>
+
+    <!--+
+        | Creates the distribution archives
+        +-->
+    <target name="dist" depends="prepare-dist" description="Creates the distribution">
+        <zip zipfile="${dist.target}/${dist.name}.zip" basedir="${dist}"/>
+        <tar tarfile="${dist.target}/${dist.name}.tar" longfile="gnu">
+             <tarfileset dir="${dist.root}">
+                 <include name="${dist.name}/**"/>
+                 <exclude name="${dist.name}/welkin.sh"/>
+             </tarfileset>
+             <tarfileset dir="${dist.root}" mode="755">
+                 <include name="${dist.name}/welkin.sh"/>
+             </tarfileset>
+        </tar>
+        <gzip zipfile="${dist.target}/${dist.name}.tar.gz" src="${dist.target}/${dist.name}.tar"/>
+        <delete file="${dist.target}/${dist.name}.tar"/>
+    </target>
+    
+    <!--+
+        | Creates the MacOSX distributions
+        +-->
+    <target name="mac-dist" depends="prepare-dist" description="Creates the distribution for MacOSX">
+    
+        <!-- Remove in case it already exists -->
+        <delete dir="${dist.target}/Welkin.app" quiet="true"/>
+        
+        <!-- Create the Java Bundle -->
+        <jarbundler dir="${dist.target}"
+                  name="Welkin"
+                  mainclass="edu.mit.simile.welkin.Welkin" 
+                  icon="${misc}/welkin.icns"
+                  version="${version}"
+                  infostring="${Name} ${version}"
+                  aboutmenuname="Welkin"
+                  jvmversion="1.4+"
+                  bundleid="edu.mit.simile.welkin.Welkin"
+                  vmoptions="-Xmx128m"
+                  smalltabs="true"
+                  antialiasedgraphics="true"
+                  antialiasedtext="true"
+                  liveresize="true"
+                  growboxintrudes="true"
+                  screenmenu="true">
+            <jarfileset dir="${lib}">
+                <exclude name="**/CVS" />
+                <include name="**/*.jar" />
+            </jarfileset>
+        </jarbundler>
+        
+        <!-- Create the DMG -->
+        <exec executable="tools/makeDMG.sh" os="Mac OS X"/>
+    </target>
+
+    <!--+
+        | Creates the Java WebStart distributions
+        +-->
+    <target name="webstart" depends="prepare-dist" description="Creates the Java Web Start files">
+        <!-- Create the Java WebStart JNPL file -->
+        <jnlp spec="1.0+" toFile="docs/welkin.jnlp" href="docs/welkin.jnlp" codebase="http://simile.mit.edu/repository/welkin/latest/" >
+            <information>
+                <title>Welkin ${version}</title>
+                <vendor>The SIMILE Project</vendor>
+                <description>A graphical RDF visualizer</description>
+                <description kind="tooltip">Welkin - A Graphical RDF Visualizer</description>
+                <homepage href="http://simile.mit.edu/welkin/"/>
+                <offline_allowed/>
+            </information>
+            <security>
+                <all_permissions/>
+            </security>
+            <resources>
+                <j2se version="1.4+" href="http://java.sun.com/products/autodl/j2se"/>
+                <jar href="lib/welkin.jar" main="true"/>
+                <fileset dir=".">
+                 <include name="${lib}/*.jar"/>
+                 <exclude name="${lib}/welkin.jar"/>
+                </fileset>
+            </resources>
+            <application_desc main_class="edu.mit.simile.welkin.Welkin" />
+        </jnlp>
+        
+        <!-- Ask for the keystore password -->
+        <input message="Please enter the keystore password:" addproperty="keystore.password"/>
+        
+        <!-- Sign the main welkin jar -->
+        <signjar alias="welkin" storepass="${keystore.password}" keystore="${keystore}">
+             <fileset dir="." includes="${lib}/welkin.jar"/>
+        </signjar>
+    </target>
+    
+    <!--+
+        | Cleans up
+        +-->
+    <target name="clean" depends="init" description="Cleans up the project">
+        <delete dir="${dist.root}"/>
+        <delete dir="${build}"/>
+        <delete>
+             <fileset dir=".">
+                <include name="${lib}/${jar.name}"/>
+             </fileset>
+       </delete>
+    </target>
+
+</project>
+
