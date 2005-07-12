@@ -240,7 +240,11 @@
             </security>
             <resources>
                 <j2se version="1.4+" href="http://java.sun.com/products/autodl/j2se"/>
-                <fileset dir="." includes="${lib}/*.jar"/>
+                <jar href="lib/welkin.jar" main="true"/>
+                <fileset dir=".">
+                 <include name="${lib}/*.jar"/>
+                 <exclude name="${lib}/welkin.jar"/>
+                </fileset>
             </resources>
             <application_desc main_class="edu.mit.simile.welkin.Welkin" />
         </jnlp>
