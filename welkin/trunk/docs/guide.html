@@ -9,6 +9,9 @@
      #body {
         margin-bottom: 250px;
      }
+     #body .inset {
+        text-align: center;
+     }
     </style>
 </head>
 <body>
@@ -36,11 +39,45 @@
  
 <h2>User Interface Layout</h2>
 
-<p>Let's look again at a screenshot of the Welkin User Interface, this time we outline the various panes:</p>
+<p>Let's look at a screenshot of the Welkin User Interface, this time outlining the various panes:</p>
 <p class="figure"><img src="images/layout.png" title="Welkin User Interface Layout" /></p>
 
-<h3>Toolbar<h3>
+<p class="note">This screenshot was taken on MacOSX. Since java has pluggable look&feel, the look of Welkin on your platform might be different, but don't worry, the panes and buttons will be in the same position and the would have the same exact functionality (or, if not, it's a bug and please, report it to us).</p>
+
+<h3>Toolbar</h3>
+<p>The toolbar contains three buttons:</p>
+<ul>
+ <li><strong>Load</strong> - Loads RDF into the memory model.</li>
+ <li><strong>Clear</strong> - Clears the memory model and resets to the starting point</li>
+ <li><strong>About</strong> - Shows the About box with credits and copyright info</li>
+</ul>
+<p class="note">When a model is loaded, you can keep adding new statements to the loaded model by loading other ones. This is very useful to <em>merge</em> different models and see if/how they connect.</p>
+
 <h3>Graph</h3>
+<p>The graph pane is the main Welkin pane and where the model visualization takes place. The Welkin Graph canvas is highly interactive. We believe that fast and immediate interactivity is the key for a better understanding of a very complex model, rather than panning and zooming on statically drawn graphs.</p>
+
+<p>When the RDF memory model is empty, the graph pane doesn't show anything. By using the <em>Load</em> button in the toolbar above, you can load statements from files on your disk (we plan to introduce the ability to connect to Sparql web services once the protocol gets finalized).</p>
+
+<p>Once RDF statements are loaded in memory, Welkin represents them as dots and lines, placing them at, initially, at random locations.</p>
+
+<p class="note">To reduce clutter, Welkin does not display <em>literals</em> as nodes, but rather presents them in a box as soon as you click the note that you are interested in. Literals can never be subjects of RDF statements, therefore they always represent <em>Leaves</em> of the graph, which we believe do not add any useful topological information to the visualization and just add clutter. This also means that if your RDF model does not contains statements with predicates that link two resources, you will see disconnected nodes, even if there are literals hanging off of them.</p>
+
+<p>Dots can have two different shapes, depending on whether or not they are used as <em>subjects</em> in any of the statements currently loaded in memory: a small dot <img src="images/small-dot.png"/> represents a resource that is used only as an <em>object</em>, a bigger dot <img src="images/large-dot.png"/> represents a resource that is used at least once as a <em>subject</em>.</p>
+
+<p class="node">In case there are two different <em>predicates</em> between the same <em>resources</em>, Welkin displays only one line. We plan to research ways to visualize multiple predicates in a way that is efficient in both performance and visualization effectiveness. Also note how the predicates are not shown on the graph display. We also plan to work on efficient ways to allow <em>mouseover</em>-like effects to visualize the predicate values in the future.</p>
+
+<p>RDF models are directed graphs, but for performance reason Welkin defaults with the <em>direction arrows</em> of the predicates turned off. To turn it on, check the <em>Arrows</em> check-box in the <em>Drawing</em> tab of the <em>Commands</em> bar at the bottom of the Welkin screen. (see more about the drawing commands and options below)</p>
+
+<p>The graph panel reacts to mouse clicks. There are three events that it currently recognizes, each with a different effect:</p>
+<ul>
+ <li><strong>click</strong> - selects the node that is closer to the click. While the mouse button is still pressed, the <em>literal window</em> will keep showing. When the graph is <em>active</em>, the click holds the node in place and avoids it from moving as long as the mouse button is pressed. By keeping it pressed, you can also drag the node around.</li>
+ <p class="inset"><img src="images/click.png"/></p>
+ <li><strong>double-click</strong> - makes the node <em>sticky</em> and highlighted. This means that its rdf:label or resource URI gets shown even when the mouse button is not pressed and that the node is no longer free to move along the graph canvas but it's hold in place by the click. Another double-click releases the node and returns it to the original floating state.</li>
+ <p class="inset"><img src="images/double-click.png"/></p>
+ <li><strong>right-click</strong> (or ctrl+click on macosx with a single button mouse) - Turns fish-eye zoom on, where the space geometry is distorted around the mouse pointer, so that highly clustered nodes can be spaced apart and labels get shown pointing radially from the center (as to increase visibility). This is useful to have an overview of the contents of a particular node cluster in one shot. Releasing the mouse button make the space geometry return gradually to its initial state.</li>
+ <p class="inset"><img src="images/right-click.png"/></p>
+</ul>
+
 <h3>Commands</h3>
 <h3>Predicates</h3>
 <h3>Resources</h3>
