@@ -165,6 +165,14 @@
         <chmod file="${dist}/welkin.sh" perm="+x"/>
 
         <fixcrlf srcdir="${dist}" includes="*.sh" eol="lf"/>
+        
+        <!-- Ask for the keystore password -->
+        <input message="Please enter the keystore password:" addproperty="keystore.password"/>
+        
+        <!-- Sign the main welkin jar -->
+        <signjar alias="welkin" storepass="${keystore.password}" keystore="${keystore}">
+             <fileset dir="." includes="${lib}/welkin.jar"/>
+        </signjar>
 
     </target>
 
@@ -249,13 +257,6 @@
             <application_desc main_class="edu.mit.simile.welkin.Welkin" />
         </jnlp>
         
-        <!-- Ask for the keystore password -->
-        <input message="Please enter the keystore password:" addproperty="keystore.password"/>
-        
-        <!-- Sign the main welkin jar -->
-        <signjar alias="welkin" storepass="${keystore.password}" keystore="${keystore}">
-             <fileset dir="." includes="${lib}/welkin.jar"/>
-        </signjar>
     </target>
     
     <!--+
