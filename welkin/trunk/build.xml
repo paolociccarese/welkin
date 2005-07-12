@@ -226,7 +226,9 @@
         </jarbundler>
         
         <!-- Create the DMG -->
-        <exec executable="tools/makeDMG.sh" os="Mac OS X"/>
+        <exec executable="tools/makeDMG.sh" os="Mac OS X">
+         <arg line="${version}"/>
+        </exec>
     </target>
 
     <!--+

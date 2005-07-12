@@ -5,6 +5,7 @@
 #          file references should be relative to that directory or the
 #          script will break.
 
+echo "Building MacOSX DMG for Welkin " $1
 hdiutil create -ov -size 5m -fs HFS+ -volname "Welkin" pre_welkin
 hdiutil attach pre_welkin.dmg
 /Developer/Tools/CpMac -r dist/Welkin.app /Volumes/Welkin
@@ -19,4 +20,4 @@ hdiutil unflatten welkin.dmg
 /Developer/Tools/Rez /Developer/Headers/FlatCarbon/*.r misc/SLA.r -a -o welkin.dmg
 hdiutil flatten welkin.dmg
 hdiutil internet-enable -yes welkin.dmg
-mv welkin.dmg dist/welkin.dmg
+mv welkin.dmg dist/welkin-$1.dmg
