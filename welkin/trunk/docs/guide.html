@@ -7,7 +7,7 @@
   <title>SIMILE | Welkin | User Guide </title>
   <style>
      #body {
-        margin-bottom: 100px;
+        margin-bottom: 250px;
      }
     </style>
 </head>
@@ -20,7 +20,38 @@
 </ul>
 <div id="body">
 <h1>Welkin User Guide</h1>
-<p>Coming soon...</p>
+
+<h2>Design Concepts</h2>
+<p>Welkin is an archaic english term to define the <em>celestial sphere</em>, the apparent surface of the imaginary sphere on which celestial bodies appear to be projected (kudos to Jessica Klein for suggesting it to us).</p>
+<p>The reference to the sky and celestial bodies is very meaningful in this context: Welkin is not meant to be a tool to discover a single RDF statement out of a thousands, but it's meant as a "telescope" for your RDF data, a tool that lets you understand its global <em>shape</em> and cluster characteristics rather than the individual item.</p>
+<p>So, if you are thinking about using Welkin as a flashy and sexy frontend tool for your dataset, think again: end users don't care about obtaining a mental picture of an entire dataset, but care more about the extreme locality. They don't care about your galaxy, they want to find the planet that has enough air for them to survive! If that's what you are looking for, the <a href="http://simile.mit.edu/longwell/">Longwell</a> facetted and textual browser is probably what you want.</p>
+<p>Welkin is not designed as a tool for end users, it's thought for an audience of data and metadata analysts (not necessarily RDF-savvy!) that need to:
+ <ul>
+  <li>get a mental model of a dataset they are not familiar with (including the ontologies used to describe it)</li>
+  <li>have a sense of the density of connectivity of a particular dataset or dataset fragment</li>
+  <li>identify potential mappings between resources and ontologies (we plan to expand this functionality a lot more in the future)</li>
+  <li>have a way to rapidly test and visualize the RDF you are working on to understand if there are mistakes in the model as well as spelling mistakes in the namespaces and URIs (believe us: this happens more than you would expect!)
+  <li>discover the parts of your dataset that have special graph-theoretical properties and therefore might 'stand out' as having some latent meaning that might get otherwise unnoticed with localized browsing models</li>
+ </ul>
+ 
+<h2>User Interface Layout</h2>
+
+<p>Let's look again at a screenshot of the Welkin User Interface, this time we outline the various panes:</p>
+<p class="figure"><img src="images/layout.png" title="Welkin User Interface Layout" /></p>
+
+<h3>Toolbar<h3>
+<h3>Graph</h3>
+<h3>Commands</h3>
+<h3>Predicates</h3>
+<h3>Resources</h3>
+<h3>Charts</h3>
+
+<h2>Advanced Features</h2>
+
+<h3>Fish-eye Zoom</h3>
+<h3>Highlighting</h3>
+<h3>Sticky Nodes</h3>
+
 </div>
 <!--#include virtual="../footer.html" -->
 </body>
