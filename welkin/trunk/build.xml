@@ -249,10 +249,9 @@
         <input message="Please enter the keystore password:" addproperty="keystore.password"/>
         
         <!-- Sign the main welkin jar -->
-        <signjar jar="${lib}/welkin.jar" 
-           alias="welkin" 
-           storepass="${keystore.password}"
-           keystore="${keystore}"/>
+        <signjar alias="welkin" storepass="${keystore.password}" keystore="${keystore}">
+             <fileset dir="." includes="${lib}/welkin.jar"/>
+        </signjar>
     </target>
     
     <!--+
@@ -264,8 +263,6 @@
         <delete>
              <fileset dir=".">
                 <include name="${lib}/${jar.name}"/>
-                <include name="*.zip"/>
-                <include name="*.tar.gz"/>
              </fileset>
        </delete>
     </target>
