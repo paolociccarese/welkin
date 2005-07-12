@@ -18,5 +18,5 @@ rm pre_welkin.dmg
 hdiutil unflatten welkin.dmg
 /Developer/Tools/Rez /Developer/Headers/FlatCarbon/*.r misc/SLA.r -a -o welkin.dmg
 hdiutil flatten welkin.dmg
-hdiutil internet-enable -yes welkin.dmg
+#hdiutil internet-enable -yes welkin.dmg
 mv welkin.dmg dist/welkin.dmg
