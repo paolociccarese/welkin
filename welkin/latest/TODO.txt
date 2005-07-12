@@ -1,0 +1,43 @@
+
+                          +--------------------------------------+
+                          |          Welking ToDo List           |
+                          +--------------------------------------+
+
+known bugs/limitations
+======================
+
+ - the ontology tree should only display items that will make the graph change if acted upon
+
+ - the 'welkin' button does nothing, it should display an About dialog for credits, licensing
+   info and the like.
+
+ - the WebStart jnlp file doesn't work, need to understand how to automate the jar-signing
+   procedure
+
+ - there are no documents, but we'll wait until there is a little stability in both the
+   UI and the features before writing some
+
+ - need to find a cool icon/logo for both the window and the mac application
+
+ - the graph distribution widgets should be updated when the graph changes
+
+
+in the queue (and in no particular order)
+=========================================
+
+ - avoid using the jena model but try to load the RDF directly from the parsers in 
+   stream mode, this should reduce the memory consumption.
+ 
+ - allow loading of N3 files
+
+ - add provenance info to the graph model
+
+ - implement highlight by literal token match and by URI token match
+
+ - allow to restrict the graph acting upon the graph distribution widgets, for example, by
+   showing only the nodes that belong to a particular range of the distribution. This might
+   require some more clever caching of the results in order to act on the graph
+   responsively.
+
+
+
