@@ -208,32 +208,35 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
     // called by the applet sandbox
     public void init() {  
-    	try {
-    		URL dataURL = null;
-    		if(getParameter("url")!=null || getParameter("data")!=null) {
-	    		if(getParameter("url")!=null) {
-					dataURL = new URL(getParameter("url"));
-	    		} else if (getParameter("data")!=null) {
-	    		    String base = getDocumentBase().toString();
-	    		    dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) 
-	    		            + getParameter("data"));
-	    		}
+        try {
+            URL dataURL = null;
+            if ((getParameter("url") != null) || (getParameter("data") != null)) {
+                if ( getParameter("url" ) != null) {
+                    dataURL = new URL(getParameter("url"));
+                } else if (getParameter("data") != null) {
+                    String protocol = getDocumentBase().getProtocol();
+                    String host = getDocumentBase().getHost();
+                    int port = getDocumentBase().getPort();
+                    String data = protocol + "://" + host + ":" + port + getParameter("data");
+                    System.out.println("*** data: " + data);
+                    dataURL = new URL(data);
+                }
 
-				initPanel(true);
-				
+                initPanel(true);
+                
                 InputStream in = dataURL.openStream();
                 if (in == null) {
                     throw new IllegalArgumentException("File: " + dataURL.getPath()
                             + " not found");
                 }
-				
+                
                 initAll(in, dataURL.getPath());
-    		} else {
-    		    initPanel(false);
-    		}
-		} catch (Exception e) {
-			System.out.println(e + " " + e.getMessage());
-		}
+            } else {
+                initPanel(false);
+            }
+        } catch (Exception e) {
+            System.out.println(e + " " + e.getMessage());
+        }
     }
 
     public void initPanel(boolean applet){
@@ -261,13 +264,13 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         JPanel dataPane = new JPanel();
         dataPane.setLayout(new BorderLayout());
         
-        if(!applet) {
+        if (!applet) {
             dataClearButton = new JButton("Clear");
             dataLoadButton = new JButton("Load");
 
             dataClearButton.addActionListener(this);
             dataLoadButton.addActionListener(this);
-        	
+            
             aboutButton = new JButton("About");
             aboutButton.addActionListener(this);
             
@@ -370,29 +373,29 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         highlight.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
         JPanel parameters = new JPanel();
-		parameters.setLayout(new BoxLayout(parameters, BoxLayout.X_AXIS));
-		parameters.add(Box.createHorizontalGlue());
-		parameters.add(delayLabel);
-		parameters.add(Box.createRigidArea(new Dimension(5,0)));
-		parameters.add(delayField);
-		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-		parameters.add(massLabel);
-		parameters.add(Box.createRigidArea(new Dimension(5,0)));
-		parameters.add(massField);
-		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-		parameters.add(dragLabel);
-		parameters.add(Box.createRigidArea(new Dimension(5,0)));
-		parameters.add(dragField);
-		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-		parameters.add(attractionLabel);
-		parameters.add(Box.createRigidArea(new Dimension(5,0)));
-		parameters.add(attractionField);
-		parameters.add(Box.createRigidArea(new Dimension(30,0)));
-		parameters.add(repulsionLabel);
-		parameters.add(Box.createRigidArea(new Dimension(5,0)));
-		parameters.add(repulsionField);
-		parameters.add(Box.createHorizontalGlue());
-		parameters.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        parameters.setLayout(new BoxLayout(parameters, BoxLayout.X_AXIS));
+        parameters.add(Box.createHorizontalGlue());
+        parameters.add(delayLabel);
+        parameters.add(Box.createRigidArea(new Dimension(5,0)));
+        parameters.add(delayField);
+        parameters.add(Box.createRigidArea(new Dimension(30,0)));
+        parameters.add(massLabel);
+        parameters.add(Box.createRigidArea(new Dimension(5,0)));
+        parameters.add(massField);
+        parameters.add(Box.createRigidArea(new Dimension(30,0)));
+        parameters.add(dragLabel);
+        parameters.add(Box.createRigidArea(new Dimension(5,0)));
+        parameters.add(dragField);
+        parameters.add(Box.createRigidArea(new Dimension(30,0)));
+        parameters.add(attractionLabel);
+        parameters.add(Box.createRigidArea(new Dimension(5,0)));
+        parameters.add(attractionField);
+        parameters.add(Box.createRigidArea(new Dimension(30,0)));
+        parameters.add(repulsionLabel);
+        parameters.add(Box.createRigidArea(new Dimension(5,0)));
+        parameters.add(repulsionField);
+        parameters.add(Box.createHorizontalGlue());
+        parameters.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
         JPanel drawing = new JPanel();
         drawing.setLayout(new BoxLayout(drawing, BoxLayout.X_AXIS));
@@ -413,10 +416,10 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         drawing.add(Box.createHorizontalGlue());
         drawing.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
-		JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
-		toolsPane.addTab("Drawing", drawing);
-		toolsPane.addTab("Highlight",highlight);
-		toolsPane.addTab("Parameters",parameters);
+        JTabbedPane toolsPane = new JTabbedPane(JTabbedPane.TOP);
+        toolsPane.addTab("Drawing", drawing);
+        toolsPane.addTab("Highlight",highlight);
+        toolsPane.addTab("Parameters",parameters);
 
         JPanel inDegreePane = new JPanel();
         inDegreePane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "In Degree", TitledBorder.TOP, TitledBorder.LEFT, titleFont));
@@ -467,28 +470,28 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     }  
     
     public void start() {
-		super.start();
-    	if (running) internalStart();
+        super.start();
+        if (running) internalStart();
     }
     
     public void stop() {
-		super.stop();
+        super.stop();
         if (running) internalStop();
     }
 
-	public void internalStart() {
-		running = true;
-		visualizer.start();
-		controlButton.setText("Stop");
-		if (stopIcon != null) controlButton.setIcon(stopIcon);
-	}
+    public void internalStart() {
+        running = true;
+        visualizer.start();
+        controlButton.setText("Stop");
+        if (stopIcon != null) controlButton.setIcon(stopIcon);
+    }
 
-	public void internalStop() {
-		running = false;
-		visualizer.stop();
-		controlButton.setText("Start");
-		if (startIcon != null) controlButton.setIcon(startIcon);
-	}
+    public void internalStop() {
+        running = false;
+        visualizer.stop();
+        controlButton.setText("Start");
+        if (startIcon != null) controlButton.setIcon(startIcon);
+    }
 
     public void notifyTreeChange() {
         wrapper.cache.uriBasedVisualization(predTree);
@@ -514,14 +517,14 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.drawedges = selected;
         } else if (source == arrowCheckbox) {
             visualizer.drawarrows = selected;
-		} else if (source == edgeValuesCheckbox) {
-			visualizer.drawedgevalues = selected;
+        } else if (source == edgeValuesCheckbox) {
+            visualizer.drawedgevalues = selected;
         } else if (source == timeCheckbox) {
             visualizer.timing = selected;
-		} else if (source == backgroundCheckbox) {
-			visualizer.background = selected;
-		} else if (source == highlightOnLabelCheckbox) {
-			visualizer.highlightOnLabel = selected;
+        } else if (source == backgroundCheckbox) {
+            visualizer.background = selected;
+        } else if (source == highlightOnLabelCheckbox) {
+            visualizer.highlightOnLabel = selected;
         }
         visualizer.repaint();
     }
@@ -530,9 +533,9 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         Object source = e.getSource();
         if (source == controlButton) {
             if (visualizer.isRunning()) {
-            	    internalStop();
+                    internalStop();
             } else {
-            	    internalStart();
+                    internalStart();
             }
         } else if (source == circleButton) {
             visualizer.circle();
@@ -540,7 +543,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             visualizer.scramble();
         } else if (source == shakeButton) {
             visualizer.shake();
-		} else if (source == dataLoadButton) {
+        } else if (source == dataLoadButton) {
             try {
                 // Save File Manager
                 JFileChooser openWin;
@@ -557,7 +560,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-		} else if (source == dataClearButton) {
+        } else if (source == dataClearButton) {
             if (visualizer.isRunning()) {
                 internalStop();
             }
@@ -618,16 +621,18 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         int extIndex = fileName.lastIndexOf(".");
         if (extIndex > 0) {
             String ext = fileName.substring(extIndex+1);
-            if(ext.equals("n3") || ext.equals("turtle"))
+            if (ext.equals("n3") || ext.equals("turtle"))
                 // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
                 // this might return an error in valid N3 files, but until RIO supports
                 // N3 this is the easiest way.
                 res = wrapper.addModel(stream, ModelManager.TURTLE);
-            else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
+            else if (ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
                 res = wrapper.addModel(stream, ModelManager.RDFXML);
             else {
                 throw new IllegalArgumentException("Extension not recognized!");
             }
+        } else {
+            res = wrapper.addModel(stream, ModelManager.RDFXML);
         }
         
         try {
@@ -651,30 +656,30 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         }       
     }
 
-	protected static ImageIcon createImageIcon(String path) {
-		URL imgURL = Welkin.class.getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL);
-		} else {
-			System.err.println("Couldn't find image resource: " + path);
-			return null;
-		}
-	}
+    protected static ImageIcon createImageIcon(String path) {
+        URL imgURL = Welkin.class.getResource(path);
+        if (imgURL != null) {
+            return new ImageIcon(imgURL);
+        } else {
+            System.err.println("Couldn't find image resource: " + path);
+            return null;
+        }
+    }
 
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) { }
 
-		Welkin welkin = new Welkin();
-		welkin.initPanel(false);
+        Welkin welkin = new Welkin();
+        welkin.initPanel(false);
 
         frame = new JFrame(NAME);
         URL logo = Welkin.class.getResource(LOGO_SMALL_ICON);
         if (logo != null) {
-        	    frame.setIconImage(Toolkit.getDefaultToolkit().createImage(logo));
+            frame.setIconImage(Toolkit.getDefaultToolkit().createImage(logo));
         } else {
-        	    System.err.println("Couldn't find image resource: " + LOGO_ICON);
+            System.err.println("Couldn't find image resource: " + LOGO_ICON);
         }
 
         frame.getContentPane().add(welkin, BorderLayout.CENTER);
@@ -686,7 +691,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         frame.setSize(X_WIN_DIM, Y_WIN_DIM);
         //frame.pack();
         frame.setVisible(true);
-        frame.show();
+        //frame.show();
     }
 
     class WFileFilter extends FileFilter {
@@ -705,7 +710,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
                     extension.equals("turtle")) {
                         return true;
                 }
-        	}
+            }
 
             return false;
         }

@@ -29,8 +29,8 @@ public class ModelManager implements StatementHandler {
     public ModelCache cache = new ModelCache();
     
     public void handleStatement(Resource resource, URI uri, Value value) 
-		throws StatementHandlerException 
-	{    
+        throws StatementHandlerException 
+    {    
         WResource sub = null;
         if (resource instanceof URI) {
             sub = cache.addResource(resource, false);
@@ -41,9 +41,9 @@ public class ModelManager implements StatementHandler {
          
         if (value instanceof URI) {
             WResource obj = cache.addResource(value, true);
-        	
+            
             PredicateUri puri = cache.addPredicatesUri(uri);
-        	
+            
             sub.addObjectStatement(cache.getStatement(sub, puri, obj));
             cache.addStatement(sub.hash, obj.hash, puri);
             
@@ -62,7 +62,7 @@ public class ModelManager implements StatementHandler {
             cache.addStatement(sub.hash, obj.hash, puri);
             cache.addPredicatesUri(uri);
         }
-	}
+    }
     
     // -----------------------
     //      Model issues
@@ -117,15 +117,15 @@ public class ModelManager implements StatementHandler {
     //       Highlights
     // -----------------------
     public void highlightNode(String text, boolean highlight, boolean highlightOnLabel) {
-    	WResource node;
-    	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+        WResource node;
+        for(Iterator it=cache.resources.iterator(); it.hasNext();) {
             node = ((WResource) it.next());
             if(highlightOnLabel) {
-	            if(node.label.lastIndexOf(text)!=-1)
-	                node.highlighted = true;
+                if(node.label.lastIndexOf(text)!=-1)
+                    node.highlighted = true;
             } else {
-	            if(node.unique.lastIndexOf(text)!=-1)
-	                node.highlighted = true;               
+                if(node.unique.lastIndexOf(text)!=-1)
+                    node.highlighted = true;               
             }
         }
     }
@@ -162,10 +162,10 @@ public class ModelManager implements StatementHandler {
     private void setXmlRdfParserInstance() {
        if (parser==null || !(parser instanceof RdfXmlParser)) {
            // Use the SAX2-compliant Xerces parser
-           System.setProperty(
-                   "org.xml.sax.driver",
-                   "org.apache.xerces.parsers.SAXParser"
-              );
+           //System.setProperty(
+           //        "org.xml.sax.driver",
+           //        "org.apache.xerces.parsers.SAXParser"
+           //   );
            
            parser = new RdfXmlParser();
        }
