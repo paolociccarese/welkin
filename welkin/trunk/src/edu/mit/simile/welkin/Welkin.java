@@ -230,7 +230,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
                             + " not found");
                 }
                 
-                initAll(in, dataURL.getPath());
+                initAll(in, dataURL.getPath(), true);
             } else {
                 initPanel(false);
             }
@@ -447,6 +447,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         chartPane.setOneTouchExpandable(true);
         chartPane.setResizeWeight(0.80);
         chartPane.setBorder(BorderFactory.createEmptyBorder());
+        if (applet) chartPane.setDividerLocation(1.0);
 
         JSplitPane infoPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,scrollingPredTree,scrollingResTree);
         infoPane.setOneTouchExpandable(false);
@@ -456,7 +457,11 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         JSplitPane bodyPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,infoPane,chartPane);
         bodyPane.setOneTouchExpandable(true);
         bodyPane.setResizeWeight(0.25);
-        bodyPane.setDividerLocation(200);
+        if (applet) {
+            bodyPane.setDividerLocation(0.0);
+        } else {
+            bodyPane.setDividerLocation(200);
+        }
         bodyPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
         this.getContentPane().setLayout(new BorderLayout());
@@ -613,10 +618,10 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
                     + " not found");
         }
 
-        initAll(in, fileName.getAbsolutePath());
+        initAll(in, fileName.getAbsolutePath(), false);
     }
     
-    private void initAll(InputStream stream, String fileName) {
+    private void initAll(InputStream stream, String fileName, boolean applet) {
         boolean res = false;
         int extIndex = fileName.lastIndexOf(".");
         if (extIndex > 0) {
@@ -650,7 +655,12 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             resTree.createTree();
             this.notifyBaseUriColorChange();
             scrollingResTree.revalidate();
-            scrollingPredTree.revalidate(); 
+            scrollingPredTree.revalidate();
+            
+            if (applet) {
+                visualizer.circle();
+                internalStart();
+            }
         } else {
             throw new IllegalArgumentException("File not correct!");
         }       
