@@ -36,7 +36,7 @@ public class ExceptionWin extends JDialog implements ActionListener{
 		message.setEditable(false);
 		message.setBorder(BorderFactory.createLineBorder(Color.black));
 		spMessage = new JScrollPane(message);
-		spMessage.setBounds(10,10,370,54);
+		spMessage.setBounds(10,10,770,54);
 		
 		moreButton = new JButton();
 		moreButton.setActionCommand("OC");
@@ -48,7 +48,7 @@ public class ExceptionWin extends JDialog implements ActionListener{
 		stack.setEditable(false);
 		stack.setBorder(BorderFactory.createLineBorder(Color.black));
 		spStack = new JScrollPane(stack);
-		spStack.setBounds(10,100,370,90);
+		spStack.setBounds(10,100,770,90);
 		
 		this.validate();
 		this.repaint();
