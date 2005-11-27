@@ -9,6 +9,7 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.rio.ParseException;
 import org.openrdf.rio.Parser;
 import org.openrdf.rio.StatementHandler;
 import org.openrdf.rio.StatementHandlerException;
@@ -16,6 +17,7 @@ import org.openrdf.rio.rdfxml.RdfXmlParser;
 import org.openrdf.rio.turtle.TurtleParser;
 
 import edu.mit.simile.welkin.ModelCache.WResource;
+import edu.mit.simile.welkin.ModelCache.WStatement;
 import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class ModelManager implements StatementHandler {
@@ -29,8 +31,8 @@ public class ModelManager implements StatementHandler {
     public ModelCache cache = new ModelCache();
     
     public void handleStatement(Resource resource, URI uri, Value value) 
-        throws StatementHandlerException 
-    {    
+		throws StatementHandlerException 
+	{    
         WResource sub = null;
         if (resource instanceof URI) {
             sub = cache.addResource(resource, false);
@@ -41,9 +43,9 @@ public class ModelManager implements StatementHandler {
          
         if (value instanceof URI) {
             WResource obj = cache.addResource(value, true);
-            
+        	
             PredicateUri puri = cache.addPredicatesUri(uri);
-            
+        	
             sub.addObjectStatement(cache.getStatement(sub, puri, obj));
             cache.addStatement(sub.hash, obj.hash, puri);
             
@@ -62,7 +64,7 @@ public class ModelManager implements StatementHandler {
             cache.addStatement(sub.hash, obj.hash, puri);
             cache.addPredicatesUri(uri);
         }
-    }
+	}
     
     // -----------------------
     //      Model issues
@@ -74,7 +76,10 @@ public class ModelManager implements StatementHandler {
             return true;
         } catch (Exception e) {
             cache.clear();
-            e.printStackTrace();
+            ExceptionWin ew = new ExceptionWin("Loading Error", 
+                    e.getMessage(), e.toString());
+            ew.buildWindow(false);
+            ew.setVisible(true);
             return false;
         }
     }
@@ -84,9 +89,20 @@ public class ModelManager implements StatementHandler {
             initParser(type);
             parser.parse(in, baseUri);
             return true;
+        } catch (ParseException e) {
+            cache.clear();
+            ExceptionWin ew = new ExceptionWin("Loading Error", 
+                    "Line: " + e.getLineNumber() + 
+                    " Column: " + e.getColumnNumber() + "\n" + e.getMessage(), e.toString());
+            ew.buildWindow(false);
+            ew.setVisible(true);
+            return false;
         } catch (Exception e) {
             cache.clear();
-            e.printStackTrace();
+            ExceptionWin ew = new ExceptionWin("Loading Error", 
+                    e.getMessage(), e.toString());
+            ew.buildWindow(false);
+            ew.setVisible(true);
             return false;
         }
     }
@@ -112,20 +128,69 @@ public class ModelManager implements StatementHandler {
     public void clear() {
         cache.clear();
     }
+
+    // -----------------------
+    //    Icons management
+    // -----------------------
+    public void updateIcons(int id, boolean type, String rule) {
+    	if(type) {
+        	WResource node;
+        	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+                node = ((WResource) it.next());
+                WStatement statement;
+                for(Iterator ite=node.linkedObjectNodes.iterator(); ite.hasNext();) {
+                	statement = ((WStatement)ite.next());
+                	if(statement.predicate.getUri().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+                		if(((WResource)statement.object).unique.equals(rule)) {
+                			node.iconId = id;
+                		}
+                	}
+                }
+        	}
+    	} else {
+    		
+    	}
+    }
+    
+    public void updateIcons(boolean type, String rule) {
+    	if(type) {
+        	WResource node;
+        	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+                node = ((WResource) it.next());
+                WStatement statement;
+                for(Iterator ite=node.linkedObjectNodes.iterator(); ite.hasNext();) {
+                	statement = ((WStatement)ite.next());
+                	if(statement.predicate.getUri().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+                		if(((WResource)statement.object).unique.equals(rule)) {
+                			node.iconId = -1;
+                		}
+                	}
+                }
+        	}
+    	} else {
+    		
+    	}
+    }
+    
+    public void clearIcons() {
+       	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+            ((WResource) it.next()).iconId = -1;
+       	}
+    }
     
     // -----------------------
     //       Highlights
     // -----------------------
     public void highlightNode(String text, boolean highlight, boolean highlightOnLabel) {
-        WResource node;
-        for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+    	WResource node;
+    	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
             node = ((WResource) it.next());
             if(highlightOnLabel) {
-                if(node.label.lastIndexOf(text)!=-1)
-                    node.highlighted = true;
+	            if(node.label.lastIndexOf(text)!=-1)
+	                node.highlighted = true;
             } else {
-                if(node.unique.lastIndexOf(text)!=-1)
-                    node.highlighted = true;               
+	            if(node.unique.lastIndexOf(text)!=-1)
+	                node.highlighted = true;               
             }
         }
     }
@@ -162,10 +227,10 @@ public class ModelManager implements StatementHandler {
     private void setXmlRdfParserInstance() {
        if (parser==null || !(parser instanceof RdfXmlParser)) {
            // Use the SAX2-compliant Xerces parser
-           //System.setProperty(
-           //        "org.xml.sax.driver",
-           //        "org.apache.xerces.parsers.SAXParser"
-           //   );
+           System.setProperty(
+                   "org.xml.sax.driver",
+                   "org.apache.xerces.parsers.SAXParser"
+              );
            
            parser = new RdfXmlParser();
        }
