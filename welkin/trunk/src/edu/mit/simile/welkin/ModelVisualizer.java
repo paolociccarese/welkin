@@ -6,8 +6,10 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -16,6 +18,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.net.URL;
 import java.util.Iterator;
 
 import javax.swing.JComponent;
@@ -76,6 +79,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean drawedges = true;
     public boolean drawnodes = true;
     public boolean drawarrows = false;
+    public boolean drawicons = false;
     public boolean timing = true;
     public boolean drawgroups = true;
     public boolean drawedgevalues = false;
@@ -85,6 +89,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public boolean colors = false;
 
     ModelManager model;
+    Welkin welkin;
     WResource pick;
 
     boolean pickfixed;
@@ -174,10 +179,11 @@ public class ModelVisualizer extends JComponent implements Runnable {
     float cw;
     float ch;
 
-    public ModelVisualizer(ModelManager model) {
+    public ModelVisualizer(ModelManager model, Welkin welkin) {
         this.addMouseMotionListener(new MyMouseMotionListener());
         this.addMouseListener(new MyMouseListener());
         setGraph(model);
+        this.welkin = welkin;
     }
 
     public void setGraph(ModelManager model) {
@@ -466,32 +472,65 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 float z = zoom(n.x, n.y);
                 float x = n.x + (n.x - zoomX) * z + cx;
                 float y = n.y + (n.y - zoomY) * z + cy;
-
-                Shape border, inside;
-                if (n.isNotSubject) {
-                    border = new Ellipse2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
-                    inside = new Ellipse2D.Float(x - 1.5f, y - 1.5f, 3.0f, 3.0f);
+                
+                if(drawicons) {
+                	if(n.iconId== -1) {
+		                Shape border, inside;
+		                if (n.isNotSubject) {
+		                    border = new Ellipse2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+		                    inside = new Ellipse2D.Float(x - 1.5f, y - 1.5f, 3.0f, 3.0f);
+		                } else {
+	
+		                    border = new Rectangle2D.Float(x - 3.5f, y - 3.5f, 7.0f, 7.0f);
+		                    inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+		                }
+		
+		                if (n == pick) {
+		                    g2.setColor(n.color);
+		                    g2.fill(inside);
+		                    g2.setColor(fixedColor);
+		                    g2.draw(border);
+		                } else {
+		                    if (n.fixed) {
+		                        g2.setColor(fixedColor);
+		                        g2.fill(inside);
+		                        g2.setColor(n.color);
+		                        g2.draw(border);
+		                    } else {
+		                        g2.setColor(n.color);
+		                        g2.fill(inside);
+		                    }
+		                }
+                	} else {
+                		g2.drawImage(welkin.iconsManager.getIconById(n.iconId), (int) x - 8, (int) y - 8, this);                		
+                	}
                 } else {
-                    border = new Rectangle2D.Float(x - 3.5f, y - 3.5f, 7.0f, 7.0f);
-                    inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
-                }
-
-                if (n == pick) {
-                    g2.setColor(n.color);
-                    g2.fill(inside);
-                    g2.setColor(fixedColor);
-                    g2.draw(border);
-                } else {
-                    if (n.fixed) {
-                        g2.setColor(fixedColor);
-                        g2.fill(inside);
-                        g2.setColor(n.color);
-                        g2.draw(border);
-                    } else {
-                        g2.setColor(n.color);
-                        g2.fill(inside);
-                        //g2.draw(border);
-                    }
+	                Shape border, inside;
+	                if (n.isNotSubject) {
+	                    border = new Ellipse2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+	                    inside = new Ellipse2D.Float(x - 1.5f, y - 1.5f, 3.0f, 3.0f);
+	                } else {
+	                    border = new Rectangle2D.Float(x - 3.5f, y - 3.5f, 7.0f, 7.0f);
+	                    inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
+	                }
+	
+	                if (n == pick) {
+	                    g2.setColor(n.color);
+	                    g2.fill(inside);
+	                    g2.setColor(fixedColor);
+	                    g2.draw(border);
+	                } else {
+	                    if (n.fixed) {
+	                        g2.setColor(fixedColor);
+	                        g2.fill(inside);
+	                        g2.setColor(n.color);
+	                        g2.draw(border);
+	                    } else {
+	                        g2.setColor(n.color);
+	                        g2.fill(inside);
+	                        //g2.draw(border);
+	                    }
+	                }               	
                 }
             }
         }
