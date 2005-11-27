@@ -241,7 +241,8 @@ public class ModelCache {
         Set linkedLiterals = new HashSet();
 
         int hash = 0;
-
+        int iconId=-1;
+        
         Color color;
         String label;
 
