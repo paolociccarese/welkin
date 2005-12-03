@@ -133,8 +133,8 @@ public class ModelManager implements StatementHandler {
     //    Icons management
     // -----------------------
     public void updateIcons(int id, boolean type, String rule) {
+    	WResource node;
     	if(type) {
-        	WResource node;
         	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
                 node = ((WResource) it.next());
                 WStatement statement;
@@ -148,13 +148,18 @@ public class ModelManager implements StatementHandler {
                 }
         	}
     	} else {
-    		
+        	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+                node = ((WResource) it.next());
+				if(node.unique.startsWith(rule)) {
+					node.iconId = id;
+				}
+        	}    		
     	}
     }
     
     public void updateIcons(boolean type, String rule) {
+    	WResource node;
     	if(type) {
-        	WResource node;
         	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
                 node = ((WResource) it.next());
                 WStatement statement;
@@ -168,7 +173,12 @@ public class ModelManager implements StatementHandler {
                 }
         	}
     	} else {
-    		
+        	for(Iterator it=cache.resources.iterator(); it.hasNext();) {
+                node = ((WResource) it.next());
+				if(node.unique.startsWith(rule)) {
+					node.iconId = -1;
+				}
+        	}    
     	}
     }
     

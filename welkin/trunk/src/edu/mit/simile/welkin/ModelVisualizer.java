@@ -6,10 +6,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -18,7 +17,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.JComponent;
@@ -98,7 +97,18 @@ public class ModelVisualizer extends JComponent implements Runnable {
     float zoomX = 0.0f;
     float zoomY = 0.0f;
     float alpha = MIN_ALPHA;
+    
+//  Partial Fade algorithm implementation
+//  -------------------------------------
+/*
+    private TreeNode root;
 
+    private float minX = 0;
+    private float maxX = 0;
+    private float minY = 0;
+    private float maxY = 0;
+*/
+    
     class MyMouseListener extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON3 || e.isPopupTrigger()) {
@@ -229,6 +239,13 @@ public class ModelVisualizer extends JComponent implements Runnable {
     }
 
     public void circle() {
+  
+//    	 Partial Fade algorithm implementation
+//    	 -------------------------------------
+/*
+        initFade();
+*/
+    	
         float r = Math.min(cx, cy) - 50.0f;
         float alpha = (float) (2.0d * Math.PI / model.cache.resources.size());
 
@@ -238,10 +255,24 @@ public class ModelVisualizer extends JComponent implements Runnable {
             n.x = (float) (r * Math.sin(alpha * j));
             n.y = (float) (r * Math.cos(alpha * j++));
         }
+        
+// Partial Fade algorithm implementation
+// -------------------------------------
+/*
+        spaceDecomposition(root, minX, maxX, minY, maxY);
+*/
+       
         repaint();
     }
 
     public void scramble() {
+    	
+// Partial Fade algorithm implementation
+// -------------------------------------
+/*
+       initFade();
+*/
+    	
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
             if (!n.fixed) {
@@ -249,10 +280,24 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 n.y = (float) ((double) (cy - 50.0f) * 2.0f * (Math.random() - 0.5d));
             }
         }
+        
+// Partial Fade algorithm implementation
+// -------------------------------------
+ /*
+        spaceDecomposition(root, minX, maxX, minY, maxY);
+ */
+        
         repaint();
     }
 
     public void shake() {
+    	
+// Partial Fade algorithm implementation
+// -------------------------------------
+/*
+       initFade();
+*/
+    	
         for (Iterator it = model.cache.resources.iterator(); it.hasNext();) {
             WResource n = (WResource) it.next();
             if (!n.fixed) {
@@ -261,6 +306,13 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 keepInsideCanvas(n);
             }
         }
+        
+// Partial Fade algorithm implementation
+// -------------------------------------
+/*
+        spaceDecomposition(root, minX, maxX, minY, maxY);
+*/
+        
         repaint();
     }
 
@@ -293,7 +345,83 @@ public class ModelVisualizer extends JComponent implements Runnable {
             return 0.0f;
         }
     }
+    
 
+
+// Partial Fade algorithm implementation
+// -------------------------------------
+/*
+    float teta = 1;
+    
+    void initFade(){
+       root = new TreeNode();
+       minX = maxX = minY = maxY = 0;
+    }
+    
+    void spaceDecomposition(FadeTreeNode node, float minX, float maxX, float minY, float maxY) {
+
+        System.out.println("Decomposition: " + node.nodes.size());
+        
+        float cellWidth = (maxX - minX)/2;
+        float middleX = minX + cellWidth;
+        float middleY = minX + cellWidth;
+        
+        FadeTreeNode ul = new FadeTreeNode();
+        FadeTreeNode ur = new FadeTreeNode();
+        FadeTreeNode bl = new FadeTreeNode();
+        FadeTreeNode br = new FadeTreeNode();
+        
+        node.center = massCenter(node, minX, minY);
+        for(int i=0; i<node.nodes.size(); i++) {
+            WResource wr = ((WResource)node.nodes.get(i));
+            float distance = (float) Math.sqrt(Math.pow(node.center.x-wr.x,2)
+            	+(Math.pow(node.center.y-wr.x,2)));
+            
+            if(cellWidth/distance > teta) {
+                if( wr.x < middleX && wr.y < middleY) bl.addResource(wr);
+                if( wr.x < middleX && wr.y > middleY) ul.addResource(wr);
+                if( wr.x > middleX && wr.y < middleY) br.addResource(wr);
+                if( wr.x > middleX && wr.y > middleY) ur.addResource(wr);
+            } else
+                System.out.println("************");
+        }
+        
+        if(bl.nodes.size() > 0) {
+            System.out.println("Decomposition bl: " + bl.nodes.size());
+            //node.nodes.removeAll(bl.nodes);
+            spaceDecomposition(bl, minX, middleX, minY, middleY);
+        }
+        if(br.nodes.size() > 0) {
+            System.out.println("Decomposition br: " + br.nodes.size());
+            //node.nodes.removeAll(br.nodes);
+            spaceDecomposition(br, minX, middleX, middleY, maxY);
+        }
+        if(ul.nodes.size() > 0) {
+            System.out.println("Decomposition ul: " + ul.nodes.size());
+            //node.nodes.removeAll(ul.nodes);
+            spaceDecomposition(ul, middleX, maxX, minY, middleY);
+        }
+        if(ur.nodes.size() > 0) {
+            System.out.println("Decomposition ur: " + ur.nodes.size());
+            //node.nodes.removeAll(ur.nodes);
+            spaceDecomposition(ur, middleX, maxX, middleY, maxY);
+        }
+    }
+    
+    Point massCenter(FadeTreeNode tn, float x, float y) {
+        float mcx = 0;
+        float mcy = 0;
+        for(int i=0; i<tn.nodes.size(); i++) {
+            mcx += ((WResource)tn.nodes.get(i)).x;
+            mcy += ((WResource)tn.nodes.get(i)).y;
+        }   
+        
+        Point tReturn = new Point();
+        tReturn.setLocation(mcx/tn.nodes.size(), mcy/tn.nodes.size());
+        return tReturn;
+    }
+*/
+    
     void simulate() {
         long startTime = 0;
 
@@ -727,5 +855,22 @@ public class ModelVisualizer extends JComponent implements Runnable {
     public Dimension getPreferredSize() {
         return preferred;
     }
-
+    
+//  Partial Fade algorithm implementation
+//  -------------------------------------
+/*
+    class FadeTreeNode {
+        Point center;
+        ArrayList nodes = new ArrayList();;
+        ArrayList child = new ArrayList();;
+        
+        public void addResource(WResource node) {
+            nodes.add(node);
+        }
+        
+        public void addChild(WResource node) {
+            nodes.add(node);
+        }
+    }
+*/
 }

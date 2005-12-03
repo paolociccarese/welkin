@@ -179,6 +179,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 		            	if (te.id == bufferedElement.id) {
 		            		te.icon = ((ImageIcon)iconLabel.getIcon()).getImage();
 		            		te.rule = ruleField.getText().trim();
+		            		te.type = typeCheck.isSelected();
 		            		updateModel(bufferedElement.type, bufferedElement.rule);
 		            		bufferedElement = null;
 		            		break;
@@ -303,7 +304,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
     class TablePanel extends JPanel {
     	
     	Image remove;
-    	int maximumTextWidth=140;
+    	int maximumWidth=140;
     	
     	public TablePanel () {
     		iconList = new ArrayList();
@@ -335,11 +336,8 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
             for(Iterator it = iconList.iterator(); it.hasNext(); ) {
             	TableElement te = (TableElement) it.next();
             	
-            	maximumTextWidth = maximumTextWidth < fm.stringWidth(te.rule) 
-            			? fm.stringWidth(te.rule) : maximumTextWidth;
-            	this.setPreferredSize(
-            			new Dimension(maximumTextWidth + te.icon.getWidth(this)+40, 30));
-
+            	maximumWidth = maximumWidth < (fm.stringWidth(te.rule) + te.icon.getWidth(this)+40)
+            			? (fm.stringWidth(te.rule) + te.icon.getWidth(this)) : maximumWidth;
             	
             	te.x = 2 + 20;
             	te.y = dy + 2;
@@ -347,21 +345,26 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
             	te.dy = te.icon.getHeight(this)+4;
             	if(te.isSelected) {
             		g2.setColor(Color.LIGHT_GRAY);
-            		g2.fillRect(20, dy + 2, maximumTextWidth + te.icon.getWidth(this)+14, te.icon.getHeight(this)+4);
+            		g2.fillRect(20, dy + 2, maximumWidth+14, te.icon.getHeight(this)+4);
             		g2.setColor(Color.GRAY);
-            		g2.drawRect(20, dy + 2, maximumTextWidth + te.icon.getWidth(this)+14, te.icon.getHeight(this)+4);
-            		g2.setColor(Color.BLACK);
+            		g2.drawRect(20, dy + 2, maximumWidth+14, te.icon.getHeight(this)+4);
+            		if(te.type)g2.setColor(Color.BLACK);
+            		else g2.setColor(Color.BLUE);
             		g2.drawString(te.rule, 30 + te.icon.getWidth(this), dy + 8 + te.icon.getHeight(this)/2);
             	} else {
             		g2.setColor(Color.GRAY);
-            		g2.drawRect(20, dy + 2, maximumTextWidth + te.icon.getWidth(this)+14, te.icon.getHeight(this)+4);
-            		g2.setColor(Color.BLACK);
+            		g2.drawRect(20, dy + 2, maximumWidth+14, te.icon.getHeight(this)+4);
+            		if(te.type)g2.setColor(Color.BLACK);
+            		else g2.setColor(Color.BLUE);
             		g2.drawString(te.rule, 28 + te.icon.getWidth(this), dy + 8 + te.icon.getHeight(this)/2);
             	}
             	
             	g2.drawImage(remove, 2, dy + 5, this);
             	g2.drawImage(te.icon, 23, dy + 5, this);
             	dy += te.icon.getHeight(this)+ 4 + 4;
+            	
+            	this.setPreferredSize(
+            			new Dimension(maximumWidth +40, 30));
             }
         }
         
@@ -384,8 +387,10 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 						te.isSelected = false;
 					}
                 }
-                
-                repaint();
+              
+        		tablePane.repaint();
+        		scroll.revalidate();
+        		welkin.visualizer.repaint();
             }
             
             public void mouseReleased(MouseEvent e) {
