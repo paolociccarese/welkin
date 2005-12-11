@@ -539,6 +539,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
             g2.fill(new Rectangle2D.Float(0.0f, 0.0f, cw, ch));
         }
 
+        WStatement tmpStatement;
         if (drawedges) {
             g2.setFont(edgeFont);
             FontMetrics fm = g2.getFontMetrics(edgeFont);
@@ -548,7 +549,9 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 WResource n1 = (WResource) nodes.next();
                 if (!n1.isVisible()) continue;
                 for (Iterator edges = n1.linkedObjectNodes.iterator(); edges .hasNext();) {
-                    WResource n2 = ((WStatement) edges.next()).object;
+                	tmpStatement = (WStatement) edges.next();
+                	if(!tmpStatement.predicate.included) continue;
+                    WResource n2 = tmpStatement.object;
                     if (!n2.isVisible()) continue;
                     float z1 = zoom(n1.x, n1.y);
                     float z2 = zoom(n2.x, n2.y);
