@@ -463,7 +463,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
                 pu = model.cache.getEntries(n.hash,m.hash);
                 if ((pu != null) && (pu.length > 0)) {
                     for (int i = 0; i < pu.length; i++) {
-                        sum += pu[i].weight;
+                        if(pu[i].included) sum += pu[i].weight;
                     }
                 }
                 float weight = sum > 1 ? 1.0f : sum;
