@@ -128,6 +128,10 @@ public class ModelManager implements StatementHandler {
     public void clear() {
         cache.clear();
     }
+    
+    public boolean isEmpty() {
+    	return !(cache.resources.size()>0);
+    } 
 
     // -----------------------
     //    Icons management

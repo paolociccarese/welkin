@@ -97,6 +97,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
     JButton dataLoadButton;
     JButton dataClearButton;
+    JButton filterResetButton;
     JButton iconsClearButton;
     JButton iconsLoadButton;
     JButton aboutButton;
@@ -245,6 +246,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
         wrapper = new ModelManager();
         visualizer = new ModelVisualizer(wrapper, this);
+
         inDegreeChart = new InDegreeChart(wrapper);
         inDegreeChart.addActionListener(this);
         outDegreeChart = new OutDegreeChart(wrapper);
@@ -269,9 +271,11 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         dataPane.setLayout(new BorderLayout());
         
         if(!applet) {
+        	filterResetButton = new JButton("Reset Filtering");
             dataClearButton = new JButton("Clear");
             dataLoadButton = new JButton("Load");
 
+            filterResetButton.addActionListener(this);
             dataClearButton.addActionListener(this);
             dataLoadButton.addActionListener(this);
             
@@ -284,6 +288,8 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             
             dataButtons.add(dataLoadButton);
             dataButtons.add(dataClearButton);
+            dataButtons.add(Box.createRigidArea(new Dimension(10,0)));
+            dataButtons.add(filterResetButton);
             
             dataButtons.add(Box.createHorizontalGlue());
             
@@ -586,7 +592,17 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             iconsManager.clear();
             scrollingResTree.revalidate();
             scrollingPredTree.revalidate();
-            
+		} else if (source == filterResetButton) {
+			if(wrapper.isEmpty()) return;
+            if (visualizer.isRunning()) {
+                internalStop();
+            }
+            resTree.reinit();
+            predTree.reinit();
+            inDegreeChart.reinit();
+            outDegreeChart.reinit();
+            clustCoeffChart.reinit(); 
+
         } else if (source == aboutButton) {
             about();
         } else if (source == delayField) {

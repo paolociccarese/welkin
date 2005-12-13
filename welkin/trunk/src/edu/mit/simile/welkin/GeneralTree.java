@@ -83,6 +83,11 @@ public abstract class GeneralTree extends JPanel {
         vPos=5;
     }
     
+    public void reinit() {
+    	treeRoot.check.setSelected(true);
+    	forwardPropagation(true, treeRoot);
+    }
+    
     private void printNodes(WNode node) {
         if(node.isAllowed) {
         	boolean openFlag = true;

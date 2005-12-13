@@ -275,6 +275,11 @@ public abstract class ModelChart extends JComponent {
         this.lowCount = 0;
         this.highCount = getHeight() - 1;
     }
+    
+    void reinit() {
+    	reset();
+    	update();
+    }
 
     final static Color titleColor = Color.BLACK;
     final static Color axisColor = new Color(0x80,0x80,0x80);
