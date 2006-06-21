@@ -681,9 +681,9 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             throw new IllegalArgumentException("Data URL '" + url + "' could not be loaded.");
         }
         
-        if ("text/rdf+n3".equals(type)) {
+        if (type.startsWith("text/rdf+n3")) {
             res = wrapper.addModel(stream, ModelManager.TURTLE);
-        } else if ("application/rdf+xml".equals(type) || "application/xml".equals(type)) {
+        } else if (type.startsWith("application/rdf+xml") || type.startsWith("application/xml")) {
             res = wrapper.addModel(stream, ModelManager.RDFXML);
         } else {
             throw new IllegalArgumentException("I don't know how to read '" + url + "' content of type '" + type + "'.");
