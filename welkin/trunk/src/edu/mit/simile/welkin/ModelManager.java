@@ -240,12 +240,6 @@ public class ModelManager implements StatementHandler {
      */
     private void setXmlRdfParserInstance() {
        if (parser==null || !(parser instanceof RdfXmlParser)) {
-           // Use the SAX2-compliant Xerces parser
-           System.setProperty(
-                   "org.xml.sax.driver",
-                   "org.apache.xerces.parsers.SAXParser"
-              );
-           
            parser = new RdfXmlParser();
        }
     }
