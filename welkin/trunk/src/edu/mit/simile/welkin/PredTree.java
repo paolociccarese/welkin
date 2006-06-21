@@ -6,6 +6,8 @@ import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class PredTree extends GeneralTree {
 	
+    private static final long serialVersionUID = -377138988135382200L;
+
     private static final String EMPTY_LABEL = "No Predicates Loaded!";
     private static final String ROOT_LABEL = "Predicates";
 	

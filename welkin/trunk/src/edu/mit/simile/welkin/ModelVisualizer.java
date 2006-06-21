@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
@@ -17,7 +16,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.JComponent;
@@ -29,7 +27,9 @@ import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class ModelVisualizer extends JComponent implements Runnable {
 
-	final static float xBORDER = 6.0f;
+    private static final long serialVersionUID = -2459104922600917338L;
+
+    final static float xBORDER = 6.0f;
     final static float xBORDERs = xBORDER * 2.0f;
     final static float yBORDER = 3.0f;
     final static float yBORDERs = yBORDER * 2.0f;
@@ -218,8 +218,8 @@ public class ModelVisualizer extends JComponent implements Runnable {
         relaxer = null;
     }
 
-    public void reshape(int x, int y, int w, int h) {
-        super.reshape(x, y, w, h);
+    public void setBounds(int x, int y, int w, int h) {
+        super.setBounds(x, y, w, h);
         this.cw = w;
         this.ch = h;
         this.cx = cw / 2.0f;

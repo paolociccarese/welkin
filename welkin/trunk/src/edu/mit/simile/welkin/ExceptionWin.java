@@ -7,14 +7,16 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class ExceptionWin extends JDialog implements ActionListener{
 
-	private JLabel messageLabel;
-	private JTextArea message;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 405343895227428900L;
+    private JTextArea message;
 	private JScrollPane spMessage;
 	
 	private JButton moreButton;
@@ -78,10 +80,4 @@ public class ExceptionWin extends JDialog implements ActionListener{
 			this.validate();
 		}
 	}
-	
-    public static void main(String[] args) {
-    	ExceptionWin ew = new ExceptionWin("Prova","Pipppetto", "ffgdfdd");
-    	ew.buildWindow(false);
-    	ew.show();
-    }
 }

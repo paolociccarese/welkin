@@ -14,8 +14,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -33,6 +31,8 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
 public class IconsManagerPanel extends JPanel implements ActionListener {
+
+    private static final long serialVersionUID = 986669738190180364L;
 
     final Font edgeFont = new Font("Monospaced", Font.PLAIN, 12);
 	
@@ -63,6 +63,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
     TableElement bufferedElement;
 	
     public IconsManagerPanel(ModelManager model, Welkin welkin) {
+
         this.model = model;
         this.welkin = welkin;
         this.setBackground(Color.WHITE);
@@ -96,7 +97,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	            try {
 	                // Save File Manager
 	                JFileChooser openWin;
-	                if(iconsDirBase != null) openWin = new JFileChooser(iconsDirBase);
+	                if (iconsDirBase != null) openWin = new JFileChooser(iconsDirBase);
 	                else openWin = new JFileChooser();
 
 	                openWin.setFileFilter(new WFileFilter());
@@ -169,15 +170,15 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
     }
     
 	public void actionPerformed(ActionEvent a) {
-		if(a.getActionCommand().equals("Clear")) {
+		if (a.getActionCommand().equals("Clear")) {
 			resetForm();
-		} else if(a.getActionCommand().equals("Add")) {
-			if(ruleField.getText().trim().length()>0) {
+		} else if (a.getActionCommand().equals("Add")) {
+			if( ruleField.getText().trim().length()>0) {
 				if (bufferedElement != null) {
-		            for(Iterator it = iconList.iterator(); it.hasNext(); ) {
+		            for (Iterator it = iconList.iterator(); it.hasNext(); ) {
 		            	TableElement te = (TableElement) it.next();
 		            	if (te.id == bufferedElement.id) {
-		            		te.icon = ((ImageIcon)iconLabel.getIcon()).getImage();
+		            		te.icon = ((ImageIcon) iconLabel.getIcon()).getImage();
 		            		te.rule = ruleField.getText().trim();
 		            		te.type = typeCheck.isSelected();
 		            		updateModel(bufferedElement.type, bufferedElement.rule);
@@ -187,7 +188,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 		            }
 				} else {
 					iconList.add(new TableElement(iconsCount++, typeCheck.isSelected(), 
-							((ImageIcon)iconLabel.getIcon()).getImage(), 
+							((ImageIcon) iconLabel.getIcon()).getImage(), 
 							ruleField.getText().trim()));
 				}
 				updateModel();
@@ -204,10 +205,11 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	}
 	
 	public Image getIconById(int id) {
-        for(Iterator it = iconList.iterator(); it.hasNext(); ) {
+        for (Iterator it = iconList.iterator(); it.hasNext(); ) {
         	TableElement te = (TableElement) it.next();
-        	
-        	if(te.id == id) return te.icon;
+        	if (te.id == id) {
+                return te.icon;
+            }
         }		
         return null;
 	}
@@ -215,7 +217,6 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	private void updateModel() {
         for(Iterator it = iconList.iterator(); it.hasNext(); ) {
         	TableElement te = (TableElement) it.next();
-        	
         	model.updateIcons(te.id, te.type, te.rule);
         }
 	}
@@ -223,38 +224,17 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	private void updateModel(boolean type, String rule) {
         model.updateIcons(type, rule);
 	}
-	
-	protected static ImageIcon createImageIcon(String path) {
-		URL imgURL;
-		try {
-			imgURL = new URL(path);
-
-			if (imgURL != null) {
-				return new ImageIcon(imgURL);
-			} else {
-				System.err.println("Couldn't find image resource: " + path);
-				return null;
-			}
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
+		
 	public void resetForm() {
-		ruleField.setText("");
-  	    URL url = IconsManagerPanel.class.getResource("resources/icons/help16.gif");
-	    Image img = Toolkit.getDefaultToolkit().getImage(url);
-    	iconLabel.setIcon(new ImageIcon(img));
+        ruleField.setText("");
+    	iconLabel.setIcon(Welkin.createImageIcon(Welkin.HELP_ICON));
     	bufferedElement = null;
     	typeCheck.setSelected(true);
 	}
 	
 	public Image getImage(int id) {
-        for(Iterator it = iconList.iterator(); it.hasNext(); ) {
+        for (Iterator it = iconList.iterator(); it.hasNext(); ) {
         	TableElement te = (TableElement) it.next();
-
         	if(te.id == id) {
         		return te.icon;
         	}
@@ -281,14 +261,10 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
             return false;
         }
 
-        // The description of this filter
         public String getDescription() {
             return "gif, jpeg or jpg icon file";
         }
 
-        /*
-         * Get the extension of a file.
-         */
         public String getExtension(File f) {
             String ext = null;
             String s = f.getName();
@@ -303,21 +279,20 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
     
     class TablePanel extends JPanel {
     	
-    	Image remove;
-    	int maximumWidth=140;
+        private static final long serialVersionUID = 8837906595322985835L;
+
+        Image remove;
+    	int maximumWidth = 140;
     	
     	public TablePanel () {
     		iconList = new ArrayList();
     		this.setBackground(Color.WHITE);
     		this.addMouseListener(new MyMouseListener());
-      	    URL url = IconsManagerPanel.class.getResource("resources/icons/help16.gif");
-    	    Image img = Toolkit.getDefaultToolkit().getImage(url);
-    	    url = IconsManagerPanel.class.getResource("resources/icons/remove16.gif");
-    	    remove = Toolkit.getDefaultToolkit().getImage(url);
-    	    
-    	    // TODO Remove
-    		//iconList.add(new TableElement(iconsCount++, true, img, "type  Person"));
-    		//iconList.add(new TableElement(iconsCount++, true, img, "rule  http://pippo/"));
+    	    remove = Welkin.createImageIcon(Welkin.REMOVE_ICON).getImage();
+
+            //Image img = Welkin.createImageIcon(Welkin.HELP_ICON).getImage();
+            //iconList.add(new TableElement(iconsCount++, true, img, "type  Person"));
+            //iconList.add(new TableElement(iconsCount++, true, img, "rule  http://pippo/"));
     	}
     	
     	public void addItem(TableElement element) {
@@ -404,8 +379,11 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
     						bufferedElement = new TableElement(te.id, te.type, te.icon, te.rule);
     						iconLabel.setIcon(new ImageIcon(te.icon));
     						ruleField.setText(te.rule);
-    						if(te.type) typeCheck.setSelected(true);
-    						else ruleCheck.setSelected(true);
+    						if (te.type) {
+                                typeCheck.setSelected(true);
+                            } else {
+                                ruleCheck.setSelected(true);
+                            }
     						//iconList.remove(te);
     						break;
     					}

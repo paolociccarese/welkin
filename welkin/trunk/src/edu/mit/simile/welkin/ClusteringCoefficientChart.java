@@ -7,6 +7,8 @@ import edu.mit.simile.welkin.ModelCache.WStatement;
 
 public class ClusteringCoefficientChart extends ModelChart {
 
+    private static final long serialVersionUID = 9047771091320516567L;
+
     public ClusteringCoefficientChart(ModelManager model) {
         super(model);
     }

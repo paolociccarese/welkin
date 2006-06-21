@@ -26,6 +26,8 @@ import edu.mit.simile.welkin.resource.ResourceUri;
 
 public class ResourceUriBasePanel extends JComponent {
 
+    private static final long serialVersionUID = -670863445422612695L;
+
     private static final int HTOP = 13;
     private static final int XTOP = 2;
     private static final int HROW = 18;
@@ -65,7 +67,7 @@ public class ResourceUriBasePanel extends JComponent {
                         namespace = nsr.ns;
                         jcc = new JColorChooser();
                         JDialog chooser = JColorChooser.createDialog(Welkin.frame,"Pick the namespace color", true, jcc, this, this);
-                        chooser.show();
+                        chooser.setVisible(true);
                     }
                 }
             }

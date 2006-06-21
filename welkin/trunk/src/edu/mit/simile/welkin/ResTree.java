@@ -6,6 +6,8 @@ import edu.mit.simile.welkin.resource.PartialUri;
 
 public class ResTree extends GeneralTree {
 
+    private static final long serialVersionUID = -1208417333265906095L;
+
     private static final String EMPTY_LABEL = "No Resources Loaded!";
     private static final String ROOT_LABEL = "Resources";
 	

@@ -141,6 +141,9 @@ public abstract class ModelChart extends JComponent {
     }
 
     class Count extends ArrayList {
+        
+        private static final long serialVersionUID = -1897099449786956511L;
+
         boolean visible = true;
 
         public Count(Object o) {
@@ -368,8 +371,8 @@ public abstract class ModelChart extends JComponent {
         }
     }
 
-    public void reshape(int x, int y, int width, int height) {
-        super.reshape(x,y,width,height);
+    public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x,y,width,height);
         reset();
     }
 

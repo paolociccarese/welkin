@@ -17,6 +17,8 @@ import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class PredicateNode extends WNode {
 
+    private static final long serialVersionUID = -158987654236638241L;
+
     public static final int MIN_VALUE = 0;
     public static final int MAX_VALUE = 10;
     public static final int INIT_VALUE = 10;

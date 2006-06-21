@@ -26,6 +26,8 @@ import edu.mit.simile.welkin.resource.PartialUri;
 
 public class ResourcesTree extends JPanel {
 
+    private static final long serialVersionUID = 5323388104033551247L;
+
     final Font font = new Font("Verdana", Font.PLAIN, 11);
     final Font bold = new Font("Verdana", Font.BOLD, 10);
 
@@ -238,6 +240,9 @@ public class ResourcesTree extends JPanel {
     }
 
     class FullNode extends JPanel implements ChangeListener, ActionListener {
+
+        private static final long serialVersionUID = 1377946240285500759L;
+        
         private JLabel iconLabel;
         private JCheckBox check;
         private JSlider slider;

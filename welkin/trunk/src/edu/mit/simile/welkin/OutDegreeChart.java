@@ -7,6 +7,8 @@ import edu.mit.simile.welkin.ModelCache.WStatement;
 
 public class OutDegreeChart extends ModelChart {
 
+    private static final long serialVersionUID = -9091787568869584445L;
+
     public OutDegreeChart(ModelManager model) {
         super(model);
     }

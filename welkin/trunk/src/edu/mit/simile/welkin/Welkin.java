@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Panel;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
@@ -55,6 +54,8 @@ import javax.swing.filechooser.FileFilter;
 
 public class Welkin extends JApplet implements ActionListener, ItemListener {
 
+    private static final long serialVersionUID = 1994781549666813074L;
+
     public static final String NAME = "Welkin";
     public static final String VERSION = "@version@";
     public static final String YEAR = "@year@";
@@ -71,6 +72,8 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     static final String STOP_ICON = ICON_PATH + "stop.gif";
     static final String UNSELECTED_ICON = ICON_PATH + "file.gif";
     static final String SELECTED_ICON = ICON_PATH + "selected.gif";
+    static final String REMOVE_ICON = ICON_PATH + "remove16.gif";
+    static final String HELP_ICON = ICON_PATH + "help16.gif";
 
     static JFrame frame;
 
@@ -145,6 +148,9 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     String dirBase;
 
     class About extends JComponent {
+
+        private static final long serialVersionUID = -7950957335480657618L;
+
         public void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -213,16 +219,20 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     }
 
     // called by the applet sandbox
-    public void init() {  
+    public void init() {
+        
+        System.out.println("Starting " + NAME + " " + VERSION);
+        
     	try {
     		URL dataURL = null;
-    		if(getParameter("url")!=null || getParameter("data")!=null) {
-	    		if(getParameter("url")!=null) {
-					dataURL = new URL(getParameter("url"));
-	    		} else if (getParameter("data")!=null) {
+            String url = getParameter("url");
+            String data = getParameter("data");
+    		if (url != null || data != null) {
+	    		if (url != null) {
+					dataURL = new URL(url);
+	    		} else if (data != null) {
 	    		    String base = getDocumentBase().toString();
-	    		    dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) 
-	    		            + getParameter("data"));
+	    		    dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) + data);
 	    		}
 
 				initPanel(true);
@@ -270,7 +280,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         JPanel dataPane = new JPanel();
         dataPane.setLayout(new BorderLayout());
         
-        if(!applet) {
+        if (!applet) {
         	filterResetButton = new JButton("Reset Filtering");
             dataClearButton = new JButton("Clear");
             dataLoadButton = new JButton("Load");
@@ -718,9 +728,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             }
         });
         frame.setSize(X_WIN_DIM, Y_WIN_DIM);
-        //frame.pack();
         frame.setVisible(true);
-        frame.show();
     }
 
     class WFileFilter extends FileFilter {
@@ -744,14 +752,10 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             return false;
         }
 
-        // The description of this filter
         public String getDescription() {
             return "RDF, RDFS, OWL, n3 or turtle data file";
         }
 
-        /*
-         * Get the extension of a file.
-         */
         public String getExtension(File f) {
             String ext = null;
             String s = f.getName();

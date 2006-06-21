@@ -17,6 +17,8 @@ import edu.mit.simile.welkin.resource.PartialUri;
 
 public class ResourceNode extends WNode {
 
+    private static final long serialVersionUID = -5827294881835432391L;
+
     public static final int MIN_VALUE = 0;
     public static final int MAX_VALUE = 360;
     public static final int INIT_VALUE = 0;

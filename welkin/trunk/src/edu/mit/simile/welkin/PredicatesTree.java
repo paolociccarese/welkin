@@ -26,6 +26,8 @@ import edu.mit.simile.welkin.resource.PredicateUri;
 
 public class PredicatesTree extends JPanel {
 
+    private static final long serialVersionUID = -3281774983109916406L;
+
     final Font font = new Font("Verdana", Font.PLAIN, 11);
     final Font bold = new Font("Verdana", Font.BOLD, 10);
 
@@ -254,6 +256,9 @@ public class PredicatesTree extends JPanel {
     }
 
     class FullNode extends JPanel implements ChangeListener, ActionListener {
+
+        private static final long serialVersionUID = 6323122109663260148L;
+        
         private JLabel iconLabel;
         private JCheckBox check;
         private JLabel weight;

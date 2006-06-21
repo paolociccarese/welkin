@@ -68,7 +68,7 @@
             optimize="${compile.optimize}"
             deprecation="${compile.deprecation}"
             target="1.2"
-        	    source="1.2">
+            source="1.2">
             <classpath refid="classpath"/>
             <include name="**/*.java"/>
         </javac>
