@@ -19,11 +19,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -207,21 +206,25 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         // current window. Some older Swing versions have
         // a bug in getLocationOnScreen() and they may not
         // make this behave properly.
-        Point p = frame.getLocationOnScreen();
-        Dimension d1 = frame.getSize();
-        about.pack();
-        Dimension d2 = about.getSize();
-        about.setLocation(
-            p.x + (d1.width - d2.width) / 2,
-            p.y + (d1.height - d2.height) / 2
-        );
-        about.setVisible(true);
+        if (frame != null) {
+            Point p = frame.getLocationOnScreen();
+            Dimension d1 = frame.getSize();
+            about.pack();
+            Dimension d2 = about.getSize();
+            about.setLocation(
+                p.x + (d1.width - d2.width) / 2,
+                p.y + (d1.height - d2.height) / 2
+            );
+            about.setVisible(true);
+        }
     }
 
     // called by the applet sandbox
     public void init() {
         
         System.out.println("Starting " + NAME + " " + VERSION);
+
+        initPanel(true);
         
     	try {
     		URL dataURL = null;
@@ -235,17 +238,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 	    		    dataURL = new URL(base.substring(0,base.lastIndexOf('/') + 1) + data);
 	    		}
 
-				initPanel(true);
-				
-                InputStream in = dataURL.openStream();
-                if (in == null) {
-                    throw new IllegalArgumentException("File: " + dataURL.getPath()
-                            + " not found");
-                }
-				
-                initAll(in, dataURL.getPath());
-    		} else {
-    		    initPanel(false);
+                load(dataURL);
     		}
 		} catch (Exception e) {
 			System.out.println(e + " " + e.getMessage());
@@ -468,7 +461,12 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
         JSplitPane chartPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,visualizer,charts);
         chartPane.setOneTouchExpandable(true);
-        chartPane.setResizeWeight(0.80);
+        chartPane.setResizeWeight(0.8);
+        if (applet) {
+            chartPane.setDividerLocation(10000);
+        } else {
+            chartPane.setDividerLocation(0.8);
+        }
         chartPane.setBorder(BorderFactory.createEmptyBorder());
         
         JSplitPane treePane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,scrollingPredTree,scrollingResTree);
@@ -482,8 +480,12 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
 
         JSplitPane bodyPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,infoPane,chartPane);
         bodyPane.setOneTouchExpandable(true);
-        bodyPane.setResizeWeight(0.25);
-        bodyPane.setDividerLocation(200);
+        bodyPane.setResizeWeight(0.2);
+        if (applet) {
+            bodyPane.setDividerLocation(0.0);
+        } else {
+            bodyPane.setDividerLocation(0.2);
+        }
         bodyPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
 
         this.getContentPane().setLayout(new BorderLayout());
@@ -645,40 +647,49 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
         visualizer.repaint();
     }
     
-    private void loadFile(File fileName) throws FileNotFoundException {
+    private void loadFile(File fileName) throws IOException {
         dirBase = fileName.getParent();
-
-        FileInputStream in = new FileInputStream(fileName);
-        if (in == null) {
-            throw new IllegalArgumentException("File: " + fileName
-                    + " not found");
-        }
-
-        initAll(in, fileName.getAbsolutePath());
+        load(fileName.toURL());
     }
     
-    private void initAll(InputStream stream, String fileName) {
-        boolean res = false;
-        int extIndex = fileName.lastIndexOf(".");
-        if (extIndex > 0) {
-            String ext = fileName.substring(extIndex+1);
-            if(ext.equals("n3") || ext.equals("turtle"))
-                // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
-                // this might return an error in valid N3 files, but until RIO supports
-                // N3 this is the easiest way.
-                res = wrapper.addModel(stream, ModelManager.TURTLE);
-            else if(ext.equals("rdf") || ext.equals("rdfs") || ext.equals("owl"))
-                res = wrapper.addModel(stream, ModelManager.RDFXML);
-            else {
-                throw new IllegalArgumentException("Extension not recognized!");
+    private void load(URL url) throws IOException {
+        URLConnection connection = url.openConnection();
+        String type = connection.getContentType();
+        
+        if (type == null) {
+            type = "application/unknown";
+            String fileName = url.getFile(); 
+            int extIndex = fileName.lastIndexOf(".");
+            if (extIndex > 0) {
+                String ext = fileName.substring(extIndex + 1);
+                if (ext.equals("n3") || ext.equals("turtle")) {
+                    // FIXME(SM): turtle is a subset of N3, but that's what's mostly used of it
+                    // this might return an error in valid N3 files, but until RIO supports
+                    // N3 this is the easiest way.
+                    type = "text/rdf+n3";
+                } else if (ext.equals("rdf") || ext.equals("rdfs") || ext.equals ("owl")) {
+                    type = "application/rdf+xml";
+                }
             }
         }
         
-        try {
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        boolean res = false;
+
+        InputStream stream = connection.getInputStream();
+
+        if (stream == null) {
+            throw new IllegalArgumentException("Data URL '" + url + "' could not be loaded.");
         }
+        
+        if ("text/rdf+n3".equals(type)) {
+            res = wrapper.addModel(stream, ModelManager.TURTLE);
+        } else if ("application/rdf+xml".equals(type) || "application/xml".equals(type)) {
+            res = wrapper.addModel(stream, ModelManager.RDFXML);
+        } else {
+            throw new IllegalArgumentException("I don't know how to read '" + url + "' content of type '" + type + "'.");
+        }
+        
+        stream.close();
 
         if (res) { 
             visualizer.setGraph(wrapper);
@@ -691,7 +702,7 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
             scrollingResTree.revalidate();
             scrollingPredTree.revalidate(); 
         } else {
-            throw new IllegalArgumentException("File not correct!");
+            throw new IllegalArgumentException("Problem loading model from '" + url + "'.");
         }       
     }
 
