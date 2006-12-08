@@ -11,7 +11,7 @@ public class Util {
     		int lastIndex = uri.lastIndexOf(":");
     		parts[1] = uri.substring(lastIndex);
     		parts[0] = uri.substring(0, lastIndex);
-    	} else if(uri.startsWith("http:")) { // http://*/*#* 
+    	} else if(uri.startsWith("http:")|| uri.startsWith("https:")) { // http://*/*#* 
     		parts = new String[3];
     		int lastIndex = uri.indexOf("#");
     		if(lastIndex==-1) lastIndex = uri.lastIndexOf("/");
@@ -36,7 +36,7 @@ public class Util {
     		parts = new String[1];
     		int lastIndex = uri.lastIndexOf(":");
     		parts[0] = uri.substring(0, lastIndex);
-    	} else if(uri.startsWith("http:")) { // http://*/*#* 
+    	} else if(uri.startsWith("http:")|| uri.startsWith("https:")) { // http://*/*#* 
     		parts = new String[2];
     		int lastIndex = uri.indexOf("#");
     		if(lastIndex==-1) lastIndex = uri.lastIndexOf('/');
