@@ -645,7 +645,7 @@ public class ModelVisualizer extends JComponent implements Runnable {
 	                    inside = new Rectangle2D.Float(x - 3.0f, y - 3.0f, 6.0f, 6.0f);
 	                }
 	
-	                if (n == pick) {
+	                if (n == pick || (n.highlighted && !n.fixed)) {
 	                    g2.setColor(n.color);
 	                    g2.fill(inside);
 	                    g2.setColor(fixedColor);
