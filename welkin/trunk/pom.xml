@@ -60,27 +60,63 @@
               <downloadSources>true</downloadSources>
           </configuration>
       </plugin>
-    </plugins>
-  </build>
-
-  <reporting>
-    <plugins>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-jar-plugin</artifactId>
+         <configuration>
+           <archive>
+             <manifest>
+               <mainClass>edu.mit.simile.welkin.Welkin</mainClass>
+               <addClasspath>true</addClasspath>
+             </manifest>
+           </archive>
+         </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
-          <descriptors>
-           <descriptor>src/conf/assembly.xml</descriptor>
-          </descriptors>
-          <finalName>longwell-${project.version}</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-          <workDirectory>target/assembly/work</workDirectory>
-          <tarLongFileMode>warn</tarLongFileMode>
-          <outputDirectory>.</outputDirectory>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+            <manifest>
+              <mainClass>edu.mit.simile.welkin.Welkin</mainClass>
+            </manifest>
+          </archive>
+          <finalName>welkin</finalName>
+          <!--appendAssemblyId>false</appendAssemblyId-->
         </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>webstart-maven-plugin</artifactId>
+        <configuration>
+          <outputDirectory>docs</outputDirectory>
+          <jnlp>
+            <outputFile>welkin.jnlp</outputFile>
+            <mainClass>edu.mit.simile.welkin.Welkin</mainClass>
+          </jnlp>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jnlp</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
-  </reporting>
-  
+  </build>
+
   <repositories>
     <repository>
       <releases>
