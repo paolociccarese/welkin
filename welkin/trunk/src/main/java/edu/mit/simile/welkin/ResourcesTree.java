@@ -52,7 +52,7 @@ public class ResourcesTree extends JPanel {
 
     Welkin welkin;
     FullNode root;
-    List elements;
+    List<FullNode> elements;
 
     int vPos;
     int xPos;
@@ -64,7 +64,7 @@ public class ResourcesTree extends JPanel {
 
     public void clear() {
         root = null;
-        elements = new ArrayList();
+        elements = new ArrayList<FullNode>();
         setEmptyTree();
     }
 
@@ -257,7 +257,7 @@ public class ResourcesTree extends JPanel {
 
         FullNode me;
         FullNode father;
-        Vector children = new Vector();
+        Vector<FullNode> children = new Vector<FullNode>();
         PartialUri resource;
 
         FullNode(String labelT, PartialUri resource, FullNode father, boolean isLeaf) {

@@ -11,7 +11,7 @@ public class UriWrapper {
 	}
 	
 	public String getUri() {
-		return uri.getURI();
+		return uri.toString();
 	}
 	
     public int hashCode() { 

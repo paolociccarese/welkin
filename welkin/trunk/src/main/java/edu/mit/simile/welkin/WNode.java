@@ -25,11 +25,11 @@ public abstract class WNode extends JPanel
     protected boolean isVisible, isAllowed, isLeaf;
     
     protected WNode father, me;
-    protected Vector children;
+    protected Vector<WNode> children;
     
     public WNode() {
     	count = 0;
-    	children = new Vector();
+    	children = new Vector<WNode>();
     }
     
 	protected final void openCloseNodeChildren (WNode node) {

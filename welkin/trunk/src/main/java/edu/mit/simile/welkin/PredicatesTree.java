@@ -51,7 +51,7 @@ public class PredicatesTree extends JPanel {
 
     Welkin welkin;
     FullNode root;
-    List elements;
+    List<FullNode> elements;
 
     int maxWidth = 0;
     int vPos;
@@ -64,7 +64,7 @@ public class PredicatesTree extends JPanel {
 
     public void clear() {
         root = null;
-        elements = new ArrayList();
+        elements = new ArrayList<FullNode>();
         setEmptyTree();
     }
 
@@ -285,7 +285,7 @@ public class PredicatesTree extends JPanel {
 
         FullNode me;
         FullNode father;
-        Vector children = new Vector();
+        Vector<FullNode> children = new Vector<FullNode>();
         PredicateUri predicate;
 
         FullNode(String labelT, PredicateUri predicate, FullNode father, boolean isLeaf) {

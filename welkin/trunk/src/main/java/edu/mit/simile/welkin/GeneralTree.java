@@ -33,7 +33,7 @@ public abstract class GeneralTree extends JPanel {
     private int vPos, xPos; // Position of elements
     
     protected WNode treeRoot;
-    protected List elements;
+    protected List<WNode> elements;
     
     Welkin welkin;
     
@@ -45,7 +45,7 @@ public abstract class GeneralTree extends JPanel {
     
     public void clear() {
     	treeRoot = null;
-        elements = new ArrayList();
+        elements = new ArrayList<WNode>();
         
     	setEmptyTree();
     }

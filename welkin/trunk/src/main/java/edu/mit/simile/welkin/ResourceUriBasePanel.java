@@ -39,7 +39,7 @@ public class ResourceUriBasePanel extends JComponent {
 
     Welkin welkin;
 
-    Set resourcesBases = new HashSet();
+    Set<ResourcesBaseRow> resourcesBases = new HashSet<ResourcesBaseRow>();
 
     class ResourcesBaseRow {
         int x,y;
@@ -110,7 +110,7 @@ public class ResourceUriBasePanel extends JComponent {
     }
 
     public void init() {
-        resourcesBases = new HashSet();
+        resourcesBases = new HashSet<ResourcesBaseRow>();
 
         int maxWidth=0;
         int shift=0;
@@ -125,7 +125,7 @@ public class ResourceUriBasePanel extends JComponent {
     }
 
     public void clear() {
-        resourcesBases = new HashSet();
+        resourcesBases = new HashSet<ResourcesBaseRow>();
         this.setPreferredSize(new Dimension(10,10));
         this.repaint();
     }
@@ -139,8 +139,7 @@ public class ResourceUriBasePanel extends JComponent {
 
         g2.fill(new Rectangle2D.Float(0.0f, 0.0f, this.getWidth(), this.getHeight()));
 
-        for(Iterator i=resourcesBases.iterator();i.hasNext();) {
-            ResourcesBaseRow baseUriRow = (ResourcesBaseRow)(i.next());
+        for(ResourcesBaseRow baseUriRow : resourcesBases) {
             if (baseUriRow.on) g2.setColor(ResourceUriBasePanel.DEFAULT_URI_COLOR);
             else g2.setColor(Color.black);
             g2.drawString(baseUriRow.ns.getUri() ,baseUriRow.x+11,baseUriRow.y);

@@ -15,7 +15,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -52,7 +51,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	JScrollPane scroll;
 	
 	JPanel tablePanel;
-	ArrayList iconList;
+	ArrayList<TableElement> iconList;
 	
 	TablePanel tablePane;
 	
@@ -175,8 +174,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 		} else if (a.getActionCommand().equals("Add")) {
 			if( ruleField.getText().trim().length()>0) {
 				if (bufferedElement != null) {
-		            for (Iterator it = iconList.iterator(); it.hasNext(); ) {
-		            	TableElement te = (TableElement) it.next();
+		            for (TableElement te : iconList) {
 		            	if (te.id == bufferedElement.id) {
 		            		te.icon = ((ImageIcon) iconLabel.getIcon()).getImage();
 		            		te.rule = ruleField.getText().trim();
@@ -205,8 +203,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	}
 	
 	public Image getIconById(int id) {
-        for (Iterator it = iconList.iterator(); it.hasNext(); ) {
-        	TableElement te = (TableElement) it.next();
+        for (TableElement te : iconList) {
         	if (te.id == id) {
                 return te.icon;
             }
@@ -215,8 +212,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	}
 	
 	private void updateModel() {
-        for(Iterator it = iconList.iterator(); it.hasNext(); ) {
-        	TableElement te = (TableElement) it.next();
+        for(TableElement te : iconList) {
         	model.updateIcons(te.id, te.type, te.rule);
         }
 	}
@@ -233,8 +229,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
 	}
 	
 	public Image getImage(int id) {
-        for (Iterator it = iconList.iterator(); it.hasNext(); ) {
-        	TableElement te = (TableElement) it.next();
+        for (TableElement te : iconList) {
         	if(te.id == id) {
         		return te.icon;
         	}
@@ -285,7 +280,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
     	int maximumWidth = 140;
     	
     	public TablePanel () {
-    		iconList = new ArrayList();
+    		iconList = new ArrayList<TableElement>();
     		this.setBackground(Color.WHITE);
     		this.addMouseListener(new MyMouseListener());
     	    remove = Welkin.createImageIcon(Welkin.REMOVE_ICON).getImage();
@@ -308,9 +303,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
             
             int dy = 0;
             
-            for(Iterator it = iconList.iterator(); it.hasNext(); ) {
-            	TableElement te = (TableElement) it.next();
-            	
+            for(TableElement te : iconList) {            	
             	maximumWidth = maximumWidth < (fm.stringWidth(te.rule) + te.icon.getWidth(this)+40)
             			? (fm.stringWidth(te.rule) + te.icon.getWidth(this)) : maximumWidth;
             	
@@ -347,9 +340,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
             public void mousePressed(MouseEvent e) {
                 int x = e.getX();
                 int y = e.getY();
-                for(Iterator it = iconList.iterator(); it.hasNext(); ) {
-                	TableElement te = (TableElement) it.next();
-
+                for(TableElement te : iconList) {
                 	if(x > 5 && x< 21 && y > te.y && y< (te.y+te.dy)) {
                 		iconList.remove(te);
                 		updateModel(te.type, te.rule);
@@ -372,9 +363,7 @@ public class IconsManagerPanel extends JPanel implements ActionListener {
                 int x = e.getX();
                 int y = e.getY();
                 if (e.getClickCount() == 2) {
-                    for(Iterator it = iconList.iterator(); it.hasNext(); ) {
-                    	TableElement te = (TableElement) it.next();
-                    	
+                    for(TableElement te : iconList) {
     					if (x > te.x && x< (te.x+te.dx) && y > te.y && y< (te.y+te.dy)) {
     						bufferedElement = new TableElement(te.id, te.type, te.icon, te.rule);
     						iconLabel.setIcon(new ImageIcon(te.icon));

@@ -7,32 +7,37 @@ import java.util.Iterator;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.rio.ParseException;
-import org.openrdf.rio.Parser;
-import org.openrdf.rio.StatementHandler;
-import org.openrdf.rio.StatementHandlerException;
-import org.openrdf.rio.rdfxml.RdfXmlParser;
+import org.openrdf.rio.RDFParseException;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.rdfxml.RDFXMLParser;
 import org.openrdf.rio.turtle.TurtleParser;
 
 import edu.mit.simile.welkin.ModelCache.WResource;
 import edu.mit.simile.welkin.ModelCache.WStatement;
 import edu.mit.simile.welkin.resource.PredicateUri;
 
-public class ModelManager implements StatementHandler {
+public class ModelManager implements RDFHandler {
 
     public static final int RDFXML = 1;
     public static final int TURTLE = 2;
     
     private final String RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
     
-    public Parser parser;
+    public RDFParser parser;
     public ModelCache cache = new ModelCache();
     
-    public void handleStatement(Resource resource, URI uri, Value value) 
-		throws StatementHandlerException 
+    public void handleStatement(Statement stmt) 
+		throws RDFHandlerException 
 	{    
+    	Resource resource = stmt.getSubject();
+    	URI uri = stmt.getPredicate();
+    	Value value = stmt.getObject();
+    	
         WResource sub = null;
         if (resource instanceof URI) {
             sub = cache.addResource(resource, false);
@@ -89,7 +94,7 @@ public class ModelManager implements StatementHandler {
             initParser(type);
             parser.parse(in, baseUri);
             return true;
-        } catch (ParseException e) {
+        } catch (RDFParseException e) {
             cache.clear();
             ExceptionWin ew = new ExceptionWin("Loading Error", 
                     "Line: " + e.getLineNumber() + 
@@ -228,7 +233,7 @@ public class ModelManager implements StatementHandler {
         else if(type == TURTLE) setTurtleParserInstance();
         else throw new IllegalArgumentException("Wrong rdf parser type!");
         
-        parser.setStatementHandler(this);
+        parser.setRDFHandler(this);
         parser.setVerifyData(true);
         parser.setStopAtFirstError(false);
     }
@@ -239,8 +244,8 @@ public class ModelManager implements StatementHandler {
      * @return The parse instance.
      */
     private void setXmlRdfParserInstance() {
-       if (parser==null || !(parser instanceof RdfXmlParser)) {
-           parser = new RdfXmlParser();
+       if (parser==null || !(parser instanceof RDFXMLParser)) {
+           parser = new RDFXMLParser();
        }
     }
     
@@ -254,4 +259,23 @@ public class ModelManager implements StatementHandler {
            parser = new TurtleParser();
        }
     }
+
+    // --------------------------
+    //  Interface methods, unused
+    // --------------------------
+	public void endRDF() throws RDFHandlerException {
+		// ignore
+	}
+
+	public void handleComment(String arg0) throws RDFHandlerException {
+		// ignore
+	}
+
+	public void handleNamespace(String arg0, String arg1) throws RDFHandlerException {
+		// ignore
+	}
+
+	public void startRDF() throws RDFHandlerException {
+		// ignore		
+	}
 }

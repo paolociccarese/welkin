@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.mit.simile</groupId>
+  <artifactId>welkin</artifactId>
+  <name>SIMILE Welkin</name>
+  <version>1.2-SNAPSHOT</version>
+  <description>Welkin is a graph-based RDF visualizer.</description> 
+  <url>http://simile.mit.edu/welkin/</url>
+  <inceptionYear>2004</inceptionYear>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://simile.mit.edu/issues/browse/WELKIN</url>
+  </issueManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>simile.mit.edu</id>
+      <url>scpexe://simile.mit.edu/var/maven</url>
+    </repository>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:svn:http://simile.mit.edu/repository/welkin/trunk/</connection>
+    <developerConnection>scm:svn:http://simile.mit.edu/repository/welkin/trunk/</developerConnection>
+    <url>http://simile.mit.edu/viewsvn/welkin/trunk/</url>
+  </scm>
+
+  <build>
+    <plugins>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>    
+      <plugin>
+        <inherited>true</inherited>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <configuration>
+              <downloadSources>true</downloadSources>
+          </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+           <descriptor>src/conf/assembly.xml</descriptor>
+          </descriptors>
+          <finalName>longwell-${project.version}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <workDirectory>target/assembly/work</workDirectory>
+          <tarLongFileMode>warn</tarLongFileMode>
+          <outputDirectory>.</outputDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+  
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+      <id>aduna-repo</id>
+      <name>Aduna Repository</name>
+      <url>http://repository.aduna-software.org/maven2</url>
+    </repository>
+    <repository>
+      <id>simile.mit.edu</id>
+      <url>http://simile.mit.edu/maven-proxy</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openrdf</groupId>
+      <artifactId>openrdf-model</artifactId>
+      <version>2.0-beta6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openrdf</groupId>
+      <artifactId>openrdf-rio-api</artifactId>
+      <version>2.0-beta6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openrdf</groupId>
+      <artifactId>openrdf-rio-rdfxml</artifactId>
+      <version>2.0-beta6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openrdf</groupId>
+      <artifactId>openrdf-rio-turtle</artifactId>
+      <version>2.0-beta6</version>
+    </dependency>
+  </dependencies>
+</project>
