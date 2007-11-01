@@ -105,6 +105,18 @@
             <outputFile>welkin.jnlp</outputFile>
             <mainClass>edu.mit.simile.welkin.Welkin</mainClass>
           </jnlp>
+          <sign>
+            <keystore>file://${project.build.directory}/../.keystore</keystore>
+            <keypass>${keypass}</keypass>
+            <storepass>${keypass}</storepass>
+            <alias>welkin</alias>
+            <verify>true</verify>
+          </sign>
+          <keystoreConfig>
+            <delete>false</delete>
+            <gen>false</gen>
+          </keystoreConfig>
+          <pack200>true</pack200>
         </configuration>
         <executions>
           <execution>
