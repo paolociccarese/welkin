@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Properties;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -56,9 +57,22 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     private static final long serialVersionUID = 1994781549666813074L;
 
     public static final String NAME = "Welkin";
-    public static final String VERSION = "@version@";
-    public static final String YEAR = "@year@";
+    public static Properties props = new Properties();
+    static {
+    	try {
+    		java.net.URL url = ClassLoader.getSystemResource("edu/mit/simile/welkin/Welkin.properties");
+    		props.load(url.openStream());
+    	} catch (Exception e) {
+    		props.setProperty("welkin.version", "");
+    		props.setProperty("welkin.year", "");
+    	}
+    }
+    public static final String VERSION = props.getProperty("welkin.version");
+    public static final String YEAR = props.getProperty("welkin.year");
 
+    public static final String NEWVERSION = "@version@";
+    public static final String NEWYEAR = "@year@";
+    
     static final int X_WIN_DIM = 860;
     static final int Y_WIN_DIM = 700;
 

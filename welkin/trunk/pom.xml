@@ -31,6 +31,23 @@
   </scm>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.png</include>
+          <include>**/*.gif</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
 	  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -125,6 +142,37 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>replace-tokens</id>
+            <phase>process-sources</phase>
+            <configuration>
+              <tasks>
+                <tstamp>
+                  <format property="timestamp" pattern="yyyy"/>
+                </tstamp>
+                <replaceregexp>
+                  <regexp pattern="@year@"/>
+                  <substitution expression="${timestamp}"/>
+                  <fileset dir="src/main/resources" includes="**/*.properties"/>
+                </replaceregexp>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant-nodeps</artifactId>
+            <version>1.6.5</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
