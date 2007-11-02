@@ -69,9 +69,6 @@ public class Welkin extends JApplet implements ActionListener, ItemListener {
     }
     public static final String VERSION = props.getProperty("welkin.version");
     public static final String YEAR = props.getProperty("welkin.year");
-
-    public static final String NEWVERSION = "@version@";
-    public static final String NEWYEAR = "@year@";
     
     static final int X_WIN_DIM = 860;
     static final int Y_WIN_DIM = 700;

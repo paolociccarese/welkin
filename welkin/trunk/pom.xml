@@ -117,7 +117,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>webstart-maven-plugin</artifactId>
         <configuration>
-          <outputDirectory>docs</outputDirectory>
+          <libPath>lib</libPath>
           <jnlp>
             <outputFile>welkin.jnlp</outputFile>
             <mainClass>edu.mit.simile.welkin.Welkin</mainClass>
@@ -133,7 +133,7 @@
             <delete>false</delete>
             <gen>false</gen>
           </keystoreConfig>
-          <pack200>true</pack200>
+          <pack200>false</pack200>
         </configuration>
         <executions>
           <execution>
@@ -159,6 +159,167 @@
                   <substitution expression="${timestamp}"/>
                   <fileset dir="src/main/resources" includes="**/*.properties"/>
                 </replaceregexp>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>prepare-dist</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <property file="${user.home}/welkin.build.properties"/>
+                <property file="local.build.properties"/>
+                <property file="build.properties"/>
+                <mkdir dir="${dist}"/>
+                <copy todir="${dist}" filtering="on">
+                  <fileset dir="${basedir}">
+                    <include name="*.txt"/>
+                    <include name="*.xml"/>
+                    <include name="*.properties"/>
+                    <include name="*.sh"/>
+                    <include name="*.bat"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${lib}" filtering="off">
+                  <fileset dir="${project.build.directory}/jnlp">
+                    <include name="*.jar"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${dist}/${lib}" filtering="off">
+                  <fileset dir="${lib}">
+                    <include name="*.jar"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${docs}" filtering="off">
+                  <fileset dir="${project.build.directory}/jnlp">
+                    <include name="*.jnlp"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${dist}/${src}" filtering="on">
+                  <fileset dir="${src}">
+                    <exclude name="**/*.jpg"/>
+                    <exclude name="**/*.gif"/>
+                    <exclude name="**/*.png"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${dist}/${src}" filtering="off">
+                  <fileset dir="${src}">
+                    <include name="**/*.jpg"/>
+                    <include name="**/*.gif"/>
+                    <include name="**/*.png"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${dist}/${docs}" filtering="on">
+                  <fileset dir="${docs}">
+                    <exclude name="**/*.jpg"/>
+                    <exclude name="**/*.gif"/>
+                    <exclude name="**/*.png"/>
+                    <exclude name="index.html"/>
+                  </fileset>
+                </copy>
+
+                <copy todir="${dist}/${docs}" filtering="off">
+                  <fileset dir="${docs}">
+                    <include name="**/*.jpg"/>
+                    <include name="**/*.gif"/>
+                    <include name="**/*.png"/>
+                  </fileset>
+                </copy>
+
+                <chmod file="${dist}/welkin.sh" perm="+x"/>
+
+                <fixcrlf srcdir="${dist}" includes="*.sh" eol="lf"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>dist</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <property file="${user.home}/welkin.build.properties"/>
+                <property file="local.build.properties"/>
+                <property file="build.properties"/>
+                <zip zipfile="${dist.target}/${dist.name}.zip" basedir="${dist}"/>
+                <tar tarfile="${dist.target}/${dist.name}.tar" longfile="gnu">
+                  <tarfileset dir="${dist.root}">
+                    <include name="${dist.name}/**"/>
+                    <exclude name="${dist.name}/welkin.sh"/>
+                  </tarfileset>
+                  <tarfileset dir="${dist.root}" mode="755">
+                    <include name="${dist.name}/welkin.sh"/>
+                  </tarfileset>
+                </tar>
+                <gzip zipfile="${dist.target}/${dist.name}.tar.gz" src="${dist.target}/${dist.name}.tar"/>
+                <delete file="${dist.target}/${dist.name}.tar"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>mac-dist</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <property file="${user.home}/welkin.build.properties"/>
+                <property file="local.build.properties"/>
+                <property file="build.properties"/>
+                <taskdef name="jarbundler" 
+                   classpath="${tools}/jarbundler-1.4.jar"
+                   classname="com.loomcom.ant.tasks.jarbundler.JarBundler" />
+                <delete dir="${dist.target}/Welkin.app" quiet="true"/>
+
+                <jarbundler dir="${dist.target}"
+                            name="Welkin"
+                            mainclass="edu.mit.simile.welkin.Welkin" 
+                            icon="${misc}/welkin.icns"
+                            version="${version}"
+                            infostring="${Name} ${version}"
+                            aboutmenuname="Welkin"
+                            jvmversion="1.5+"
+                            bundleid="edu.mit.simile.welkin.Welkin"
+                            vmoptions="-Xmx128m"
+                            smalltabs="true"
+                            antialiasedgraphics="true"
+                            antialiasedtext="true"
+                            liveresize="true"
+                            growboxintrudes="true"
+                            screenmenu="true">
+                 <jarfileset dir="${lib}">
+                   <exclude name="**/.svn" />
+                   <include name="**/*.jar" />
+                 </jarfileset>
+               </jarbundler>
+        
+               <exec executable="tools/makeDMG.sh" os="Mac OS X">
+                 <arg line="${version}"/>
+               </exec>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>remove-dist</id>
+            <phase>clean</phase>
+            <configuration>
+              <tasks>
+                <delete dir="dist"/>
               </tasks>
             </configuration>
             <goals>

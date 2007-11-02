@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp spec="1.0+"
       codebase="http://simile.mit.edu/repository/welkin/latest/"
-      href="$outputFile">
+      href="docs/$outputFile">
 	<information>
 		<title>Welkin</title>
 		<vendor>The SIMILE Project</vendor>
@@ -15,7 +15,7 @@
 	</security>
 	<resources>
 		<j2se version="1.5+" href="http://java.sun.com/products/autodl/j2se"/>
-        $dependencies
+        $dependencies.replaceAll("href=\"", "href=\"lib/")
 	</resources>
 	<application-desc main-class="$mainClass"/>
 </jnlp>
