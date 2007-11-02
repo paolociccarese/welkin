@@ -281,9 +281,23 @@
                 <taskdef name="jarbundler" 
                    classpath="${tools}/jarbundler-1.4.jar"
                    classname="com.loomcom.ant.tasks.jarbundler.JarBundler" />
-                <delete dir="${dist.target}/Welkin.app" quiet="true"/>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 
-                <jarbundler dir="${dist.target}"
+                <condition property="do.macos">
+                  <and>
+                    <os family="mac"/>
+                    <os family="unix"/>
+                  </and>
+                </condition>
+
+                <if>
+                  <istrue value="${do.macos}"/>
+                  <then>
+                    <echo message="Mac OS X environment, building dmg distribution."/>
+
+                    <delete dir="${dist.target}/Welkin.app" quiet="true"/>
+
+                    <jarbundler dir="${dist.target}"
                             name="Welkin"
                             mainclass="edu.mit.simile.welkin.Welkin" 
                             icon="${misc}/welkin.icns"
@@ -299,15 +313,20 @@
                             liveresize="true"
                             growboxintrudes="true"
                             screenmenu="true">
-                 <jarfileset dir="${lib}">
-                   <exclude name="**/.svn" />
-                   <include name="**/*.jar" />
-                 </jarfileset>
-               </jarbundler>
-        
-               <exec executable="tools/makeDMG.sh" os="Mac OS X">
-                 <arg line="${version}"/>
-               </exec>
+                      <jarfileset dir="${lib}">
+                        <exclude name="**/.svn" />
+                        <include name="**/*.jar" />
+                      </jarfileset>
+                    </jarbundler>
+       
+                    <exec executable="tools/makeDMG.sh" os="Mac OS X">
+                      <arg line="${version}"/>
+                    </exec>
+                  </then>
+                  <else>
+                    <echo message="Not in Mac OS X environment, will not build dmg distribution."/>
+                  </else>
+                </if>
               </tasks>
             </configuration>
             <goals>
@@ -332,6 +351,11 @@
             <groupId>ant</groupId>
             <artifactId>ant-nodeps</artifactId>
             <version>1.6.5</version>
+          </dependency>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>1.0b2</version>
           </dependency>
         </dependencies>
       </plugin>
