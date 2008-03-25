@@ -20,7 +20,6 @@ if [ "$JAVA_OPTIONS" = "" ] ; then
   JAVA_OPTIONS='-Xms32M -Xmx512M'
   #JAVA_OPTIONS='-Xms32M -Xmx512M -Xrunhprof:heap=all,cpu=samples,thread=y,depth=3'
   #JAVA_OPTIONS='-XrunShark'
-  #JAVA_OPIIONS='-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n'
 fi
 
 # ----- Set platform specific variables
